@@ -102,6 +102,8 @@ class GraphMLHandler(ContentHandler):
         return self._graph
 
 def read_graphml(f):
+    if not hasattr(f, 'read'):
+        f = open(f, 'r')
     handler = GraphMLHandler()
     parser = make_parser()
     parser.setContentHandler(handler)
@@ -180,7 +182,9 @@ class GraphMLWriter(object):
 
 
 
-def write_graphml(f, graph):
+def write_graphml(graph, f):
+    if not hasattr(f, 'write'):
+        f = open(f, 'w')
     generator = GraphMLWriter(f)
     generator.write(graph)
 
@@ -190,9 +194,9 @@ if __name__ == '__main__':
     from StringIO import StringIO
 
     a, b = StringIO(), StringIO()
-    write_graphml(a, read_graphml('articles-Cytokine.gml'))
+    write_graphml(read_graphml('articles-Cytokine.gml'), a)
     a = StringIO(a.getvalue())
-    write_graphml(b, read_graphml(a))
+    write_graphml(read_graphml(a), b)
 
     open('a.xml', 'w').write(a.getvalue())
     open('b.xml', 'w').write(b.getvalue())
