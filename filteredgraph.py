@@ -84,7 +84,7 @@ print "Attempting to draw graph for viewing"
 import matplotlib.pyplot as plt
 plt.figure(figsize=(8,8))
 #nx.draw(filtered_g, node_colors=[float(filtered_g.level[x] % 4 *64) for x in filtered_g])
-nx.draw(filtered_g, filtered_g.position)
+nx.draw(filtered_g, filtered_g.position, node_color=[float(filtered_g.degree(v)) for v in filtered_g])
 print "Saving graph image as %s" % (journal+"-"+regex+".png")
 plt.savefig(journal+"-"+regex+".png")
 plt.show()
