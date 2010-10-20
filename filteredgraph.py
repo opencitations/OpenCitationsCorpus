@@ -53,7 +53,12 @@ while(hits):
   if children_dict:
     for l in children_dict.values():
       hits.update(l)
+    print "Found %s cited works within %s by %s articles at level %s" % (len(hits), journal, len(children_dict.keys()), level)
     level = level + 1
 
 print "Writing out YAML graph to %s" % (journal+"-"+regex+".yaml")
-nx.write_yaml(journal+"-"+regex+".yaml")
+nx.write_yaml(filtered_g, journal+"-"+regex+".yaml")
+
+print "Attempting to draw graph for viewing"
+nx.draw(g)
+nx.show()
