@@ -8,6 +8,8 @@ import re
 
 from graphml import read_graphml, write_graphml
 
+from collections import defaultdict
+
 # {cmd} journal regex 
 
 assert len(sys.argv) == 3
@@ -19,7 +21,7 @@ assert os.path.isfile(journal+".gml")
 print "Compiling regex: %s" % regex
 p = re.compile(regex, re.U)
 
-print "Loading YAML network graph for %s" % journal
+print "Loading GraphML network graph for %s" % journal
 g = read_graphml(journal+".gml")
 
 print "Creating a directional graph to hold just the citation chains"
@@ -28,9 +30,8 @@ filtered_g.level = {}
 filtered_g.position = {}
 filtered_g.year = {}
 
-years_max = 0
-years_min = 3000
 rows = {}
+
 
 print "Scanning nodes for title regex matches"
 hits = set()
@@ -40,22 +41,10 @@ for node in g.nodes(data=True):
     if m != None:
       hits.add(node[0])
       filtered_g.level[node[0]] = 1
-      filtered_g.year[node[0]] = node[1].get('year', 1990)
       filtered_g.add_node(node[0], **node[1])
-
-print "Seed IDs:"
-print hits
+      filtered_g.year[node[0]] = node[1].get('year', 1990)
 
 rows[0] = hits
-
-def arrange_nodes_at_level(filtered_g, nodes, level):
-  if nodes:
-    y = 900 - 100 * level
-    dx = (year_max - year_min)/900
-    st_x = 0
-    for node in nodes:
-      filtered_g.position[node] = (st_x, y)
-      st_x =st_x + dx
 
 def get_children(g, nodes, filtered_g, level):
   children = {}
@@ -75,8 +64,6 @@ def get_children(g, nodes, filtered_g, level):
   rows[level] = set(children.keys())
   return children
 
-arrange_nodes_at_level(filtered_g, hits, 0)
-
 level = 1
 while(hits):
   print "Getting cited works at level %s" % level
@@ -86,16 +73,44 @@ while(hits):
     for l in children_dict.values():
       hits.update(l)
     print "Found %s cited works within %s by %s articles at level %s" % (len(hits), journal, len(children_dict.keys()), level)
-    arrange_nodes_at_level(filtered_g, hits, level)
     level = level + 1
 
+years = [filtered_g.node[i].get('year',1930) for i in filtered_g.nodes()]
+
+try:
+  year_max = int(max(years)[:4])
+except ValueError:
+  print "Couldn't convert the max year '%s' to an int" % year_max
+try:
+  year_min = int(min(years)[:4])
+except ValueError:
+  print "Couldn't convert the max year '%s' to an int" % year_max
+
+print year_max, year_min
+
+dx = (year_max - year_min)/900.0
+
+offset = defaultdict(lambda: defaultdict(lambda: 0))
+
 print "2nd pass - removing any nodes with degree == 0"
+
 for node in filtered_g.nodes():
+  # set position
+  try:
+    thisy = int(filtered_g.year[node][:4])
+    thisl = filtered_g.level[node]
+    filtered_g.position[node] = (dx * (thisy - year_min), 900 - 100 * thisl - offset[thisl][thisy])
+    offset[thisl][thisy] = offset[thisl][thisy] + 2
+  except ValueError:
+    print "Couldn't set position based on year for %s" % node
+    print "Using x -> 0 instead"
+    filtered_g.position[node] = (0 , 900 - 100 * filtered_g.level[node])
   if filtered_g.degree(node) == 0:
     filtered_g.remove_node(node)
     for row in rows:
       if node in rows[row]:
-        rows[row].remove(node)
+        pass
+        #rows[row].remove(node)
 
 print "Writing out GraphML graph to %s" % (journal+"-"+regex+".gml")
 write_graphml(filtered_g, open(journal+"-"+regex+".gml", "w"))
