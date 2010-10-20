@@ -69,6 +69,12 @@ def generate_network(journal_dir):
               break
             elif t == "doi":
               c_id = "doi:%s" % pub_id.text
+          if c_id == None:
+            # PLoS sometimes hides it's DOIS in comment/ext-link
+            doi_comment = citation.xpath("comment/ext-link")
+            if len(doi_comment) == 1:
+              c_id = "doi:%s" % doi_comment[0].text
+            
           # Get some metadata about article if node doesn't exist
           if not g.has_node(c_id):
             node_p = {'title':'','source':'','year':'','volume':''}
