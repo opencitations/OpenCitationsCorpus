@@ -129,6 +129,9 @@ class GraphMLWriter(object):
             self._write_node(node, graph.node[node])
 
         for source, target, data in graph.edges(data=True):
+            if source is None or target is None:
+                print source, target, data
+                continue
             self._write_edge(source, target, data)
         
         generator.endElement('graph')
