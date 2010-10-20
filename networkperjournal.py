@@ -11,6 +11,8 @@ from lxml import etree as ET
 
 import os, sys
 
+from graphml import write_graphml
+
 if len(sys.argv) == 2 and os.path.isdir(sys.argv[1]): # assume journal is passed on the commandline
   jlist = [sys.argv[1]]
 else:
@@ -74,7 +76,39 @@ def generate_network(journal_dir):
             doi_comment = citation.xpath("comment/ext-link")
             if len(doi_comment) == 1:
               c_id = "doi:%s" % doi_comment[0].text
-            
+          if c_id == None:
+            node_p = {'title':'','source':'','year':'','volume':''}
+            hash_string = ""
+            title_n = citation.find("source")
+            if title_n != None:
+              if title_n.getchildren():
+                title_n = title_n.getchildren()[0]
+              if title_n.text:
+                node_p['title'] = title_n.text
+                hash_string = hash_string + title_n.text
+            else:
+              title_n = citation.find("article-title")
+              if title_n != None:
+                if title_n.getchildren():
+                  title_n = title_n.getchildren()[0]
+                if title_n.text:
+                  node_p['title'] = title_n.text
+                  hash_string = hash_string + title_n.text
+            source_n = citation.find("publisher-name")
+            if source_n !=None:
+              if source_n.getchildren():
+                source_n = source_n.getchildren()[0]
+              if source_n.text:
+                node_p['source'] = source_n.text
+                hash_string = hash_string + source_n.text
+            year_n = citation.find("year")
+            if year_n != None:
+              if year_n.getchildren():
+                year_n = year_n.getchildren()[0]
+              if year_n.text:
+                node_p['year'] = year_n.text
+                hash_string = hash_string + year_n.text
+            c_id = "j:"+md5(hash_string.encode("utf-8")).hexdigest()
           # Get some metadata about article if node doesn't exist
           if not g.has_node(c_id):
             node_p = {'title':'','source':'','year':'','volume':''}
@@ -132,7 +166,7 @@ def generate_network(journal_dir):
             if year_n.text:
               node_p['year'] = year_n.text
               hash_string = hash_string + year_n.text
-          c_id = md5(hash_string.encode("utf-8")).hexdigest()
+          c_id = "b:"+md5(hash_string.encode("utf-8")).hexdigest()
           if not g.has_node(c_id):
             g.add_node(c_id, **node_p)
           # add directed edge for this
@@ -161,10 +195,12 @@ for journal in jlist:
     #continue
   try:
     g = generate_network(journal)
-    print "Saving as YAML - %s" % (journal+".yaml")
-    nx.write_yaml(g, journal+".yaml")
-    print "Saving as GraphML - %s" % (journal+".gml")
-    nx.write_graphml(g, journal+".gml")
+    #print "Saving as YAML - %s" % (journal+".yaml")
+    #nx.write_yaml(g, journal+".yaml")
+    print "Saving as New shiny GraphML - %s" % (journal+".gml")
+    write_graphml(g, open(journal+".gml", "w"))
+    #print "Saving as GraphML - %s" % (journal+".gml")
+    #nx.write_graphml(g, journal+".gml")
   except IndexError:
     print "ERROR Couldn't parse journal: %s" % journal
     errorlist.write("%s\n" % journal)

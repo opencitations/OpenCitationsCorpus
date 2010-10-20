@@ -15,10 +15,9 @@ if len(sys.argv)==2:
   print "Reading in %s" % fn
   g = nx.read_yaml(fn)
   print "Simulating spring network..."
-  pos=nx.spring_layout(g,iterations=100)
-  plt.clf()
+  pos=nx.spring_layout(g,iterations=50)
   print "Drawing a simple graph"
-  plt.figure(figsize=(30,30))
-  nx.draw(g,pos,node_size=20,with_labels=False)
-  plt.savefig("%s.spring_no_label.png" % fn) # save as png
-  #plt.show() # display
+  plt.figure(figsize=(10,10))
+  nx.draw(g,pos,node_size=40)
+  #plt.savefig("%s.spring_no_label.png" % fn) # save as png
+  plt.show() # display
