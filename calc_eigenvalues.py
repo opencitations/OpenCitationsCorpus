@@ -14,12 +14,14 @@ try:
 except:
     pass
 
+from graphml import read_graphml
+
 import sys,os
 
 if len(sys.argv)==2:
   fn = sys.argv[1]
   print "Reading in %s" % fn
-  g = nx.read_yaml(fn)
+  g = read_graphml(fn)
   print "Generating a generalized laplacian"
   l = nx.generalized_laplacian(g)
   print "Calculating eigenvalues"
