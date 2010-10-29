@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding=utf-8 -*-
 
+from plugin_manager import Plugin_manager
+
+PUBMED_PLUGIN_MANAGER = Plugin_manager()
+
+
 import networkx as nx
 import matplotlib.pyplot as plt
 

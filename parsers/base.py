@@ -7,8 +7,17 @@ the content types"""
 
 class NotImplemented(Exception):
   pass
+class NoIDFound(Exception):
+  pass
+
+registry = []
 
 class PubMedParser(object):
+  class __metaclass__(type):
+    def __init__(cls, name, bases, dict):
+      super(type, cls).__init__()
+      registry.append((name, cls))
+
   def __init__(self):  # Use conf files for per instance settings.
     """ Requires some registation attributes to be set up:
          self.name = "Name for the parser, typically the filename"
@@ -21,11 +30,11 @@ class PubMedParser(object):
          self.version = Parser version (used to record provenance)
          self.repo = Repo location of parser (also a provenance item)
     """
-    raise NotImplemented
+    self.name = "BaseParserPlugin"
 
   def gather_data(self, path_to_nxml, gather=['authors','citations','full_biblio']):
     """Main function called to extract metadata from the passed nxml file at the given filepath"""
-    # return {'authors':...., 'citations':...., etc}
+    # return {'id':.., 'parsername':..., 'authors':...., 'citations':...., etc}
     raise NotImplemented
 
   def plugin_warmup(self):
@@ -39,4 +48,10 @@ class PubMedParser(object):
     """
     raise NotImplemented
 
-PUBMED_PLUGINS.register(PubMedParser())
+  def __repr__(self):
+    if hasattr(self, "name"):
+      if hasattr(self, "version"):
+        return "PubMed Parser plugin: '%s-v%s'" % (self.name, self.version)
+      return "PubMed Parser plugin '%s'" % self.name
+    else:
+      return "Unnamed PubMed Parser"
