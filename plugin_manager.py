@@ -15,21 +15,17 @@ class Plugin_manager(object):
 
   def _register_plugins(self):
     for plugin, cls in registry:
-      try:
-        self._register(cls())
-      except Exception, e:
-        print "Plugin %s failed to initialise" % plugin_instance.name
-        self.status[plugin_instance.name] = e
+      self._register(cls())
 
   def _register(self, plugin_instance):
     print "Registering %s" % plugin_instance
     try:
+      plugin_instance.plugin_warmup()
       assert plugin_instance.name != None
       assert isinstance(plugin_instance.actson, dict)
       assert isinstance(plugin_instance.provides, dict)
       assert plugin_instance.version != None
       assert plugin_instance.repo != None
-      plugin_instance.plugin_warmup()
       assert plugin_instance.actson.has_key('journals')
     except AssertionError:
       print "Plugin '%s' failed to provide base attributes about itself" % repr(plugin_instance)

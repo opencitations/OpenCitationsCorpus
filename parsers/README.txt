@@ -34,3 +34,32 @@ this should reply:
  ‘citations’:{’parser’:’Plugin 2’..data..},}
 
 (NB currently, the plugin manager just picks the highest ranked plugin for all components - this is being changed right now!)
+
+Writing your own plugin:
+------------------------
+
+- Subclass from base.PubMedParser
+- 3 main methods: __init__, gather_data and plugin_warmup
+- In __init__, set the following attributes:
+   name = "PluginName” # make this unique
+   actson = {'journals':{'Journal Short Name':100 # confidence, etc}}
+       (eg ‘PLoS_Med’:100, ‘BMC_Bioinformatics’: 50, ..)
+   
+   provides = {’name of component’:’Description’}
+   version = Version number of code - can be hg/git HEAD id
+   repo = URL to code repository
+
+- plugin_warmup: perform all the mysql or sparql connection inits, name resolution logins, etc here. Raising an exception here will cause the plugin manager to mark the plugin as ‘failed’ and will remove it from selection.
+
+- gather_data(self, path_to_nxml, gather=[’component list’...])
+
+Pass in the filepath to an nxml file to parse and a list of components to retrieve from it.
+
+Expected reply is a dict of values that must contain the following:
+
+   {’parser’:’Parser name’, ‘component1’:{ data },
+                            ‘component2’:{ data },
+                            etc }
+         Where ‘component1’ is the name of the requested component.
+
+Look in parsers/fallback.py for a mechanism to automagically publish and use components.

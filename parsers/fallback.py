@@ -1,25 +1,36 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding=utf-8 -*-
 """Fallback parser, used if no other better parser is found for a given Journal/article"""
 
 from base import NotImplemented, PubMedParser, NoIDFound
 
+from inspect import getdoc  # to get component docs automatically
+
 from lxml import etree as ET # this varient provides good, fast xpath support which is required.
 
 VERSION = 0.1
 REPO = "http://bitbucket.org/beno/PubMed-OA-network-analysis-scripts"
+COMP_PREF = "_comp_"
 
 class Fallback(PubMedParser):
   def __init__(self):  # Use conf files for per instance settings.
     self.name = "Fallback"
     self.actson = {'journals':{'*':100}} # acts on all journals with weight 100
-    self.provides = {'authors':'author list, if it exists',
-                     'citations':'List of citation information in the order it occurs. Returns source, title, author list, date if found',
-                     'full_biblio':'full bibliographic data, as far as that is possible for the article itself'}
+
+    self.provides = {}  # Automagic setting of components
+    
+    all_comps = [c[len(COMP_PREF):] for c in dir(self) if c.startswith(COMP_PREF)]
+    for comp in all_comps:
+      comment = getdoc(getattr(self, "%s%s" % (COMP_PREF, comp)))
+      if not comment:
+        comment = "No documentation available"
+      self.provides[comp] = comment
+
     self.version = VERSION 
     self.repo = REPO
 
   def _comp_full_biblio(self, d, quiet=True):
+    """Full bibliographic data, as far as that is possible for the article itself"""
     # setup the dict with blank values:
     anode = {'source':'', 'title':'', 'year':'', 'volume':''}
     atitle = d.xpath('/article/front/article-meta/title-group/article-title')
@@ -41,6 +52,7 @@ class Fallback(PubMedParser):
     return ('full_biblio',anode)
 
   def _comp_article_id(self, d, quiet=True):
+    """Get the ID for a given article - in order of preference: PMID, PMD, DOI, other"""
     # 1 Get PMID (from /article/front/article-meta/article-id[@pub-id-type="pmid"])
     id_list = d.xpath('/article/front/article-meta/article-id[@pub-id-type="pmid"]')
     if len(id_list) >= 1:
@@ -66,9 +78,9 @@ class Fallback(PubMedParser):
       print "%s - tackling %s. Attempting to extract %s" % (self.name, path_to_nxml, gather) 
       print "Opening %s with lxml.etree" % (path_to_nxml)
     d = ET.parse(path_to_nxml)
-    data_pkg = {'parser_name':self.name}
+    data_pkg = {'parser_name':self.name, 'repo':self.repo, 'version':self.version}
     for component in gather:
-      if hasattr(self, "_comp_%s" % component):
+      if hasattr(self, "%s%s" % (COMP_PREF, component)):
         data_pkg[component] = getattr(self, "_comp_%s" % component)(d, quiet=quiet)
     return data_pkg
 
