@@ -39,21 +39,14 @@ Writing your own plugin:
 ------------------------
 
 - Subclass from base.PubMedParser
-- 3 main methods: __init__, gather_data and plugin_warmup
-- In __init__, set the following attributes:
+- Main methods: plugin_warmup and methods beginning with '_comp_'
+- In plugin_warmup, set the following attributes:
    name = "PluginName” # make this unique
    actson = {'journals':{'Journal Short Name':100 # confidence, etc}}
        (eg ‘PLoS_Med’:100, ‘BMC_Bioinformatics’: 50, ..)
-   
-   provides = {’name of component’:’Description’}
    version = Version number of code - can be hg/git HEAD id
    repo = URL to code repository
-
-- plugin_warmup: perform all the mysql or sparql connection inits, name resolution logins, etc here. Raising an exception here will cause the plugin manager to mark the plugin as ‘failed’ and will remove it from selection.
-
-- gather_data(self, path_to_nxml, gather=[’component list’...])
-
-Pass in the filepath to an nxml file to parse and a list of components to retrieve from it.
+   - perform all the mysql or sparql connection inits, name resolution logins, etc here. Raising an exception here will cause the plugin manager to mark the plugin as ‘failed’ and will remove it from selection.
 
 Expected reply is a dict of values that must contain the following:
 
@@ -62,4 +55,21 @@ Expected reply is a dict of values that must contain the following:
                             etc }
          Where ‘component1’ is the name of the requested component.
 
-Look in parsers/fallback.py for a mechanism to automagically publish and use components.
+-- Providing components in your plugin --
+
+Simply add a method beginning with '_comp_' and it will automatically show up as a 
+provided plugin method.
+
+The plugin manager will also retrieve the method description for display through the plugin
+or the plugin manager.
+
+eg:
+
+  def _comp_get_emails(self, d, quiet=True):
+    """This string will be inspected and put into the main description for this component"""
+    # d - lxml etree object for the given NLM xml file
+    ...
+    return some_data_object
+    
+in self.provides will contain 'get_emails':'This string... nent', amongst any other
+components this plugin provides.

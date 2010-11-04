@@ -12,6 +12,12 @@ class NoIDFound(Exception):
 
 registry = []
 
+COMP_PREF = "_comp_"
+
+from lxml import etree as ET
+
+from inspect import getdoc  # to get component docs automatically
+
 class PubMedParser(object):
   class __metaclass__(type):
     def __init__(cls, name, bases, dict):
@@ -30,12 +36,27 @@ class PubMedParser(object):
          self.version = Parser version (used to record provenance)
          self.repo = Repo location of parser (also a provenance item)
     """
+    self.provides = {}  # Automagic setting of components
+    
+    all_comps = [c[len(COMP_PREF):] for c in dir(self) if c.startswith(COMP_PREF)]
+    for comp in all_comps:
+      comment = getdoc(getattr(self, "%s%s" % (COMP_PREF, comp)))
+      if not comment:
+        comment = "No documentation available"
+      self.provides[comp] = comment
+
     self.name = "BaseParserPlugin"
 
-  def gather_data(self, path_to_nxml, gather=['authors','citations','full_biblio']):
-    """Main function called to extract metadata from the passed nxml file at the given filepath"""
-    # return {'id':.., 'parsername':..., 'authors':...., 'citations':...., etc}
-    raise NotImplemented
+  def gather_data(self, path_to_nxml, gather=['article_id','authors','citations','biblio'], quiet=True):
+    if not quiet:
+      print "%s - tackling %s. Attempting to extract %s" % (self.name, path_to_nxml, gather) 
+      print "Opening %s with lxml.etree" % (path_to_nxml)
+    d = ET.parse(path_to_nxml)
+    data_pkg = {'parser_name':self.name, 'repo':self.repo, 'version':str(self.version)}
+    for component in gather:
+      if hasattr(self, "%s%s" % (COMP_PREF, component)):
+        data_pkg[component] = getattr(self, "_comp_%s" % component)(d, quiet=quiet)
+    return data_pkg
 
   def plugin_warmup(self):
     """ Do any per-instance initialisation here. Mainly used to see if the plugin is ready or workable.

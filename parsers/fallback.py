@@ -4,30 +4,21 @@
 
 from base import NotImplemented, PubMedParser, NoIDFound
 
-from inspect import getdoc  # to get component docs automatically
-
 from hashlib import md5
 
 VERSION = 0.2
 REPO = "http://bitbucket.org/beno/PubMed-OA-network-analysis-scripts"
-COMP_PREF = "_comp_"
 
 class Fallback(PubMedParser):
-  def __init__(self):  # Use conf files for per instance settings.
-    self.name = "Fallback"
-    self.actson = {'journals':{'*':100}} # acts on all journals with weight 100
-
-    self.provides = {}  # Automagic setting of components
+  def plugin_warmup(self):
+    """Doing module import here, to catch import errors for the manager"""
     
-    all_comps = [c[len(COMP_PREF):] for c in dir(self) if c.startswith(COMP_PREF)]
-    for comp in all_comps:
-      comment = getdoc(getattr(self, "%s%s" % (COMP_PREF, comp)))
-      if not comment:
-        comment = "No documentation available"
-      self.provides[comp] = comment
-
+    self.name = "Fallback"
+    self.actson = {'journals':{'_fallback':0}} # acts on all journals with weight 0
     self.version = VERSION 
     self.repo = REPO
+
+    return True
 
   def _comp_biblio(self, d, quiet=True):
     """Full bibliographic data, as far as that is possible for the article itself"""
@@ -37,17 +28,31 @@ class Fallback(PubMedParser):
     if atitle:
       # If there is italic or other formatting around the title:
       if atitle[0].getchildren():
-        atitle = u"<%s>%s</%s>" % (atitle[0].tag, atitle[0].text, atitle[0].tag)
+        anode['title'] = "<%s>%s</%s>" % (atitle[0].tag, atitle[0].text, atitle[0].tag)
       else:
-        atitle = atitle[0].text
-    ayear = d.xpath('/article/front/article-meta/pub-date/year')
+        anode['title'] = atitle[0].text
+    # get Author list
+    
+    ayear = d.xpath('/article/front/article-meta/pub-date[@pub-type="ppub"]/year')
     if ayear:
       # grab the first one
       anode['year'] = ayear[0].text
+      amonth = d.xpath('/article/front/article-meta/pub-date[@pub-type="ppub"]/month')
+      if amonth:
+        anode['year'] = amonth[0].text
+    else:
+      ayear = d.xpath('/article/front/article-meta/pub-date[@pub-type="epub"]/year')
+      if ayear:
+        # grab the first one
+        anode['year'] = ayear[0].text
     av = d.xpath('/article/front/article-meta/volume')
     if av:
       # grab the first one
       anode['volume'] = av[0].text
+    av = d.xpath('/article/front/article-meta/issue')
+    if av:
+      # grab the first one
+      anode['issue'] = av[0].text
     return anode
 
   def _comp_citations(self, d, quiet=True):
@@ -194,20 +199,3 @@ class Fallback(PubMedParser):
       if not quiet:
         print "Found id of %s:%s for %s" % (id_element.get("pub-id-type"), id_element.text, path_to_nxml)
     return ids
-
-  def gather_data(self, path_to_nxml, gather=['article_id','authors','citations','biblio'], quiet=True):
-    if not quiet:
-      print "%s - tackling %s. Attempting to extract %s" % (self.name, path_to_nxml, gather) 
-      print "Opening %s with lxml.etree" % (path_to_nxml)
-    d = self.ET.parse(path_to_nxml)
-    data_pkg = {'parser_name':self.name, 'repo':self.repo, 'version':str(self.version)}
-    for component in gather:
-      if hasattr(self, "%s%s" % (COMP_PREF, component)):
-        data_pkg[component] = getattr(self, "_comp_%s" % component)(d, quiet=quiet)
-    return data_pkg
-
-  def plugin_warmup(self):
-    """Doing module import here, to catch import errors for the manager"""
-    from lxml import etree as ET
-    self.ET = ET
-    return True
