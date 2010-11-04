@@ -28,7 +28,8 @@ class Fallback(PubMedParser):
     if atitle:
       # If there is italic or other formatting around the title:
       if atitle[0].getchildren():
-        anode['title'] = "<%s>%s</%s>" % (atitle[0].tag, atitle[0].text, atitle[0].tag)
+        inner = atitle[0].getchildren()[0]
+        anode['title'] = "<%s>%s</%s>" % (inner.tag, inner.text, inner.tag)
       else:
         anode['title'] = atitle[0].text
     # get Author list
@@ -39,12 +40,15 @@ class Fallback(PubMedParser):
       anode['year'] = ayear[0].text
       amonth = d.xpath('/article/front/article-meta/pub-date[@pub-type="ppub"]/month')
       if amonth:
-        anode['year'] = amonth[0].text
+        anode['month'] = amonth[0].text
     else:
       ayear = d.xpath('/article/front/article-meta/pub-date[@pub-type="epub"]/year')
       if ayear:
         # grab the first one
         anode['year'] = ayear[0].text
+      amonth = d.xpath('/article/front/article-meta/pub-date[@pub-type="epub"]/month')
+      if amonth:
+        anode['month'] = amonth[0].text
     av = d.xpath('/article/front/article-meta/volume')
     if av:
       # grab the first one
@@ -70,7 +74,6 @@ class Fallback(PubMedParser):
             if not c_id:
               c_id = "%s:%s" % (t, pub_id.text)
             if t == "pmid":
-              c_id = pub_id.text
               break
             elif t == "doi":
               c_id = "doi:%s" % pub_id.text
@@ -80,21 +83,21 @@ class Fallback(PubMedParser):
             if len(doi_comment) == 1:
               c_id = "doi:%s" % doi_comment[0].text
                       
-          node_p = {'title':'','source':'','year':'','volume':'','publisher-name':''}
+          node_p = {'title':'','source':'','year':'','volume':'','publisher-name':'', 'ctype':'journal'}
           source_n = citation.find("source")
           if source_n != None:
             if source_n.getchildren():
               source_n = source_n.getchildren()[0]
             if source_n.text:
               node_p['source'] = source_n.text
-          else:
-            title_n = citation.find("article-title")
-            if title_n != None:
-              # If there is italic or other formatting around the title:
-              if title_n.getchildren():
-                node_p['title'] = u"<%s>%s</%s>" % (title_n.tag, title_n.text, title_n.tag)
-              else:
-                node_p['title'] = title_n.text
+          title_n = citation.find("article-title")
+          if title_n != None:
+            # If there is italic or other formatting around the title:
+            if title_n.getchildren():
+              inner = title_n.getchildren()[0]
+              node_p['title'] = u"<%s>%s</%s>" % (inner.tag, inner.text, inner.tag)
+            else:
+              node_p['title'] = title_n.text
           pubname_n = citation.find("publisher-name")
           if pubname_n !=None:
             if pubname_n.getchildren():
@@ -115,7 +118,7 @@ class Fallback(PubMedParser):
           citations_list.append((c_id, node_p))
         elif ctype.lower() == "book":
           # erm... hash the title + year for an id of sorts?
-          node_p = {'title':'','source':'','year':'','volume':''}
+          node_p = {'title':'','source':'','year':'','volume':'', 'ctype':'book'}
           hash_string = ""
           title_n = citation.find("source")
           if title_n != None:

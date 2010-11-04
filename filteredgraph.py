@@ -10,6 +10,8 @@ from graphml import read_graphml, write_graphml
 
 from collections import defaultdict
 
+from operator import itemgetter
+
 # {cmd} journal regex 
 
 assert len(sys.argv) == 3
@@ -32,11 +34,14 @@ filtered_g.year = {}
 
 rows = {}
 
+# unescape '_' in the Journal
+
+journal = " ".join(journal.split("_"))
 
 print "Scanning nodes for title regex matches"
 hits = set()
 for node in g.nodes(data=True):
-  if node[1].get('source', '') == journal:
+  if node[1].get('source', '') == journal and node[1].get('_xml_container', '') == '':
     m = p.search(node[1].get('title','') or '')
     if m != None:
       hits.add(node[0])
@@ -45,6 +50,8 @@ for node in g.nodes(data=True):
       filtered_g.year[node[0]] = node[1].get('year', 1990)
 
 rows[0] = hits
+
+print "Found %s works within %s for regex:'%s'" % (len(hits), journal, regex)
 
 def get_children(g, nodes, filtered_g, level):
   children = {}
@@ -80,7 +87,7 @@ years = [filtered_g.node[i].get('year',1930) for i in filtered_g.nodes()]
 try:
   year_max = int(max(years)[:4])
 except ValueError:
-  print "Couldn't convert the max year '%s' to an int" % year_max
+  print "Couldn't convert the max year '%s' to an int" % years
 try:
   year_min = int(min(years)[:4])
 except ValueError:
@@ -96,22 +103,49 @@ print "2nd pass - removing any nodes with degree == 0"
 
 for node in filtered_g.nodes():
   # set position
-  try:
-    thisy = int(filtered_g.year[node][:4])
-    thisl = filtered_g.level[node]
-    filtered_g.position[node] = (dx * (thisy - year_min), 900 - 100 * thisl - offset[thisl][thisy])
-    offset[thisl][thisy] = offset[thisl][thisy] + 2
-  except ValueError:
-    print "Couldn't set position based on year for %s" % node
-    print "Using x -> 0 instead"
-    filtered_g.position[node] = (0 , 900 - 100 * filtered_g.level[node])
   if filtered_g.degree(node) == 0:
     filtered_g.remove_node(node)
     for row in rows:
       if node in rows[row]:
         pass
-        #rows[row].remove(node)
+        rows[row].remove(node)
 
+for node in filtered_g.nodes():
+  try:
+    thisy = int(filtered_g.year[node][:4])
+    if filtered_g.node[i].get('month',''):
+      try:
+        month = int(filtered_g.node[node].get('month',''))
+        if month > 1:
+          thisy = thisy + ((month-1.0)/12.0)
+      except ValueError:
+        pass
+    thisl = filtered_g.level[node]
+    filtered_g.position[node] = (dx * (thisy - year_min), 900 - 100 * thisl - offset[thisl][thisy])
+    offset[thisl][thisy] = offset[thisl][thisy] + 8
+  except ValueError:
+    print "Couldn't set position based on year for %s" % node
+    print "Using x -> 0 instead"
+    filtered_g.position[node] = (0 , 900 - 100 * filtered_g.level[node])
+
+for year_marker in xrange(year_max+1-year_min):
+  filtered_g.add_node(year_marker+year_min)
+  filtered_g.position[year_marker+year_min] = (dx * year_marker, 950)
+
+# Most cited
+degrees = [(x, len(filtered_g.predecessors(x))) for x in filtered_g.nodes()]
+top5 = sorted(degrees, key=itemgetter(1), reverse=True)[:5]
+print "Top cited works:"
+for item, citers in top5:
+  print "%s - %s.  Cited %s times" % (item, filtered_g.node[item].get('title',''), citers)
+  
+# Most same-journal citations
+degrees = [(x, len(filtered_g.successors(x))) for x in filtered_g.nodes()]
+top5 = sorted(degrees, key=itemgetter(1), reverse=True)[:5]
+print "Top same-journal citations:"
+for item, citers in top5:
+  print "%s - %s.  Citing a %s-sourced article %s times" % (item, filtered_g.node[item].get('title',''), journal, citers)
+  
 print "Writing out GraphML graph to %s" % (journal+"-"+regex+".gml")
 write_graphml(filtered_g, open(journal+"-"+regex+".gml", "w"))
 
