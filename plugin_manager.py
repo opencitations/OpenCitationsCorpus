@@ -49,7 +49,7 @@ class Plugin_manager(object):
           self.journal_w[key][plugin_instance.name] = plugin_instance.actson['journals'][key]
       self.status[plugin_instance.name] = True
 
-  def handle(self, journal_name, path_to_nxml, components=['authors', 'citations', 'full_biblio'], force_plugin="", quiet=True):
+  def handle(self, journal_name, path_to_nxml, components=['authors', 'citations', 'biblio', 'article_id'], force_plugin="", quiet=True):
     # TODO Handle + validate components before asking for it
     if force_plugin and force_plugin in self.plugins.keys():
       return self.plugins[force_plugin].gather_data(path_to_nxml, gather=components, quiet=quiet)
