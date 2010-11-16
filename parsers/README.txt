@@ -38,38 +38,51 @@ this should reply:
 Writing your own plugin:
 ------------------------
 
-- Subclass from base.PubMedParser
-- Main methods: plugin_warmup and methods beginning with '_comp_'
-- In plugin_warmup, set the following attributes:
-   name = "PluginName” # make this unique
-   actson = {'journals':{'Journal Short Name':100 # confidence, etc}}
-       (eg ‘PLoS_Med’:100, ‘BMC_Bioinformatics’: 50, ..)
-   version = Version number of code - can be hg/git HEAD id
-   repo = URL to code repository
-   - perform all the mysql or sparql connection inits, name resolution logins, etc here. Raising an exception here will cause the plugin manager to mark the plugin as ‘failed’ and will remove it from selection.
+Basic Skeleton:
 
-Expected reply is a dict of values that must contain the following:
+----->
 
-   {’parser’:’Parser name’, ‘component1’:{ data },
-                            ‘component2’:{ data },
-                            etc }
-         Where ‘component1’ is the name of the requested component.
+from base import PubmedParser
 
--- Providing components in your plugin --
+...
 
-Simply add a method beginning with '_comp_' and it will automatically show up as a 
-provided plugin method.
+class MyPlugin(PubmedParser):
+  def plugin_warmup(self):
+    """ Do two things here: 1) set some properties to describe the plugin and
+    2) warm up or connection to any caches, indexes or lookup tables that this
+    instance will need.
+ 
+    If anything goes wrong, or a vital client cannot be configured, throw an Exception.
 
-The plugin manager will also retrieve the method description for display through the plugin
-or the plugin manager.
+    for 1) set the following:"""
 
-eg:
+    name = "PluginName” # make this unique to your plugin
+    actson = {'journals':{'Journal Short Name':100}}
 
+    #     (eg ‘PLoS_Med’:100, ‘BMC_Bioinformatics’: 50, ..)
+    #     'journals' dict key = Name of journal directory, value = confidence/preference (higher = better)
+
+    version = Version number of code - can be hg/git HEAD id
+
+    repo = URL to code repository
+
+    """ 2) - do things to set up the plugin - perform all the mysql or sparql connection inits, name resolution logins, etc here. Raising an exception here will cause the plugin manager to mark the plugin as ‘failed’ and will remove it from selection.
+    """
+    pass
+
+  # write the components you want this parser to provide, like a set of citation authors, 'cited by' lookups for all the citations in the paper, and so on
+
+  # Preface a component method with '_comp_' and give it an inline comment. It will automatically be picked up and made available
+  # eg 
+  
   def _comp_get_emails(self, d, quiet=True):
     """This string will be inspected and put into the main description for this component"""
     # d - lxml etree object for the given NLM xml file
     ...
     return some_data_object
     
-in self.provides will contain 'get_emails':'This string... nent', amongst any other
-components this plugin provides.
+  # in self.provides dict there will be a key of 'get_emails' with value 'This string... nent', amongst any other components this plugin provides.
+
+<----
+
+
