@@ -44,10 +44,10 @@ def generate_network(journal_dir):
     print "Processing %s in %s" % (nlmxml, journal_dir)
     info = P.handle(journal_dir, os.path.join(journal_dir, nlmxml), components=["article_id", "all_article_ids", "biblio", "citations"])
     
-    nodeid = info['article_id']    
+    nodeid = info['article_id']
     if not g.has_node(nodeid):
       info['biblio']['source'] = u" ".join(journal_dir.split("_"))
-      g.add_node(nodeid, **to_node_params(info['biblio'], 
+      g.add_node(nodeid, **to_node_params(info['biblio'],
                                           source=u" ".join(journal_dir.split("_")),
                                           nlmxml=os.path.join(journal_dir, nlmxml) )
                                           )
