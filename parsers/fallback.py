@@ -5,6 +5,7 @@
 from base import NotImplemented, PubMedParser, NoIDFound
 
 from hashlib import md5
+from itertools import chain
 
 VERSION = 0.2
 REPO = "http://bitbucket.org/beno/PubMed-OA-network-analysis-scripts"
@@ -15,7 +16,7 @@ class Fallback(PubMedParser):
     
     self.name = "Fallback"
     self.actson = {'journals':{'_fallback':0}} # acts on all journals with weight 0
-    self.version = VERSION 
+    self.version = VERSION
     self.repo = REPO
 
     return True
@@ -34,21 +35,14 @@ class Fallback(PubMedParser):
         anode['title'] = atitle[0].text
     # get Author list
     
-    ayear = d.xpath('/article/front/article-meta/pub-date[@pub-type="ppub"]/year')
-    if ayear:
-      # grab the first one
-      anode['year'] = ayear[0].text
-      amonth = d.xpath('/article/front/article-meta/pub-date[@pub-type="ppub"]/month')
-      if amonth:
-        anode['month'] = amonth[0].text
-    else:
-      ayear = d.xpath('/article/front/article-meta/pub-date[@pub-type="epub"]/year')
-      if ayear:
-        # grab the first one
-        anode['year'] = ayear[0].text
-      amonth = d.xpath('/article/front/article-meta/pub-date[@pub-type="epub"]/month')
-      if amonth:
-        anode['month'] = amonth[0].text
+    pubdate = list(chain(d.xpath("/article/front/article-meta/pub-date[@pub-type='ppub']"),
+                         d.xpath("/article/front/article-meta/pub-date[@pub-type='epub']")))
+    if pubdate:
+        for e in pubdate[0].xpath('year|month|day'):
+            anode[e.tag] = e.text
+
+
+    print d.xpath('/article/front/article-meta/volume')
     av = d.xpath('/article/front/article-meta/volume')
     if av:
       # grab the first one
@@ -84,12 +78,6 @@ class Fallback(PubMedParser):
               c_id = "doi:%s" % doi_comment[0].text
                       
           node_p = {'title':'','source':'','year':'','volume':'','publisher-name':'', 'ctype':'journal'}
-          source_n = citation.find("source")
-          if source_n != None:
-            if source_n.getchildren():
-              source_n = source_n.getchildren()[0]
-            if source_n.text:
-              node_p['source'] = source_n.text
           title_n = citation.find("article-title")
           if title_n != None:
             # If there is italic or other formatting around the title:
@@ -98,18 +86,16 @@ class Fallback(PubMedParser):
               node_p['title'] = u"<%s>%s</%s>" % (inner.tag, inner.text, inner.tag)
             else:
               node_p['title'] = title_n.text
-          pubname_n = citation.find("publisher-name")
-          if pubname_n !=None:
-            if pubname_n.getchildren():
-              pubname_n = pubname_n.getchildren()[0]
-            if pubname_n.text:
-              node_p['publisher-name'] = pubname_n.text
-          year_n = citation.find("year")
-          if year_n != None:
-            if year_n.getchildren():
-              year_n = year_n.getchildren()[0]
-            if year_n.text:
-              node_p['year'] = year_n.text  
+
+          for name in ('publisher-name', 'year', 'source', 'volume', 'issue'):
+            node = citation.find(name)
+            if node is not None:
+              if len(node):
+                node = node[0]
+              if node.text:
+                node_p[name] = node.text
+
+
           ## TODO - get author list if one exists
           if c_id == None:
             hash_string = node_p['title']+node_p['source']+node_p['year']+node_p['publisher-name']
