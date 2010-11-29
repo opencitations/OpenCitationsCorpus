@@ -3,7 +3,7 @@
 
 from __future__ import division
 
-import sys, os
+import sys, os, traceback
 from collections import defaultdict
 from pprint import pprint
 
@@ -39,6 +39,9 @@ if __name__ == '__main__':
                 journal_attribs[k][path] = v
         except KeyboardInterrupt:
             break
+        except Exception, e:
+            traceback.print_exc(file=sys.stderr)
+            continue
 
 
 
