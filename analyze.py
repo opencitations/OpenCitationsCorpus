@@ -21,31 +21,31 @@ def avg(iterable):
 if __name__ == '__main__':
 
     journal_attribs = defaultdict(dict)
-    i = 0
-    for path in os.listdir(sys.argv[1]):
-        if i == 20:
+    for i, path in enumerate(os.listdir(sys.argv[1])):
+        print '%4d %s' % (i, path)
+
+        try:
+            g = generate_network(os.path.join(sys.argv[1], path))
+
+            attribs = defaultdict(lambda:[0,0])
+    
+            for n in g.nodes():
+                for k,v in g.node[n].items():
+                    attribs[k][0 if v else 1] += 1
+    
+            attribs = [(k, v[0]/sum(v)) for k, v in attribs.items()]
+    
+            for k, v in attribs:
+                journal_attribs[k][path] = v
+        except KeyboardInterrupt:
             break
-        else:
-            i += 1
-        print path
-
-        g = generate_network(os.path.join(sys.argv[1], path))
-
-        attribs = defaultdict(lambda:[0,0])
-
-        for n in g.nodes():
-            for k,v in g.node[n].items():
-                attribs[k][0 if v else 1] += 1
-
-        attribs = [(k, v[0]/sum(v)) for k, v in attribs.items()]
-
-        for k, v in attribs:
-            journal_attribs[k][path] = v
 
 
 
     journal_attribs = list(journal_attribs.items())
     journal_attribs.sort(key=lambda a: avg(a[1].values()))
     journal_attribs = [(k, sorted(v.items(), key=lambda x:x[1])) for k,v in journal_attribs]
+    
+    pprint(journal_attribs, stream=open('fields_found.txt', 'w'))
     pprint(journal_attribs)
 
