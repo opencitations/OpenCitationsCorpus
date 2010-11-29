@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from hashlib import md5
 
-import os, sys
+import os, sys, re
 
 from graphml import write_graphml
 
@@ -66,10 +66,11 @@ if __name__ == "__main__":
   for journal in jlist:
     try:
       g = generate_network(journal)
+      filename = re.sub('[^a-z.]+', '-', journal.lower()).strip('-') + '.gml'
       #print "Saving as YAML - %s" % (journal+".yaml")
       #nx.write_yaml(g, journal+".yaml")
-      print "Saving as New shiny GraphML - %s" % (journal+".gml")
-      write_graphml(g, open(journal+".gml", "w"))
+      print "Saving as New shiny GraphML - %s" % (filename)
+      write_graphml(g, open(filename, "w"))
       #print "Saving as GraphML - %s" % (journal+".gml")
       #nx.write_graphml(g, journal+".gml")
     except IndexError:
