@@ -18,6 +18,17 @@ from lxml import etree as ET
 
 from inspect import getdoc  # to get component docs automatically
 
+def flatten_element(element):
+    import re
+    ws_re = re.compile(r'\s+')
+    def flatten(e):
+        yield e.text or ''
+        for c in e:
+            for n in flatten(c):
+                yield n
+            yield c.tail or ''
+    return ''.join(ws_re.sub(' ', t) for t in flatten(element))
+
 class PubMedParser(object):
   class __metaclass__(type):
     def __init__(cls, name, bases, dict):
