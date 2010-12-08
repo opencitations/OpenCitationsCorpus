@@ -86,7 +86,7 @@
     </node>
     <xsl:for-each select="back/ref-list/ref">
       <xsl:variable name="ref" select="."/>
-      <node name="{$id}:{@id}">
+      <node id="{$id}:{@id}">
         <data key="_xml_container">
           <xsl:value-of select="*[position()=last()]/name()"/>
         </data>
@@ -139,7 +139,7 @@
           </xsl:when>
           <xsl:when test="(citation|element-citation|mixed-citation)[@publication-type='book' or @citation-type='book']">
             <xsl:variable name="citation" select="(citation|element-citation|mixed-citation)[@publication-type='book' or @citation-type='book']"/>
-            <data name="title">
+            <data key="title">
               <xsl:choose>
                 <xsl:when test="$citation/article-title">
                   <xsl:value-of select="$citation/article-title"/>
@@ -149,10 +149,10 @@
                 </xsl:when>
               </xsl:choose>
             </data>
-            <data name="year">
+            <data key="year">
               <xsl:value-of select="$citation/year"/>
             </data>
-            <data name="author">
+            <data key="author">
               <xsl:for-each select="$citation/person-group[@person-group-type='author']/name">
                 <xsl:value-of select="concat(surname, ' ', given-names)"/>
                 <xsl:if test="position() != last()">
@@ -160,10 +160,10 @@
                 </xsl:if>
               </xsl:for-each>
             </data>
-            <data name="publisher-name">
+            <data key="publisher-name">
                 <xsl:value-of select="$citation/publisher-name"/>
             </data>
-            <data name="edition">
+            <data key="edition">
                 <xsl:value-of select="$citation/edition"/>
             </data>
           </xsl:when>
@@ -187,7 +187,7 @@
                 <xsl:value-of select="$citation/pub-id[@pub-id-type='doi']"/>
               </data>
             </xsl:if>
-            <data name="author">
+            <data key="author">
               <xsl:for-each select="$citation/person-group[@person-group-type='author']/name">
                 <xsl:value-of select="concat(surname, ' ', given-names)"/>
                 <xsl:if test="position() != last()">
