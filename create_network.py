@@ -66,7 +66,7 @@ if __name__ == "__main__":
   for journal in jlist:
     try:
       g = generate_network(journal)
-      filename = re.sub('[^a-z.]+', '-', journal.lower()).strip('-') + '.gml'
+      filename = re.sub('[^a-z.]+', '-', journal.lower()).strip('-') + '.graphml'
       #print "Saving as YAML - %s" % (journal+".yaml")
       #nx.write_yaml(g, journal+".yaml")
       print "Saving as New shiny GraphML - %s" % (filename)

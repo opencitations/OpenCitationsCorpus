@@ -7,6 +7,8 @@ from base import NotImplemented, PubMedParser, NoIDFound
 from hashlib import md5
 from itertools import chain
 
+from lxml import etree
+
 VERSION = 0.2
 REPO = "http://bitbucket.org/beno/PubMed-OA-network-analysis-scripts"
 
@@ -28,11 +30,12 @@ class Fallback(PubMedParser):
     atitle = d.xpath('/article/front/article-meta/title-group/article-title')
     if atitle:
       # If there is italic or other formatting around the title:
-      if atitle[0].getchildren():
-        inner = atitle[0].getchildren()[0]
-        anode['title'] = "<%s>%s</%s>" % (inner.tag, inner.text, inner.tag)
-      else:
-        anode['title'] = atitle[0].text
+      #if atitle[0].getchildren():
+      #  inner = atitle[0].getchildren()[0]
+      #  anode['title'] = "<%s>%s</%s>" % (inner.tag, inner.text, inner.tag)
+      #else:
+      #  anode['title'] = atitle[0].text
+      anode['title'] = etree.tostring(atitle[0], method="text", encoding="UTF-8").decode('utf-8')
     # get Author list
     
     pubdate = list(chain(d.xpath("/article/front/article-meta/pub-date[@pub-type='ppub']"),
@@ -42,7 +45,6 @@ class Fallback(PubMedParser):
             anode[e.tag] = e.text
 
 
-    print d.xpath('/article/front/article-meta/volume')
     av = d.xpath('/article/front/article-meta/volume')
     if av:
       # grab the first one
@@ -81,11 +83,7 @@ class Fallback(PubMedParser):
           title_n = citation.find("article-title")
           if title_n != None:
             # If there is italic or other formatting around the title:
-            if title_n.getchildren():
-              inner = title_n.getchildren()[0]
-              node_p['title'] = u"<%s>%s</%s>" % (inner.tag, inner.text, inner.tag)
-            else:
-              node_p['title'] = title_n.text
+            node_p['title'] = etree.tostring(title_n, method="text", encoding="UTF-8").decode('utf-8')
 
           for name in ('publisher-name', 'year', 'source', 'volume', 'issue'):
             node = citation.find(name)
@@ -108,33 +106,21 @@ class Fallback(PubMedParser):
           hash_string = ""
           title_n = citation.find("source")
           if title_n != None:
-            if title_n.getchildren():
-              title_n = title_n.getchildren()[0]
-            if title_n.text:
-              node_p['title'] = title_n.text
-              hash_string = hash_string + title_n.text
+            node_p['title'] = etree.tostring(title_n, method="text", encoding="UTF-8").decode('utf-8')
+            hash_string = hash_string + node_p['title']
           else:
             title_n = citation.find("article-title")
             if title_n != None:
-              if title_n.getchildren():
-                title_n = title_n.getchildren()[0]
-              if title_n.text:
-                node_p['title'] = title_n.text
-                hash_string = hash_string + title_n.text
+              node_p['title'] = etree.tostring(title_n, method="text", encoding="UTF-8").decode('utf-8')
+              hash_string = hash_string + node_p['title']
           source_n = citation.find("publisher-name")
           if source_n !=None:
-            if source_n.getchildren():
-              source_n = source_n.getchildren()[0]
-            if source_n.text:
-              node_p['source'] = source_n.text
-              hash_string = hash_string + source_n.text
+            node_p['source'] = etree.tostring(source_n, method="text", encoding="UTF-8").decode('utf-8')
+            hash_string = hash_string + node_p['source']
           year_n = citation.find("year")
           if year_n != None:
-            if year_n.getchildren():
-              year_n = year_n.getchildren()[0]
-            if year_n.text:
-              node_p['year'] = year_n.text
-              hash_string = hash_string + year_n.text
+            node_p['year'] = etree.tostring(year_n, method="text", encoding="UTF-8").decode('utf-8')
+            hash_string = hash_string + node_p['year']
               
           ## TODO - get author list if one exists
           c_id = "b:"+md5(hash_string.encode("utf-8")).hexdigest()
