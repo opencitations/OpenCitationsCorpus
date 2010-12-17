@@ -26,7 +26,7 @@ class Fallback(PubMedParser):
   def _comp_biblio(self, d, quiet=True):
     """Full bibliographic data, as far as that is possible for the article itself"""
     # setup the dict with blank values:
-    anode = {'source':'', 'title':'', 'year':'', 'volume':''}
+    anode = {'source':'', 'title':'', 'year':'', 'volume':'', 'affiliations':{}, 'contributors':[]}
     atitle = d.xpath('/article/front/article-meta/title-group/article-title')
     if atitle:
       # If there is italic or other formatting around the title:
@@ -36,17 +36,46 @@ class Fallback(PubMedParser):
       #else:
       #  anode['title'] = atitle[0].text
       anode['title'] = etree.tostring(atitle[0], method="text", encoding="UTF-8").decode('utf-8')
-    # get Author list
     
+    # get Affiliations
+    affiliations = {}
+    affil_list = d.xpath('/article/front/article-meta/aff')
+    for affil in affil_list:
+      if affil.attrib.has_key('id'):
+        affiliations[affil.attrib['id']] = etree.tostring(affil, method="text", encoding="UTF-8").decode('utf-8')
+    anode['affiliations'] = affiliations
+    # Author list
+    contrib_list = d.xpath('/article/front/article-meta/contrib-group/contrib')
+    for contributor in contrib_list:
+      person = {}
+      # Affiliation mappings
+      person['affiliations'] = [x.attrib['rid'] for x in contributor.xpath('xref[@ref-type="aff"]')]
+      s = contributor.xpath('name/surname')
+      if s != None:
+        for e in s:
+          person['surname'] = etree.tostring(e, method="text", encoding="UTF-8").decode('utf-8')
+      s = contributor.xpath('name/given-names')
+      if s != None:
+        for e in s:
+          person['given-names'] = etree.tostring(e, method="text", encoding="UTF-8").decode('utf-8')
+      s = contributor.xpath('email')
+      if s != None:
+        for e in s:
+         person['email'] = etree.tostring(e, method="text", encoding="UTF-8").decode('utf-8')
+      
+      anode['contributors'].append(person)
+    
+    # Publication date
     pubdate = list(chain(d.xpath("/article/front/article-meta/pub-date[@pub-type='ppub']"),
                          d.xpath("/article/front/article-meta/pub-date[@pub-type='epub']")))
     if pubdate:
-        for e in pubdate[0].xpath('year|month|day'):
-            anode[e.tag] = e.text
+      for e in pubdate[0].xpath('year|month|day'):
+         anode[e.tag] = e.text
 
 
     av = d.xpath('/article/front/article-meta/volume')
     if av:
+    
       # grab the first one
       anode['volume'] = av[0].text
     av = d.xpath('/article/front/article-meta/issue')
@@ -79,7 +108,7 @@ class Fallback(PubMedParser):
             if len(doi_comment) == 1:
               c_id = "doi:%s" % doi_comment[0].text
                       
-          node_p = {'title':'','source':'','year':'','volume':'','publisher-name':'', 'ctype':'journal'}
+          node_p = {'title':'','source':'','year':'','volume':'','publisher-name':'', 'ctype':'journal', 'people':{}}
           title_n = citation.find("article-title")
           if title_n != None:
             # If there is italic or other formatting around the title:
@@ -93,8 +122,56 @@ class Fallback(PubMedParser):
               if node.text:
                 node_p[name] = node.text
 
+          # List of Cited Authors/editors/etc
+          p_groups = citation.findall("person-group")
+          if not p_groups:
+            # Quirk-mode - assume any <name> elements in the core citation count as authors
+            p_type = 'author'
+            name_list = []
+            name_matches = citation.findall("name")
+            if name_matches:
+              for name in name_matches:
+                # --> "surname, given_names"
+                surname = name.find("surname")
+                g_names = name.find("given-names")
+                if g_names != None and surname != None:
+                  name_list.append(u"%s, %s" % (surname.text, g_names.text))
+                elif surname != None:
+                  name_list.append(surname.text)
+                else:
+                  # if <surname> or <given-names> isn't used, typically it is just a text field.
+                  name_txt = etree.tostring(name, method="text", encoding="UTF-8").decode('utf-8')
+                  if name_txt:
+                    name_list.append(name_txt)
+            if node_p['people'].has_key(p_type):
+              node_p['people'][p_type].extend(name_list)
+            else:
+              node_p['people'][p_type] = name_list
+          else:
+            for p_group in p_groups:
+              p_type = 'author'
+              if p_group.attrib.has_key("person-group-type"):
+                p_type = p_group.attrib["person-group-type"]
+              # quirks exist here....
+                name_list = []
+              name_matches = p_group.findall("name")
+              if name_matches:
+                for name in name_matches:
+                  # --> "surname, given_names"
+                  surname = name.find("surname")
+                  g_names = name.find("given-names")
+                  if g_names != None and surname != None:
+                    name_list.append(u"%s, %s" % (surname.text, g_names.text))
+                  elif surname != None:
+                    name_list.append(surname.text)
+              else:
+                # if <name> isn't used, typically it is just a text field.
+                name_list.append(etree.tostring(p_group, method="text", encoding="UTF-8").decode('utf-8'))
+              if node_p['people'].has_key(p_type):
+                node_p['people'][p_type].extend(name_list)
+              else:
+                node_p['people'][p_type] = name_list
 
-          ## TODO - get author list if one exists
           if c_id == None:
             hash_string = node_p['title']+node_p['source']+node_p['year']+node_p['publisher-name']
             c_id = "j:"+md5(hash_string.encode("utf-8")).hexdigest()
@@ -102,7 +179,7 @@ class Fallback(PubMedParser):
           citations_list.append((c_id, node_p))
         elif ctype.lower() == "book":
           # erm... hash the title + year for an id of sorts?
-          node_p = {'title':'','source':'','year':'','volume':'', 'ctype':'book'}
+          node_p = {'title':'','source':'','year':'','volume':'', 'ctype':'book', 'people':{}}
           hash_string = ""
           title_n = citation.find("source")
           if title_n != None:
@@ -121,7 +198,57 @@ class Fallback(PubMedParser):
           if year_n != None:
             node_p['year'] = etree.tostring(year_n, method="text", encoding="UTF-8").decode('utf-8')
             hash_string = hash_string + node_p['year']
-              
+          
+          # List of Cited Authors/editors/etc
+          p_groups = citation.findall("person-group")
+          if not p_groups:
+            # Quirk-mode - assume any <name> elements in the core citation count as authors
+            p_type = 'author'
+            name_list = []
+            name_matches = citation.findall("name")
+            if name_matches:
+              for name in name_matches:
+                # --> "surname, given_names"
+                surname = name.find("surname")
+                g_names = name.find("given-names")
+                if g_names != None and surname != None:
+                  name_list.append(u"%s, %s" % (surname.text, g_names.text))
+                elif surname != None:
+                  name_list.append(surname.text)
+                else:
+                  # if <surname> or <given-names> isn't used, typically it is just a text field.
+                  name_txt = etree.tostring(name, method="text", encoding="UTF-8").decode('utf-8')
+                  if name_txt:
+                    name_list.append(name_txt)
+            if node_p['people'].has_key(p_type):
+              node_p['people'][p_type].extend(name_list)
+            else:
+              node_p['people'][p_type] = name_list
+          else:
+            for p_group in p_groups:
+              p_type = 'author'
+              if p_group.attrib.has_key("person-group-type"):
+                p_type = p_group.attrib["person-group-type"]
+              # quirks exist here....
+                name_list = []
+              name_matches = p_group.findall("name")
+              if name_matches:
+                for name in name_matches:
+                  # --> "surname, given_names"
+                  surname = name.find("surname")
+                  g_names = name.find("given-names")
+                  if g_names != None and surname != None:
+                    name_list.append(u"%s, %s" % (surname.text, g_names.text))
+                  elif surname != None:
+                    name_list.append(surname.text)
+              else:
+                # if <name> isn't used, typically it is just a text field.
+                name_list.append(etree.tostring(p_group, method="text", encoding="UTF-8").decode('utf-8'))
+              if node_p['people'].has_key(p_type):
+                node_p['people'][p_type].extend(name_list)
+              else:
+                node_p['people'][p_type] = name_list
+          
           ## TODO - get author list if one exists
           c_id = "b:"+md5(hash_string.encode("utf-8")).hexdigest()
           
