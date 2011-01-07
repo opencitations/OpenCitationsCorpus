@@ -49,7 +49,12 @@ class Fallback(PubMedParser):
     for contributor in contrib_list:
       person = {}
       # Affiliation mappings
-      person['affiliations'] = [x.attrib['rid'] for x in contributor.xpath('xref[@ref-type="aff"]')]
+      person['affiliations'] = [x.attrib['rid'] for x in contributor.xpath('xref[@ref-type="aff"]') if x.attrib.has_key('rid')]
+      # type
+      if contributor.attrib.has_key("contrib-type"):
+        person['type'] = contributor.attrib["contrib-type"]
+      else:
+        person['type'] = 'author'
       s = contributor.xpath('name/surname')
       if s != None:
         for e in s:
@@ -91,6 +96,8 @@ class Fallback(PubMedParser):
       citations_list = []
       for citation in cite_list:
         ctype = citation.get(type_attrib)
+        if not ctype:
+          ctype = "journal"
         if ctype.lower() == "journal":
           # get pmid or doi
           c_id = None
@@ -153,7 +160,7 @@ class Fallback(PubMedParser):
               if p_group.attrib.has_key("person-group-type"):
                 p_type = p_group.attrib["person-group-type"]
               # quirks exist here....
-                name_list = []
+              name_list = []
               name_matches = p_group.findall("name")
               if name_matches:
                 for name in name_matches:
@@ -230,7 +237,7 @@ class Fallback(PubMedParser):
               if p_group.attrib.has_key("person-group-type"):
                 p_type = p_group.attrib["person-group-type"]
               # quirks exist here....
-                name_list = []
+              name_list = []
               name_matches = p_group.findall("name")
               if name_matches:
                 for name in name_matches:

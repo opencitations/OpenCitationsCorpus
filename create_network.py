@@ -38,6 +38,19 @@ def to_node_params(data_params, **additional):
       for group in data_params[key]:
         if group in node_params:
           node_params[group] = ";".join(data_params[key][group])
+    elif key == "contributors":
+      # reorient around the type
+      dts = {}
+      for contributor in data_params['contributors']:
+        if not dts.has_key(contributor['type']):
+          dts[contributor['type']] = []
+        if contributor.has_key('surname') and contributor.has_key('given-names'):
+          dts[contributor['type']].append(u"%s, %s" % (contributor['surname'], contributor['given-names']))
+        elif contributor.has_key('surname'):
+          dts[contributor['type']].append(contributor['surname'])
+      for key in dts:
+        if key in node_params:
+          node_params[key] = u";".join(dts[key])
     elif key in node_params:
       node_params[key] = data_params[key]
     if key in additional:
