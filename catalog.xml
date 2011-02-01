@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+  <group>
+    <public publicId="-//NLM//DTD Journal Archiving and Interchange DTD v2.1 20050630//EN" uri="dtd/archiving/2.1/archivearticle.dtd"/>
+    <public publicId="-//NLM//DTD Journal Archiving and Interchange DTD v2.2 20060430//EN" uri="dtd/archiving/2.2/Archiving-2_2-dtd-June/archivearticle.dtd"/>
+    <public publicId="-//NLM//DTD Journal Archiving and Interchange DTD v2.3 20070202//EN" uri="dtd/archiving/2.3/archivearticle.dtd"/>
+    <public publicId="-//NLM//DTD Journal Archiving and Interchange DTD v3.0 20080202//EN" uri="dtd/archiving/3.0/archiving/archivearticle3.dtd"/>
+
+    <system systemId="issue-admin" uri="dtd/archiving
+  </group>
+</catalog>
