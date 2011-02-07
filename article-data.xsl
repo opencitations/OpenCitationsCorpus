@@ -374,18 +374,19 @@
     <xsl:param name="id"/>
     <xsl:variable name="prev" select="preceding-sibling::node()[position()&lt;3]"/>
     <xsl:variable name="next" select="following-sibling::node()[position()&lt;3]"/>
-    <xsl:if test="not($prev[2]='-' and name($prev[1])='xref' and $prev[1]/@ref-type='bibr')">
+    <xsl:variable name="seps" select="('-', '&#x2013;')"/>
+    <xsl:if test="not($prev[2] and index-of($seps, $prev[2]) and name($prev[1])='xref' and $prev[1]/@ref-type='bibr')">
       <node type="in-text-reference-pointer">
         <data key="paragraph">
           <xsl:value-of select="count(preceding::p[ancestor::body])+1"/>
         </data>
         <xsl:choose>
-          <xsl:when test="$next[1]='-' and name($next[2])='xref' and $next[2]/@ref-type='bibr'">
+          <xsl:when test="$next[2] and index-of($seps, $next[1]) and name($next[2])='xref' and $next[2]/@ref-type='bibr'">
             <xsl:variable name="rid-from" select="@rid"/>
             <xsl:variable name="rid-to" select="$next[2]/@rid"/>
             <data key="text">
               <xsl:value-of select=".//text()"/>
-              <xsl:text>-</xsl:text>
+              <xsl:value-of select="$next[1]"/>
               <xsl:value-of select="$next[2]//text()"/>
             </data>
             <xsl:variable name="elem-from" select="/article/back/ref-list/ref[@id=$rid-from]"/>
