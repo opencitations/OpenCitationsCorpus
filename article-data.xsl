@@ -25,6 +25,12 @@
     <xsl:variable name="id">
       <xsl:call-template name="article-id"/>
     </xsl:variable>
+    <!-- We'll keep our in text reference pointers for later -->
+    <xsl:variable name="in-text-reference-pointers">
+      <xsl:apply-templates select="body">
+        <xsl:with-param name="id" select="$id"/>
+      </xsl:apply-templates>
+    </xsl:variable>
     <node type="article" id="{$id}">
       <data key="xml_container">article</data>
       <data key="ctype">
@@ -94,9 +100,7 @@
           </xsl:if>
         </xsl:for-each>
       </data>
-      <xsl:apply-templates select="body">
-        <xsl:with-param name="id" select="$id"/>
-      </xsl:apply-templates>
+      <xsl:copy-of select="$in-text-reference-pointers"/>
     </node>
     <xsl:for-each select="front/article-meta/contrib-group/contrib">
       <xsl:variable name="person-index" select="position()"/>
@@ -142,8 +146,11 @@
     <xsl:for-each select="back//ref-list/ref">
       <xsl:variable name="ref" select="."/>
       <xsl:variable name="citation" select="(citation|element-citation|mixed-citation)[1]"/>
+      <xsl:variable name="cited-id">
+          <xsl:value-of select="concat($id, ':reference:', @id)"/>
+      </xsl:variable>
       <xsl:if test="$citation">
-        <node type="article" id="{$id}:reference:{@id}">
+        <node type="article" id="$cited-id">
           <data key="_xml_container">
             <xsl:value-of select="*[position()=last()]/name()"/>
           </data>
@@ -315,7 +322,7 @@
             </data>
           </edge>
         </xsl:for-each>
-        <edge type="cites" source="{$id}" target="{$id}:reference:{@id}">
+        <edge type="cites" source="{$id}" target="$cited-id">
           <!--
           <data key="paragraphs">
             <xsl:for-each select="/article/body//p[not(ancestor::p) and .//xref[@rid=$ref/@id or index-of(tokenize(@rid, ' '), $ref/@id)]]">
@@ -333,6 +340,19 @@
           </xsl:when>
           </xsl:choose>
           -->
+          <xsl:variable name="denotions" select="$in-text-reference-pointers//node[@type='in-text-reference-pointer']/edge[@type='denotes' and @target=$cited-id]"/>
+          <data key="count">
+              <xsl:value-of select="count($denotions)"/>
+          </data>
+          <data key="paragraphs">
+              <xsl:for-each select="$denotions">
+              <xsl:value-of select="count(preceding::p)+1"/>
+              <xsl:if test="position() != last()">
+                <xsl:text> </xsl:text>
+              </xsl:if>
+            </xsl:for-each>
+        </data>
+
         </edge>
       </xsl:if>
     </xsl:for-each>
@@ -368,6 +388,9 @@
       <xsl:apply-templates select="node()">
         <xsl:with-param name="id" select="$id"/>
       </xsl:apply-templates>
+      <data key="index">
+          <xsl:value-of select="count(preceding::p[ancestor::body])+1"/>
+        </data>
     </p>
   </xsl:template>
   <xsl:template match="xref[@ref-type='bibr']">
