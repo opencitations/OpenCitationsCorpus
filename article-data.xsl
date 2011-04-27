@@ -3,6 +3,9 @@
   <xsl:output indent="yes"/>
   <xsl:template match="/">
     <article-data>
+      <xsl:comment>
+          Citation data from <xsl:value-of select="document-uri(.)"/>.
+      </xsl:comment>
       <xsl:apply-templates select="*"/>
     </article-data>
   </xsl:template>
@@ -32,6 +35,12 @@
       </xsl:apply-templates>
     </xsl:variable>
     <node type="article" id="{$id}">
+      <data key="in_text_reference_pointer_count">
+        <xsl:value-of select="count($in-text-reference-pointers//node[@type='in-text-reference-pointer'])"/>
+      </data>
+      <data key="reference_count">
+        <xsl:value-of select="count(back//ref-list/ref/(citation|element-citation|mixed-citation))"/>
+      </data>
       <data key="xml_container">article</data>
       <data key="ctype">
         <xsl:choose>
@@ -46,6 +55,7 @@
       <data key="title">
         <xsl:value-of select="front/article-meta/title-group/article-title"/>
       </data>
+      <data key="in_oa_subset">true</data>
       <xsl:variable name="date">
         <xsl:choose>
           <xsl:when test="front/article-meta/pub-date[@pub-type='ppub']">
@@ -147,11 +157,11 @@
       <xsl:variable name="ref" select="."/>
       <xsl:variable name="citation" select="(citation|element-citation|mixed-citation)[1]"/>
       <xsl:variable name="cited-id">
-          <xsl:value-of select="concat($id, ':reference:', @id)"/>
+        <xsl:value-of select="concat($id, ':reference:', @id)"/>
       </xsl:variable>
       <xsl:if test="$citation">
-        <node type="article" id="$cited-id">
-          <data key="_xml_container">
+        <node type="article" id="{$cited-id}">
+          <data key="xml_container">
             <xsl:value-of select="*[position()=last()]/name()"/>
           </data>
           <data key="ctype">
@@ -167,11 +177,11 @@
               </xsl:otherwise>
             </xsl:choose>
           </data>
+          <data key="full_citation">
+            <xsl:call-template name="verbatim"/>
+          </data>
           <xsl:choose>
             <xsl:when test="$citation[@publication-type='other' or @citation-type='other' or not(@publication-type or @citation-type)]">
-              <data key="full-citation">
-                <xsl:value-of select="$citation"/>
-              </data>
               <xsl:if test="matches($citation, '(^|[^\dA-Za-z])10\.\d+/[\d.a-zA-Z\-]+')">
                 <data key="doi">
                   <xsl:value-of select="replace($citation, '^(.*[^\dA-Za-z]|)(10\.\d+/[\d.a-zA-Z\-]*[\da-zA-Z]).*$', '$2', 's')"/>
@@ -222,70 +232,54 @@
                 </xsl:if>
               </xsl:for-each>
               <xsl:if test="matches($citation, 'https?://[a-z.]+/[A-Za-z\d\-._%/?=&amp;:#]+([^A-Za-z\d_/]|$)')">
-                <data key="link">
+                <data key="uri">
                   <xsl:value-of select="replace($citation, '^.*(https?://[a-z.]+/[A-Za-z\d\-._%/?=&amp;:#]+)([^A-Za-z\d_/].*|$)', '$1', 's')"/>
                 </data>
               </xsl:if>
             </xsl:when>
-            <xsl:when test="$citation[@publication-type='book' or @citation-type='book']">
-              <data key="title">
-                <xsl:choose>
-                  <xsl:when test="$citation/article-title">
-                    <xsl:value-of select="$citation/article-title"/>
-                  </xsl:when>
-                  <xsl:when test="$citation/source">
-                    <xsl:value-of select="$citation/source[1]"/>
-                  </xsl:when>
-                </xsl:choose>
-              </data>
-              <data key="author">
-                <xsl:for-each select="$citation/person-group[@person-group-type='author']/name">
-                  <xsl:value-of select="concat(surname, ' ', given-names)"/>
-                  <xsl:if test="position() != last()">
-                    <xsl:text>, </xsl:text>
-                  </xsl:if>
-                </xsl:for-each>
-              </data>
-              <xsl:for-each select="$citation/*">
-                <xsl:if test="index-of(('edition', 'publisher-name', 'fpage', 'lpage', 'year'), name())">
-                  <data key="{name()}">
-                    <xsl:value-of select="."/>
-                  </data>
-                </xsl:if>
-              </xsl:for-each>
-              <data key="edition">
-                <xsl:value-of select="$citation/edition"/>
-              </data>
-            </xsl:when>
-            <xsl:when test="$citation[@publication-type='journal' or @citation-type='journal']">
-              <xsl:for-each select="$citation/(year|month|day|volume|issue|source|fpage|lpage)">
-                <data key="{name()}">
+            <!--<xsl:when test="$citation[@publication-type='patent' or @citation-type='patent']">-->
+            <xsl:when test="$citation/patent">
+              <data key="patent_number">
+                <xsl:for-each select="$citation/patent">
                   <xsl:value-of select="."/>
-                </data>
-              </xsl:for-each>
-              <data key="title">
-                <xsl:value-of select="$citation/article-title"/>
-              </data>
-              <xsl:if test="$citation/pub-id[@pub-id-type='pmid']">
-                <data key="pmid">
-                  <xsl:value-of select="$citation/pub-id[@pub-id-type='pmid']"/>
-                </data>
-              </xsl:if>
-              <xsl:if test="$citation/pub-id[@pub-id-type='doi']">
-                <data key="doi">
-                  <xsl:value-of select="$citation/pub-id[@pub-id-type='doi']"/>
-                </data>
-              </xsl:if>
-              <data key="author">
-                <xsl:for-each select="$citation/person-group[@person-group-type='author']/name">
-                  <xsl:value-of select="concat(surname, ' ', given-names)"/>
-                  <xsl:if test="position() != last()">
-                    <xsl:text>, </xsl:text>
-                  </xsl:if>
+                  <xsl:if test="position() != last()"><xsl:text>, </xsl:text></xsl:if>
                 </xsl:for-each>
               </data>
             </xsl:when>
           </xsl:choose>
+          <xsl:if test="$citation/pub-id[@pub-id-type='pmid']">
+            <data key="pmid">
+              <xsl:value-of select="$citation/pub-id[@pub-id-type='pmid']"/>
+            </data>
+          </xsl:if>
+          <xsl:if test="$citation/pub-id[@pub-id-type='doi']">
+            <data key="doi">
+              <xsl:value-of select="$citation/pub-id[@pub-id-type='doi']"/>
+            </data>
+          </xsl:if>
+          <xsl:for-each select="$citation/(year|month|day|volume|issue|source|fpage|lpage|edition)">
+            <data key="{name()}">
+              <xsl:value-of select="."/>
+            </data>
+          </xsl:for-each>
+          <data key="title">
+            <xsl:choose>
+              <xsl:when test="$citation/article-title">
+                <xsl:value-of select="$citation/article-title"/>
+              </xsl:when>
+              <xsl:when test="$citation/source">
+                <xsl:value-of select="$citation/source[1]"/>
+              </xsl:when>
+            </xsl:choose>
+          </data>
+          <data key="author">
+            <xsl:for-each select="$citation/person-group[index-of(('author','allauthors'), @person-group-type)]/name">
+              <xsl:value-of select="concat(surname, ' ', given-names)"/>
+              <xsl:if test="position() != last()">
+                <xsl:text>, </xsl:text>
+              </xsl:if>
+            </xsl:for-each>
+          </data>
           <xsl:if test=".//ext-link[@ext-link-type='uri']">
             <data key="uri">
               <xsl:value-of select=".//ext-link[@ext-link-type='uri']/@xlink:href"/>
@@ -306,6 +300,11 @@
               </xsl:choose>
             </xsl:for-each>
           </xsl:if>
+          <xsl:if test=".//uri">
+            <data key="uri">
+              <xsl:value-of select=".//uri[1]/@xlink:href"/>
+            </data>
+          </xsl:if>
         </node>
         <xsl:for-each select="$citation/person-group[@person-group-type]/name">
           <node type="person" id="{$id}:reference:{$ref/@id}:contributor:{position()}">
@@ -322,7 +321,7 @@
             </data>
           </edge>
         </xsl:for-each>
-        <edge type="cites" source="{$id}" target="$cited-id">
+        <edge type="cites" source="{$id}" target="{$cited-id}">
           <!--
           <data key="paragraphs">
             <xsl:for-each select="/article/body//p[not(ancestor::p) and .//xref[@rid=$ref/@id or index-of(tokenize(@rid, ' '), $ref/@id)]]">
@@ -342,17 +341,26 @@
           -->
           <xsl:variable name="denotions" select="$in-text-reference-pointers//node[@type='in-text-reference-pointer']/edge[@type='denotes' and @target=$cited-id]"/>
           <data key="count">
-              <xsl:value-of select="count($denotions)"/>
+            <xsl:value-of select="count($denotions)"/>
           </data>
           <data key="paragraphs">
-              <xsl:for-each select="$denotions">
+            <xsl:for-each select="$denotions">
               <xsl:value-of select="count(preceding::p)+1"/>
               <xsl:if test="position() != last()">
                 <xsl:text> </xsl:text>
               </xsl:if>
             </xsl:for-each>
+          </data>
+          <!--
+        <data key="denote-ids">
+            <xsl:for-each select="$denotions/..">
+                <xsl:value-of select="@id"/>
+              <xsl:if test="position() != last()">
+                <xsl:text> </xsl:text>
+              </xsl:if>
+            </xsl:for-each>
         </data>
-
+        -->
         </edge>
       </xsl:if>
     </xsl:for-each>
@@ -384,13 +392,13 @@
   </xsl:template>
   <xsl:template match="p">
     <xsl:param name="id"/>
-    <p n="{count(preceding-sibling::p)+1}">
+    <p n="{count(preceding-sibling::p)+1}" id="{$id}:paragraph:{count(preceding::p[ancestor::body])+1}">
       <xsl:apply-templates select="node()">
         <xsl:with-param name="id" select="$id"/>
       </xsl:apply-templates>
       <data key="index">
-          <xsl:value-of select="count(preceding::p[ancestor::body])+1"/>
-        </data>
+        <xsl:value-of select="count(preceding::p[ancestor::body])+1"/>
+      </data>
     </p>
   </xsl:template>
   <xsl:template match="xref[@ref-type='bibr']">
@@ -399,7 +407,7 @@
     <xsl:variable name="next" select="following-sibling::node()[position()&lt;3]"/>
     <xsl:variable name="seps" select="('-', '&#x2013;')"/>
     <xsl:if test="not($prev[2] and index-of($seps, $prev[2]) and name($prev[1])='xref' and $prev[1]/@ref-type='bibr')">
-      <node type="in-text-reference-pointer">
+      <node type="in-text-reference-pointer" id="{$id}:in-text-reference-pointer:{generate-id()}">
         <data key="paragraph">
           <xsl:value-of select="count(preceding::p[ancestor::body])+1"/>
         </data>
@@ -442,11 +450,11 @@
   </xsl:template>
   <xsl:template match="node()">
     <xsl:param name="id"/>
-    <!--<xsl:copy>-->
+    <xsl:copy>
     <xsl:apply-templates select="node()">
       <xsl:with-param name="id" select="$id"/>
     </xsl:apply-templates>
-    <!--</xsl:copy>-->
+    </xsl:copy>
   </xsl:template>
   <xsl:template match="fig|title|caption|label|graphic">
     <xsl:param name="id"/>
@@ -472,6 +480,7 @@
     <xsl:param name="article-id"/>
     <xsl:for-each select="front/article-meta/related-article[@related-article-type='retracted-article']">
       <node type="article" id="{$article-id}:retracted:{position()}">
+        <data key="retracted">true</data>
         <xsl:choose>
           <xsl:when test="@ext-link-type='pubmed'">
             <data key="pmid">
@@ -483,7 +492,22 @@
               <xsl:value-of select="substring-after(@xlink:href, 'info:doi/')"/>
             </data>
           </xsl:when>
+          <xsl:when test="@ext-link-type='uri' and starts-with(@xlink:href, 'info:doi/')">
+            <data key="doi">
+              <xsl:value-of select="substring-after(@xlink:href, 'info:doi/')"/>
+            </data>
+          </xsl:when>
+          <xsl:when test="@xlink:href">
+            <data key="uri">
+              <xsl:value-of select="@xlink:href"/>
+            </data>
+          </xsl:when>
           <xsl:otherwise>
+            <!--
+            <data key="uri">
+              <xsl:value-of select="@xlink:href"/>
+            </data>
+            -->
             <xsl:message terminate="yes">Unexpected @ext-link-type</xsl:message>
             <warning type="unexpected-ext-link-type">Unexpected @ext-link-type</warning>
           </xsl:otherwise>
@@ -491,5 +515,34 @@
       </node>
       <edge type="retracts" source="{$article-id}" target="{$article-id}:retracted:{position()}"/>
     </xsl:for-each>
+  </xsl:template>
+  <xsl:template name="verbatim_">
+    <xsl:for-each select="node()">
+      <xsl:text> [ </xsl:text>
+      <xsl:text> # </xsl:text>
+      <xsl:value-of select="if (self::text()) then T else 0"/>
+      <xsl:text> # </xsl:text>
+      <xsl:value-of select="if (self::node()) then N else 0"/>
+      <xsl:text> # </xsl:text>
+      <xsl:choose>
+        <xsl:when test="name()='label'"/>
+        <xsl:when test="self::text()">
+          <xsl:value-of select="replace(., '\s+', ' ')"/>
+          <xsl:text> </xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:for-each select="node()">
+            <xsl:call-template name="verbatim_"/>
+          </xsl:for-each>
+        </xsl:otherwise>
+      </xsl:choose>
+      <xsl:text> ] </xsl:text>
+    </xsl:for-each>
+  </xsl:template>
+  <xsl:template name="verbatim">
+    <xsl:variable name="text">
+      <xsl:call-template name="verbatim_"/>
+    </xsl:variable>
+    <xsl:value-of select="normalize-space($text)"/>
   </xsl:template>
 </xsl:stylesheet>
