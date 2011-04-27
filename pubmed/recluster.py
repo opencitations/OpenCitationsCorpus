@@ -11,6 +11,7 @@ class DistanceCache(defaultdict):
         return distance
 
 def recluster(cluster):
+    #print cluster
     cluster = set(cluster)
     distances = DistanceCache()
 
@@ -33,4 +34,31 @@ def recluster(cluster):
         new_clusters.append(new_cluster)
         cluster -= new_cluster
     return new_clusters
+
+def smart_recluster(cluster, preliminary=None):
+    if not preliminary:
+        return recluster(cluster)
+
+    attachments = []
+
+    for c in preliminary:
+        if len(c) <= 5:
+            continue
+        s = set(random.sample(c, 5))
+        c_set = set(c)
+        attachments.append((s, c_set - s))
+        c[:] = list(s)
+
+    clusters = recluster(itertools.chain(preliminary))
+
+    for sample, others in attachments:
+        closest_cluster, closest_count = None, -1
+        for cluster in clusters:
+            count = len(set(cluster) & sample)
+            if count > closest_count:
+                closest_cluster, closest_count, cluster, count
+        closest_cluster.extend(others)
+
+    return clusters
+
 
