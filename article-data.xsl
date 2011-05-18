@@ -35,6 +35,7 @@
       </xsl:apply-templates>
     </xsl:variable>
     <node type="article" id="{$id}">
+      <data key="provenance">pmc_oa</data>
       <data key="in_text_reference_pointer_count">
         <xsl:value-of select="count($in-text-reference-pointers//node[@type='in-text-reference-pointer'])"/>
       </data>
@@ -161,6 +162,7 @@
       </xsl:variable>
       <xsl:if test="$citation">
         <node type="article" id="{$cited-id}">
+          <data key="provenance">pmc_oa_reference</data>
           <data key="xml_container">
             <xsl:value-of select="*[position()=last()]/name()"/>
           </data>
@@ -480,6 +482,7 @@
     <xsl:param name="article-id"/>
     <xsl:for-each select="front/article-meta/related-article[@related-article-type='retracted-article']">
       <node type="article" id="{$article-id}:retracted:{position()}">
+        <data key="provenance">pmc_oa_retraction</data>
         <data key="retracted">true</data>
         <xsl:choose>
           <xsl:when test="@ext-link-type='pubmed'">
