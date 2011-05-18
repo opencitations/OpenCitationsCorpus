@@ -275,12 +275,39 @@
             </xsl:choose>
           </data>
           <data key="author">
-            <xsl:for-each select="$citation/person-group[index-of(('author','allauthors'), @person-group-type)]/name">
-              <xsl:value-of select="concat(surname, ' ', given-names)"/>
-              <xsl:if test="position() != last()">
-                <xsl:text>, </xsl:text>
-              </xsl:if>
-            </xsl:for-each>
+            <xsl:choose>
+              <xsl:when test="$citation/person-group/name">
+                <xsl:for-each select="$citation/person-group[not(@person-group-type) or index-of(('author','allauthors'), @person-group-type)]/name">
+                  <xsl:value-of select="concat(surname, ' ', given-names)"/>
+                  <xsl:if test="position() != last()">
+                    <xsl:text>, </xsl:text>
+                  </xsl:if>
+                </xsl:for-each>
+              </xsl:when>
+              <xsl:when test="$citation/person-group[@person-group-type='allauthors']">
+                <xsl:value-of select="$citation/person-group[@person-group-type='allauthors']"/>
+              </xsl:when>
+              <xsl:when test="$citation/person-group/collab">
+                  <xsl:for-each select="$citation/person-group/collab">
+                  <xsl:value-of select="concat(surname, ' ', given-names)"/>
+                  <xsl:if test="position() != last()">
+                    <xsl:text>, </xsl:text>
+                  </xsl:if>
+                </xsl:for-each>
+              </xsl:when>
+              <xsl:when test="$citation/name">
+                <xsl:for-each select="$citation/name">
+                  <xsl:value-of select="concat(surname, ' ', given-names)"/>
+                  <xsl:if test="position() != last()">
+                    <xsl:text>, </xsl:text>
+                  </xsl:if>
+                </xsl:for-each>
+              </xsl:when>
+              <xsl:when test="not($citation/name) and not($citation/person-group)"/>
+              <xsl:otherwise>
+                  <xsl:message>Unable to find author for <xsl:value-of select="$cited-id"/></xsl:message>
+              </xsl:otherwise>
+            </xsl:choose>
           </data>
           <xsl:if test=".//ext-link[@ext-link-type='uri']">
             <data key="uri">
@@ -520,27 +547,18 @@
     </xsl:for-each>
   </xsl:template>
   <xsl:template name="verbatim_">
-    <xsl:for-each select="node()">
-      <xsl:text> [ </xsl:text>
-      <xsl:text> # </xsl:text>
-      <xsl:value-of select="if (self::text()) then T else 0"/>
-      <xsl:text> # </xsl:text>
-      <xsl:value-of select="if (self::node()) then N else 0"/>
-      <xsl:text> # </xsl:text>
-      <xsl:choose>
-        <xsl:when test="name()='label'"/>
-        <xsl:when test="self::text()">
-          <xsl:value-of select="replace(., '\s+', ' ')"/>
-          <xsl:text> </xsl:text>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:for-each select="node()">
-            <xsl:call-template name="verbatim_"/>
-          </xsl:for-each>
-        </xsl:otherwise>
-      </xsl:choose>
-      <xsl:text> ] </xsl:text>
-    </xsl:for-each>
+    <xsl:choose>
+      <xsl:when test="name()='label'"/>
+      <xsl:when test="self::text()">
+        <xsl:value-of select="replace(., '\s+', ' ')"/>
+        <xsl:text> </xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:for-each select="node()">
+          <xsl:call-template name="verbatim_"/>
+        </xsl:for-each>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   <xsl:template name="verbatim">
     <xsl:variable name="text">
