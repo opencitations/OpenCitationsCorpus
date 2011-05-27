@@ -15,11 +15,32 @@ class Data(dict):
 
 
 ARTICLE_FIELDS = """title year month day volume edition author editor cites
-                    doi pmid isbn pmc uri publisher""".split()
-ARTICLE_MAP = {'description': 'abstract', 'pageStart': 'fpage', 'pageEnd': 'lpage', 'citation': 'full_citation'}
+                    doi pmid isbn pmc uri publisher journal""".split()
+ARTICLE_MAP = {
+    'description': 'abstract',
+    'pageStart': 'fpage',
+    'pageEnd': 'lpage',
+    'citation': 'full_citation',
+    'x-in-text-reference-pointer-count': 'in_text_reference_pointer_count',
+    'x-reference-count': 'reference_count',
+    'x-fabio-type': 'fabio_type',
+}
+
+JOURNAL_MAP = {
+    'nlm_ta': 'x-nlm-ta',
+    'title': 'title',
+    'issn': 'issn',
+    'eissn': 'eissn',
+}
 
 def article_record(xml, node, data):
+    record = {
+        'id': data._id,
+        'type': 'Article',
+    }
+
     data.cites, data.author, data.editor, data.translator, data.retracts = [], [], [], [], []
+    data.journal = None
     for edge in xml.xpath("/article-data/edge[@source='%s']" % data._id):
         ptype = edge.attrib['type']
         try:
@@ -36,6 +57,9 @@ def article_record(xml, node, data):
             l = data.editor
         elif ptype == 'contributor' and contrib_type == 'translator':
             l = data.translator
+        elif ptype== 'journal':
+            data.journal = {'ref': '@%s' % edge.attrib['target']}
+            continue
         else:
             print "Unknown type: %r %r" % (ptype, contrib_type)
             print etree.tostring(edge)
@@ -44,10 +68,6 @@ def article_record(xml, node, data):
             'ref': '@%s' % edge.attrib['target'],
         })
 
-    record = {
-        'id': data._id,
-        'type': 'Article',
-    }
 
     for article_field in ARTICLE_FIELDS:
         if getattr(data, article_field):
@@ -60,12 +80,31 @@ def article_record(xml, node, data):
 
     return record
 
+def journal_record(xml, node, data):
+    journal = {
+        'id': data._id,
+        'x-nlm-ta': getattr(data, 'nlm_ta'),
+    }
+
+    for edge in xml.xpath("/article-data/edge[@source='%s']" % data._id):
+        if edge.attrib['type'] == 'publisher':
+            journal['publisher'] = {'ref': '@%s' % edge.attrib['target']}
+    for a, b in JOURNAL_MAP.iteritems():
+        if getattr(data, b):
+            journal[a] = data[b]
+
+    return journal
+
+
 def person_record(xml, node, data):
     record = {
         'id': data._id,
         'type': 'Person',
         'name': '%s, %s' % (data.surname, data.get('given-names')),
     }
+    for edge in xml.xpath("/article-data/edge[@source='%s']" % data._id):
+        if edge.attrib['type'] == 'affiliation':
+            record['affiliated'] = {'ref': '@%s' % edge.attrib['target']}
     return record
 
 def organisation_record(xml, node, data):
@@ -74,6 +113,7 @@ def organisation_record(xml, node, data):
         'type': 'Organization',
         'address': data.address,
     }
+    return record
 
 def run(input_directory, articles_filename):
     tar = tarfile.open(articles_filename, 'w:gz')
@@ -100,7 +140,9 @@ def run(input_directory, articles_filename):
                 record_list.append(article_record(xml, node, data))
             elif data._type == 'person':
                 record_list.append(person_record(xml, node, data))
-            elif data._type == 'affiliation':
+            elif data._type == 'journal':
+                record_list.append(journal_record(xml, node, data))
+            elif data._type == 'organisation':
                 record_list.append(organisation_record(xml, node, data))
             else:
                 print data._type
