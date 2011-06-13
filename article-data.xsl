@@ -121,6 +121,32 @@
       </data>
       <xsl:copy-of select="$in-text-reference-pointers"/>
     </node>
+    <node type="journal" id="{$id}:journal">
+      <data key="nlm_ta">
+        <xsl:value-of select="front/journal-meta/journal-id[@journal-id-type='nlm-ta']/text()"/>
+      </data>
+      <data key="issn">
+        <xsl:value-of select="front/journal-meta/issn[not(@pub-type='epub')]/text()"/>
+      </data>
+      <data key="eissn">
+        <xsl:value-of select="front/journal-meta/issn[@pub-type='epub']/text()"/>
+      </data>
+      <data key="title">
+        <xsl:value-of select="front/journal-meta/journal-title-group/text()"/>
+      </data>
+    </node>
+    <edge type="journal" source="{$id}" target="{$id}:journal"/>
+    <xsl:for-each select="front/journal-meta/publisher">
+      <node type="organisation" id="{$id}:publisher">
+        <data key="name">
+          <xsl:value-of select="publisher-name"/>
+        </data>
+        <data key="address">
+          <xsl:value-of select="publisher-loc"/>
+        </data>
+      </node>
+      <edge type="publisher" source="{$id}:journal" target="{$id}:publisher"/>
+    </xsl:for-each>
     <xsl:for-each select="front/article-meta/contrib-group/contrib">
       <xsl:variable name="person-index" select="position()"/>
       <node type="person" id="{$id}:person:{$person-index}">
@@ -369,6 +395,14 @@
             </data>
           </xsl:if>
         </node>
+        <xsl:if test="$citation/source">
+            <node type="journal" id="{$id}:reference:{$ref/@id}:journal">
+              <data key="nlm_ta">
+                  <xsl:value-of select="$citation/source"/>
+                </data>
+            </node>
+            <edge type="journal" source="{$id}:reference:{$ref/@id}" target="{$id}:reference:{$ref/@id}:journal"/>
+        </xsl:if>
         <xsl:for-each select="$citation/person-group[@person-group-type]/name">
           <node type="person" id="{$id}:reference:{$ref/@id}:contributor:{position()}">
             <data key="surname">
