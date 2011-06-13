@@ -83,6 +83,7 @@ def article_record(xml, node, data):
 def journal_record(xml, node, data):
     journal = {
         'id': data._id,
+        'type': 'Journal',
         'x-nlm-ta': getattr(data, 'nlm_ta'),
     }
 

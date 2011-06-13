@@ -1,6 +1,6 @@
 import simplejson, StringIO
 
-def get_records(tar, with_index=False):
+def get_records(tar, with_index=False, types=('Article',)):
     for tar_info in tar:
         if tar_info.name.endswith('.json'):
             json = tar.extractfile(tar_info)
@@ -13,7 +13,7 @@ def get_records(tar, with_index=False):
             else:
                 index = None
             for record in json['recordList']:
-                if record and record['type'] == 'Article':
+                if record and record['type'] in types:
                     yield index, record
 
 def get_datasets(tar):

@@ -133,8 +133,11 @@ def convert_doc_sum(pmid):
         journal['issn'] = items['ISSN']
     if 'ESSN' in items:
         journal['eissn'] = items['ESSN']
+    if 'Source' in items:
+        journal['x-nlm-ta'] = items['Source']
     if journal:
         journal['id'] = 'pubmed-api:%s:journal' % pmid
+        journal['type'] = 'Journal'
         record['journal'] = {'ref': '@pubmed-api:%s:journal' % pmid}
         records.append(journal)
 
