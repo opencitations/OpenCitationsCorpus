@@ -89,8 +89,7 @@ def run(input_filename, output_filename):
     merge_sort(record_file.name, sorted_record_filename)
     os.unlink(record_file.name)
 
-    del index, to_add, queue, groups, record, identifier, identifiers, i, k, biggest, records, record_file, fh, data, article_list, article, article_id, group
-    print list(locals())
+    del index, to_add, queue, groups, record, identifier, identifiers, i, k, biggest, records, record_file, fh, data, article_list, article_id, group
 
     tar.close()
     tar = tarfile.open(output_filename, 'w:gz')
