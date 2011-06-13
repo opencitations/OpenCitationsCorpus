@@ -86,6 +86,14 @@
       <data key="abstract">
         <xsl:value-of select="front/article-meta/abstract"/>
       </data>
+      <data key="fabio_type">
+          <xsl:choose>
+              <xsl:when test="front-article-meta/article-categories/subj-group[@subj-group-type = 'heading']/subject[text() = 'Research Article']">
+                  <xsl:text>JournalArticle</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>Expression</xsl:otherwise>
+            </xsl:choose>
+        </data>
       <xsl:for-each select="front/article-meta/(volume|issue|fpage|lpage)">
         <data key="{name()}">
           <xsl:value-of select="."/>
@@ -166,7 +174,7 @@
           <data key="xml_container">
             <xsl:value-of select="*[position()=last()]/name()"/>
           </data>
-          <data key="ctype">
+          <xsl:variable name="ctype">
             <xsl:choose>
               <xsl:when test="$citation/@publication-type">
                 <xsl:value-of select="$citation/@publication-type"/>
@@ -178,7 +186,33 @@
                 <xsl:text>none</xsl:text>
               </xsl:otherwise>
             </xsl:choose>
-          </data>
+        </xsl:variable>
+        <data key="ctype"><xsl:value-of select="$ctype"/></data>
+          <data key="fabio_type">
+              <xsl:choose>
+                  <xsl:when test="$ctype='journal'">JournalArticle</xsl:when>
+                  <xsl:when test="$ctype='book'">Book</xsl:when>
+                  <xsl:when test="$ctype='thesis'">Thesis</xsl:when>
+                  <xsl:when test="$ctype='database'">Database</xsl:when>
+                  <xsl:when test="$ctype='weblink'">WebPage</xsl:when>
+                  <xsl:when test="$ctype='webpage'">WebPage</xsl:when>
+                  <xsl:when test="$ctype='web'">WebSite</xsl:when>
+                  <xsl:when test="$ctype='patent'">Patent</xsl:when>
+                  <xsl:when test="$ctype='confproc'">ConferenceProceedings</xsl:when>
+                  <xsl:when test="$ctype='conf-proceeding'">ConferenceProceedings</xsl:when>
+                  <xsl:when test="$ctype='conf-proc'">ConferenceProceedings</xsl:when>
+                  <xsl:when test="$ctype='computer-program'">ComputerProgram</xsl:when>
+                  <xsl:when test="$ctype='commun'">PersonalCommunication</xsl:when>
+                  <xsl:when test="$ctype='report'">Report</xsl:when>
+                  <xsl:when test="$ctype='other'">Expression</xsl:when>
+                  <xsl:when test="$ctype='other-ref'">Expression</xsl:when>
+                  <xsl:when test="$ctype='undeclared'">Expression</xsl:when>
+                  <xsl:otherwise>
+                      <xsl:message>Unknown ctype: <xsl:value-of select="$ctype"/></xsl:message>
+                      <xsl:text>Expression</xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </data>
           <data key="full_citation">
             <xsl:call-template name="verbatim"/>
           </data>
@@ -511,6 +545,7 @@
       <node type="article" id="{$article-id}:retracted:{position()}">
         <data key="provenance">pmc_oa_retraction</data>
         <data key="retracted">true</data>
+        <data key="fabio_type">Expression</data>
         <xsl:choose>
           <xsl:when test="@ext-link-type='pubmed'">
             <data key="pmid">
