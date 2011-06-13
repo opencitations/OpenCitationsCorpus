@@ -16,12 +16,13 @@ def get_records(tar, with_index=False, types=('Article',)):
                 if record and record['type'] in types:
                     yield index, record
 
-def get_datasets(tar):
+def get_datasets(tar, types=('Article', 'Journal')):
     for tar_info in tar:
         if tar_info.name.endswith('.json'):
             json = tar.extractfile(tar_info)
             json = simplejson.load(json)
-            yield tar_info, json
+            if any(r['type'] in types for r in json['recordList']):
+                yield tar_info, json
 
 def get_json_files(tar):
     for tar_info in tar:
