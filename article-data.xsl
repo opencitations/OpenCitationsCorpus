@@ -171,8 +171,8 @@
         </xsl:for-each>
       </xsl:for-each>
     </xsl:for-each>
-    <xsl:for-each select="front/article-meta/aff">
-      <node type="affiliation" id="{$id}:affiliation:{@id}">
+    <xsl:for-each select="front/article-meta//aff">
+      <node type="organisation" id="{$id}:affiliation:{@id}">
         <data key="address">
           <xsl:choose>
             <xsl:when test="addr-line">
@@ -304,7 +304,9 @@
               <data key="patent_number">
                 <xsl:for-each select="$citation/patent">
                   <xsl:value-of select="."/>
-                  <xsl:if test="position() != last()"><xsl:text>, </xsl:text></xsl:if>
+                  <xsl:if test="position() != last()">
+                    <xsl:text>, </xsl:text>
+                  </xsl:if>
                 </xsl:for-each>
               </data>
             </xsl:when>
@@ -348,7 +350,7 @@
                 <xsl:value-of select="$citation/person-group[@person-group-type='allauthors']"/>
               </xsl:when>
               <xsl:when test="$citation/person-group/collab">
-                  <xsl:for-each select="$citation/person-group/collab">
+                <xsl:for-each select="$citation/person-group/collab">
                   <xsl:value-of select="concat(surname, ' ', given-names)"/>
                   <xsl:if test="position() != last()">
                     <xsl:text>, </xsl:text>
@@ -365,7 +367,7 @@
               </xsl:when>
               <xsl:when test="not($citation/name) and not($citation/person-group)"/>
               <xsl:otherwise>
-                  <xsl:message>Unable to find author for <xsl:value-of select="$cited-id"/></xsl:message>
+                <xsl:message>Unable to find author for <xsl:value-of select="$cited-id"/></xsl:message>
               </xsl:otherwise>
             </xsl:choose>
           </data>
@@ -548,9 +550,9 @@
   <xsl:template match="node()">
     <xsl:param name="id"/>
     <xsl:copy>
-    <xsl:apply-templates select="node()">
-      <xsl:with-param name="id" select="$id"/>
-    </xsl:apply-templates>
+      <xsl:apply-templates select="node()">
+        <xsl:with-param name="id" select="$id"/>
+      </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
   <xsl:template match="fig|title|caption|label|graphic">
