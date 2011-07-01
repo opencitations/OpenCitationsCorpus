@@ -18,8 +18,9 @@ def run_all(input_directory, output_directory):
 
     #parse_xml(input_directory, rel('articles-raw.csv'), rel('citations-raw.csv'))
     #sanitize(rel('articles-raw.csv'), rel('articles-sanitized.csv'))
-    #unify_identifiers(rel('articles-sanitized.csv'), rel('articles-id-unified.csv'))
-    #merge_sort(rel('articles-id-unified.csv'), rel('articles-id-unified-sorted.csv'))
+    unify_identifiers(rel('articles-sanitized.csv'), rel('articles-id-unified.csv'))
+    merge_sort(rel('articles-id-unified.csv'), rel('articles-id-unified-sorted.csv'))
+    return
     load_solr(rel('articles-id-unified-sorted.csv'))
     merge_solr(rel('articles-id-unified-sorted.csv'), rel('articles-solr-unified.csv'))
     merge_sort(rel('articles-solr-unified.csv'), rel('articles-solr-unified-sorted.csv'))

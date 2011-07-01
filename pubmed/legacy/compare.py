@@ -61,13 +61,13 @@ def compare_integer(a, b, weight=1):
 def compare(a, b):
     cs = []
     if a.doi and b.doi:
-        cs.append((0.4, 1 if a.doi == b.doi else 0))
+        cs.append((0.2, 1 if a.doi == b.doi else 0))
     if a.pmid and b.pmid:
-        cs.append((0.4, 1 if a.pmid == b.pmid else 0))
+        cs.append((0.6, 1 if a.pmid == b.pmid else 0))
     if a.pmc and b.pmc:
-        cs.append((0.4, 1 if a.pmc == b.pmc else 0))
+        cs.append((0.6, 1 if a.pmc == b.pmc else 0))
     if a.uri and b.uri:
-        cs.append((0.4, 1 if a.uri == b.uri else 0))
+        cs.append((0.6, 1 if a.uri == b.uri else 0))
     if a.volume and b.volume:
         cs.append(compare_integer(a.volume, b.volume, weight=0.4))
     if a.issue and b.issue:
@@ -78,6 +78,8 @@ def compare(a, b):
         cs.append((1, levenshtein(a.title.lower(), b.title.lower())))
     if a.author and b.author:
         cs.append(compare_authors(a.author, b.author))
+    if a.uri and b.uri and a.uri == b.uri:
+        cs.append((100, 1))
 
     if a.year and b.year:
         try:

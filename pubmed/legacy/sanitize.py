@@ -1,4 +1,4 @@
-import csv, urlparse, itertools, threading, os, urllib, time
+import csv, urlparse, itertools, threading, os, urllib, time, traceback
 from functools import partial
 import Queue
 
@@ -12,6 +12,8 @@ def sanitize_uri(uri):
     uri = uri._replace(scheme=(uri.scheme or 'http'),
                        path=(uri.path or '/'),
                        netloc=(uri.netloc.lower()))
+    if uri.netloc == 'dx.doi.org' and uri.path.startswith('doi:'):
+        uri = uri._replace(path=uri.path[4:])
     return urlparse.urlunparse(uri)
 
 PREFIXES = {
@@ -47,7 +49,12 @@ def sanitize_patent_number(value):
 def retrieve_doc_sums(root_dir, pmids):
 
     response = urllib.urlopen('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&rettype=xml&id=%s' % ','.join(sorted(pmids)))
-    xml = etree.parse(response).getroot()
+    try:
+        xml = etree.parse(response).getroot()
+    except Exception, e:
+        print "Exception processing %s" % response.url
+        traceback.print_exc()
+        return
 
     for doc_sum in xml.xpath('DocSum'):
         yield doc_sum.xpath('Id')[0].text, doc_sum
@@ -251,6 +258,8 @@ def sanitize(article):
         except Exception, e:
             pass
             #print article.uri, repr(e)
+        if article.uri.startswith('http://dx.doi.org/'):
+            article = article._replace(doi=article.uri[18:])
     if article.patent_number:
         try:
             print "%40s %40s" % (article.patent_number, sanitize_patent_number(article.patent_number))

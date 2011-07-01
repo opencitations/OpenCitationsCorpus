@@ -1,0 +1,18 @@
+,,,,,,,,,,,,,,,,,,,,,,,,
+"Open Research Reports",,,,,,,,,,,,,,,,,,,,,,,,
+,,"Numerical data",,,"Pubmed IDs of 20 most highly cited papers among A (with number of times cited)",,,,,,,,,,,,,,,,,,,
+"Disease name","Search terms 
+(searches conducted over title, abstract and keywords)","A: Number of disease-relevant papers, from among 2,435,045 unique publications cited by Open Access subset papers","B: Number of disease-relevant papers within Open Access subset","C:Number of disease-relevant papers in Open Access subset that are cited by other Open Access subset papers",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+"Cholera ","Cholera, Vibrio cholerae, V. cholerae",,,,,,,,,,,,,,,,,,,,,,,
+"Dengue fever ","Dengue, breakbone fever, Aedes aegypti, A. aegypti",,,,,,,,,,,,,,,,,,,,,,,
+"HIV/AIDS","Acquired immunodeficiency syndrome, AIDS, human immunodeficiency virus, HIV",,,,,,,,,,,,,,,,,,,,,,,
+"Leprosy","Leprosy, Mycobacterium leprae, M. leprae, Mycobacterium lepromatosis, M. lepromatosis",,,,,,,,,,,,,,,,,,,,,,,
+"Leptospirosis","Leptospirosis, Weil's disease, Leptospira",,,,,,,,,,,,,,,,,,,,,,,
+"Malaria","Malaria, Plasmodium, Anopheles",,,,,,,,,,,,,,,,,,,,,,,
+"Measles","Measles, Rubeola, Morbilli, Morbillivirus",,,,,,,,,,,,,,,,,,,,,,,
+"Pneumonia","Pneumonia, Streptococcus pneumoniae, S. pneumoniae",,,,,,,,,,,,,,,,,,,,,,,
+"Schistosomiasis","Schistosomiasis, bilharzia, Schistosoma",,,,,,,,,,,,,,,,,,,,,,,
+"Trypanosomiasis","Trypanosomiasis, trypanosomosis, Trypanosoma, sleeping sickness, tsetse fly, Glossina, Chagas disease, Triatominae",,44,,,,,,,,,,,,,,,,,,,,,
+"Tuberculosis","Tuberculosis, TB, Mycobacterium tuberculosis, M. tuberculosis",,,,,,,,,,,,,,,,,,,,,,,
+"Amyotrophic lateral sclerosis","Amyotrophic lateral sclerosis, ALS, Lou Gehrig's disease",,,,,,,,,,,,,,,,,,,,,,,
+"Spinal Muscular Atrophy","Spinal Muscular Atrophy, SMA",,,,,,,,,,,,,,,,,,,,,,,

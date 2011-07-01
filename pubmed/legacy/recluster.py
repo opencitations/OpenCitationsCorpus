@@ -22,7 +22,7 @@ def recluster(cluster):
         new_cluster = set()
         while current_distances:
             distance, selected = min((b,a) for (a,b) in current_distances.iteritems())
-            if distance > 0.4:
+            if distance > 0.9:
                 break
             new_cluster.add(selected)
             del current_distances[selected]
