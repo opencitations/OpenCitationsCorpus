@@ -30,9 +30,28 @@ def to_node_params(data_params, **additional):
                  'publisher-name':'',
                  'source':'',
                  'ctype':'',
+                 'author':'',
+                 'editor':'',
                  'nlmxml':''}
-  for key in node_params:
-    if key in data_params:
+  for key in data_params:
+    if key == "people":
+      for group in data_params[key]:
+        if group in node_params:
+          node_params[group] = ";".join(data_params[key][group])
+    elif key == "contributors":
+      # reorient around the type
+      dts = {}
+      for contributor in data_params['contributors']:
+        if not dts.has_key(contributor['type']):
+          dts[contributor['type']] = []
+        if contributor.has_key('surname') and contributor.has_key('given-names'):
+          dts[contributor['type']].append(u"%s, %s" % (contributor['surname'], contributor['given-names']))
+        elif contributor.has_key('surname'):
+          dts[contributor['type']].append(contributor['surname'])
+      for key in dts:
+        if key in node_params:
+          node_params[key] = u";".join(dts[key])
+    elif key in node_params:
       node_params[key] = data_params[key]
     if key in additional:
       node_params[key] = additional[key]
@@ -40,6 +59,7 @@ def to_node_params(data_params, **additional):
 
 def generate_network(journal_dir):
   g = nx.DiGraph()
+  no_attribs = nx.DiGraph()
   for nlmxml in [x for x in os.listdir(journal_dir) if x.endswith("nxml")]:
     print "Processing %s in %s" % (nlmxml, journal_dir)
     info = P.handle(journal_dir, os.path.join(journal_dir, nlmxml), components=["article_id", "all_article_ids", "biblio", "citations"])
@@ -51,54 +71,31 @@ def generate_network(journal_dir):
                                           source=u" ".join(journal_dir.split("_")),
                                           nlmxml=os.path.join(journal_dir, nlmxml) )
                                           )
+      no_attribs.add_node(nodeid)
 
     for ctype in info['citations'].keys():
       for c_id, citation_params in info['citations'][ctype]:
         if not g.has_node(c_id):
           citation_params['_xml_container'] = ctype
           g.add_node(c_id, **to_node_params(citation_params))
+          no_attribs.add_node(c_id)
         # add directed edge for this
         g.add_edge(nodeid, c_id)
-  return g
+        no_attribs.add_edge(nodeid, c_id)
+  return g, no_attribs
 
 errorlist = open("unparsable.log", "w")
 if __name__ == "__main__":
   for journal in jlist:
     try:
-      g = generate_network(journal)
-      filename = re.sub('[^a-z.]+', '-', journal.lower()).strip('-') + '.gml'
-      #print "Saving as YAML - %s" % (journal+".yaml")
-      #nx.write_yaml(g, journal+".yaml")
-      print "Saving as New shiny GraphML - %s" % (filename)
+      g, no_attribs = generate_network(journal)
+      filename = re.sub('[^a-z.]+', '-', journal.lower()).strip('-') + '.graphml'
+      n_filename = re.sub('[^a-z.]+', '-', journal.lower()).strip('-') + '-nodesonly.graphml'
+      print "Saving fully attrib'd graph as %s" % (filename)
       write_graphml(g, open(filename, "w"))
-      #print "Saving as GraphML - %s" % (journal+".gml")
-      #nx.write_graphml(g, journal+".gml")
+      print "Saving plain graph, no attributes as %s" % (n_filename)
+      write_graphml(no_attribs, open(n_filename, "w"))
     except IndexError:
       print "ERROR Couldn't parse journal: %s" % journal
       errorlist.write("%s\n" % journal)
-  # nx.draw()
-
-  #print "Saving as graphviz dot file - %s" % (journal+".dot")
-  #nx.write_dot(g, journal+".dot")
-  #print "Calculating eigenvalues"
-  #L=nx.generalized_laplacian(g)
-  #e=nx.eigenvalues(L)
-  #print("Largest eigenvalue:", max(e))
-  #print("Smallest eigenvalue:", min(e))
-  # plot with matplotlib if we have it
-  # shows "semicircle" distribution of eigenvalues
-  #try:
-  #  nx.hist(e,bins=100) # histogram with 100 bins
-  #  nx.xlim(0,2)  # eigenvalues between 0 and 2
-  #  nx.show()
-  #except:
-  #  pass
-
-  #print "Saving %s w/ GraphViz" % (journal+".dot")
-  #nx.draw_graphviz(g)
-  #nx.write_dot(journal+".dot")
-  #print "pylab drawings:"
-  #print "Circular %s"  % (journal+"circ.png")
-  #nx.draw_circular(g)
-  #plt.savefig(journal+"circ.png")
 
