@@ -11,7 +11,6 @@ import urlparse
 from lxml import etree
 
 from utils import get_graphs
-from model import article_field_set
 
 class Data(dict):
     def __init__(self, xml):
