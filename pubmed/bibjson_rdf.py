@@ -91,6 +91,12 @@ def merge_people(person_lists, mappings, records):
         person_list.append(normalize_field(person, mappings, records))
     return person_list
 
+SOURCE_WEIGHTINGS = {
+    'pmc_oa': 7,
+    'pmc_oa_reference': 1,
+    'pubmed_api': 2,
+}
+
 def majority_vote(records, types, mappings):
     records = dict((r['id'], r) for r in records)
 
@@ -100,7 +106,7 @@ def majority_vote(records, types, mappings):
             continue
         for field, value in record.iteritems():
             value = normalize_field(value, mappings, records)
-            fields[field][value] += 1
+            fields[field][value] += SOURCE_WEIGHTINGS.get(record.get('x-source-type'), 0.5)
     ret = {}
     for field, values in fields.items():
         values = fields[field] = sorted(values.iteritems(), key=lambda x:-x[1])
