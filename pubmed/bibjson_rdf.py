@@ -450,10 +450,14 @@ ARTICLE_DATA_PROPERTIES = (
 #PERSON_OBJECT_PROPERTIES = (
 #    ('author', 
 
+BAD_URI_CHARS = frozenset(ur'\<>')
+
 def normalize_quad(quad):
     assert len(quad) == 4, "Quad of wrong length"
     for term in quad:
         if isinstance(term, URIRef):
+            if set(term) & BAD_URI_CHARS:
+                raise ValueError("Bad URI: %s" % term)
             if not term.startswith(u'urn:') and not term.startswith(u'http:'):
                 yield URIRef(u'http://opencitations.net' + term).n3()
             else:
@@ -476,6 +480,8 @@ def quad_writer(out):
         try:
             queue.append(' '.join(term.encode('utf-8') for term in normalize_quad(quad)))
             queue.append(' .\n')
+        except ValueError, e:
+            sys.stderr.write('%s\n' % e)
         except Exception:
             traceback.print_exc(file=sys.stderr)
         if len(queue) > 128:
