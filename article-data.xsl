@@ -88,7 +88,7 @@
       </data>
       <data key="fabio_type">
           <xsl:choose>
-              <xsl:when test="front-article-meta/article-categories/subj-group[@subj-group-type = 'heading']/subject[text() = 'Research Article']">
+              <xsl:when test="front/article-meta/article-categories/subj-group[@subj-group-type = 'heading']/subject[text() = 'Research Article']">
                   <xsl:text>JournalArticle</xsl:text>
                 </xsl:when>
                 <xsl:otherwise>Expression</xsl:otherwise>
