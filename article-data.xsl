@@ -112,8 +112,18 @@
         </xsl:if>
       </xsl:for-each>
       <data key="author">
-        <xsl:for-each select="front/article-meta/contrib-group/contrib[@contrib-type='author']/name">
-          <xsl:value-of select="concat(surname, ' ', given-names)"/>
+        <xsl:for-each select="front/article-meta/contrib-group/contrib[@contrib-type='author']">
+          <xsl:choose>
+            <xsl:when test="name">
+              <xsl:value-of select="concat(name/surname, ' ', name/given-names)"/>
+            </xsl:when>
+            <xsl:when test="collab">
+              <xsl:value-of select="collab"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:message>Unexpected class of contributor</xsl:message>
+            </xsl:otherwise>
+          </xsl:choose>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>
           </xsl:if>
@@ -148,26 +158,40 @@
       <edge type="publisher" source="{$id}:journal" target="{$id}:publisher"/>
     </xsl:for-each>
     <xsl:for-each select="front/article-meta/contrib-group/contrib">
-      <xsl:variable name="person-index" select="position()"/>
-      <node type="person" id="{$id}:person:{$person-index}">
-        <data key="surname">
-          <xsl:value-of select="name/surname"/>
-        </data>
-        <data key="given-names">
-          <xsl:value-of select="name/given-names"/>
-        </data>
+      <xsl:variable name="contrib-index" select="position()"/>
+      <node id="{$id}:contributor:{$contrib-index}">
+        <xsl:choose>
+          <xsl:when test="name">
+            <xsl:attribute name="type">person</xsl:attribute>
+            <data key="surname">
+              <xsl:value-of select="name/surname"/>
+            </data>
+            <data key="given-names">
+              <xsl:value-of select="name/given-names"/>
+            </data>
+            <data key="name-style">
+              <xsl:value-of select="name/@name-style"/>
+            </data>
+          </xsl:when>
+          <xsl:when test="collab">
+            <xsl:attribute name="type">organization</xsl:attribute>
+            <data key="name">
+              <xsl:value-of select="collab"/>
+            </data>
+          </xsl:when>
+        </xsl:choose>
       </node>
-      <edge type="contributor" source="{$id}" target="{$id}:person:{$person-index}">
+      <edge type="contributor" source="{$id}" target="{$id}:contributor:{$contrib-index}">
         <data key="contrib-type">
           <xsl:value-of select="@contrib-type"/>
         </data>
         <data key="position">
-          <xsl:value-of select="$person-index"/>
+          <xsl:value-of select="$contrib-index"/>
         </data>
       </edge>
       <xsl:for-each select="xref[@ref-type='aff']/@rid">
         <xsl:for-each select="tokenize(., '\s+')">
-          <edge type="affiliation" source="{$id}:person:{$person-index}" target="{$id}:affiliation:{.}"/>
+          <edge type="affiliation" source="{$id}:contributor:{$contrib-index}" target="{$id}:affiliation:{.}"/>
         </xsl:for-each>
       </xsl:for-each>
     </xsl:for-each>
@@ -412,6 +436,9 @@
             </data>
             <data key="given-names">
               <xsl:value-of select="given-names"/>
+            </data>
+            <data key="name-style">
+              <xsl:value-of select="@name-style"/>
             </data>
           </node>
           <edge type="contributor" source="{$id}:reference:{$ref/@id}" target="{$id}:reference:{$ref/@id}:contributor:{position()}">
