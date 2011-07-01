@@ -358,10 +358,10 @@ def process_person(person_uri, person, graph_uri, writer, mappings):
 
         name = "%s %s" % (first_name, last_name)
 
-        writer.send((person_uri, FOAF.givenName,  Literal(given_names), graph_uri))
-        writer.send((person_uri, FOAF.familyName, Literal(surname), graph_uri))
-        writer.send((person_uri, FOAF.firstName,  Literal(first_name), graph_uri))
-        writer.send((person_uri, FOAF.lastName,  Literal(last_name), graph_uri))
+#        writer.send((person_uri, FOAF.givenName,  Literal(given_names), graph_uri))
+#        writer.send((person_uri, FOAF.familyName, Literal(surname), graph_uri))
+#        writer.send((person_uri, FOAF.firstName,  Literal(first_name), graph_uri))
+#        writer.send((person_uri, FOAF.lastName,  Literal(last_name), graph_uri))
 
     if sort_name != name:
         writer.send((person_uri, OV.sortLabel,  Literal(sort_name), graph_uri))
@@ -410,7 +410,6 @@ def process_citation(records, writer, mappings):
         if i == size - 1:
             writer.send((ref_list_uri, COLLECTIONS.lastItem, item_uri, graph_uri))
         if i < size - 1:
-            writer.send((URIRef('%s/%d' % (ref_list_uri, i+2)), COLLECTIONS.previousItem, item_uri, graph_uri))
             writer.send((item_uri, COLLECTIONS.nextItem, URIRef('%s/%d' % (ref_list_uri, i+2)), graph_uri))
 
         writer.send((item_uri, COLLECTIONS.itemContent, citation, graph_uri))
