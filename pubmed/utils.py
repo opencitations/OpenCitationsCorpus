@@ -2,14 +2,19 @@ import os, stat, traceback, sys, time
 from datetime import datetime
 from lxml import etree
 
-def get_graphs(input_directory):
+def get_graphs(input_directory, filter=lambda:True):
     #directories = sorted(os.listdir('out'), key=lambda x:max([0]+[os.stat(os.path.join('out', x, y))[stat.ST_MTIME] for y in os.listdir(os.path.join('out', x))]), reverse=True)
     directories = os.listdir(input_directory)
     directories.sort()
     for directory in directories:
+        #print directory
+        #if directory != 'PLoS_Negl_Trop_Dis': continue
         if not os.path.isdir(os.path.join(input_directory, directory)):
             continue
         for filename in os.listdir(os.path.join(input_directory, directory)):
+            if not filter(directory, filename):
+                continue
+            #if filename != 'PLoS_Negl_Trop_Dis-2-4-2292260.nxml.xml': continue
             filename = os.path.join(input_directory, directory, filename)
             if os.stat(filename).st_size > 10e6:
                 print "Skipping %r" % filename

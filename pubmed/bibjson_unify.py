@@ -8,11 +8,22 @@ import tarfile, simplejson, tempfile, itertools, os, StringIO, pprint
 from bibjson_util import get_records
 from merge_sort import run as merge_sort
 
-IDENTIFIERS = ('pmid', 'doi', 'pmc', 'uri', 'patent_number', 'isbn', 'issn', 'eissn', 'x-nlm-ta')
+IDENTIFIERS = (
+    'pmid', 'doi', 'pmc', 'uri', 'patent_number', 'isbn',
+    'issn', 'eissn', 'x-nlm-ta', 'x-nlm-id', 'url',
+    'x-nlm-publisher-id',)
+
+SPLIT_OUT = frozenset(['Article', 'Journal', 'Organization'])
+
+GENERIC_URLS = frozenset([u'http://www.ncbi.nlm.nih.gov/'])
 
 def tidy_identifier(scheme, value):
+    if value is None:
+        return scheme, None
     if scheme == 'x-nlm-ta':
         return scheme, ' '.join(value.lower().replace('.', '').split())
+    if scheme == 'url' and value in GENERIC_URLS:
+        return scheme, None
     return scheme, value
 
 def run(input_filename, output_filename):
@@ -23,8 +34,11 @@ def run(input_filename, output_filename):
     biggest = 0
 
     try:
-        for i, (_, record) in enumerate(get_records(tar, types=("Article", "Journal"))):
-            identifiers = [tidy_identifier(k, record[k]) for k in record if k in IDENTIFIERS and record.get(k)]
+        for i, (_, record) in enumerate(get_records(tar, types=SPLIT_OUT)):
+            identifiers = [tidy_identifier(k, record[k]) for k in record if k in IDENTIFIERS]
+            identifiers = filter(lambda x:x[1], identifiers)
+            if record['type'] == 'Organization':
+                identifiers.append(('org', hash((record.get('name'), record.get('address')))))
             if not identifiers:
                 without_identifiers.add(record['id'])
                 continue
@@ -37,7 +51,8 @@ def run(input_filename, output_filename):
                         biggest = len(articles[identifier])
 
             if i % 10000 == 0:
-                print "%7d" % i
+                print "%7d %7d %7d %7d %10d" % (i, len(articles), len(without_identifiers), biggest, resource.getrusage(resource.RUSAGE_SELF)[2])
+                tar.members = []
     except BaseException, e:
         traceback.print_exc()
 
@@ -55,10 +70,10 @@ def run(input_filename, output_filename):
 
     del without_identifiers, articles
 
-    RELATIONS = 'affiliated publisher author editor translator'.split()
+    RELATIONS = 'author editor translator'.split()
 
     try:
-        for i, (index, record) in enumerate(get_records(tar, True, types=('Article', 'Journal'))):
+        for i, (index, record) in enumerate(get_records(tar, True, types=SPLIT_OUT)):
             #pprint.pprint(index)
             records, group = [], groups[record['id']]
             to_add, queue, data = set(), set([record['id']]), {'group': group, 'records': records}
@@ -68,10 +83,11 @@ def run(input_filename, output_filename):
                 record = index[id_]
                 to_add.add(id_)
                 for id_ in itertools.chain(*[(lambda x:(x if isinstance(x, list) else [x]))(record.get(k, [])) for k in RELATIONS]):
-                    print id_
+                    #print id_
                     id_ = id_['ref'][1:]
                     if id_ not in to_add:
-                        queue.add(id_)
+                        if id_ in index and index[id_]['type'] not in SPLIT_OUT:
+                            queue.add(id_)
 
             for id_ in to_add:
                 records.append(index[id_])
@@ -79,6 +95,7 @@ def run(input_filename, output_filename):
 
             if i % 10000 == 0:
                 print "%7d" % i
+                tar.members = []
     except BaseException, e:
         traceback.print_exc()
 
@@ -107,15 +124,18 @@ def run(input_filename, output_filename):
             }
 
             for record in records:
-                if record['type'] in ('Article', 'Journal'):
+                if record['type'] in SPLIT_OUT:
                     ptype = record['type']
                     break
             else:
                 ptype = "Unknown"
 
             for record in records:
-                if 'x-nlm-ta' in record:
+                if record.get('x-nlm-ta'):
                     filename = ' '.join(record['x-nlm-ta'].replace('.', '').split()).title().replace(' ', '_')
+                    break
+                if 'x-nlm-publisher-id' in record:
+                    filename = 'publisher-' + record['x-nlm-publisher-id']
                     break
             else:
                 filename = '%s/%s' % (group[-4:], group)
@@ -141,6 +161,6 @@ def run(input_filename, output_filename):
 
 
 if __name__ == '__main__':
-    run('../parsed/articles-augmented.bibjson.tar.gz', '../parsed/articles-unified.bibjson.tar.gz')
+    run('../parsed/articles-sanitized.bibjson.tar.gz', '../parsed/articles-unified.bibjson.tar.gz')
 
 

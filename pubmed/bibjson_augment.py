@@ -25,6 +25,11 @@ def run(input_filename, output_filename):
 
         process_pmids(tar_out, seen, pmids)
 
+        for j in dataset['recordList']:
+            if j.get('type') != 'Journal':
+                continue
+            #print j
+
         if article_count >= t:
             t = t + 10000
 #            if t == 100000:
@@ -33,15 +38,18 @@ def run(input_filename, output_filename):
 
     process_pmids(tar_out, seen, pmids, True)
 
-def doc_sum_location(pmid):
-    return os.path.join(doc_sum_dir, pmid[-4:], pmid)
+def doc_sum_location(db, pmid):
+    if db == 'pubmed':
+        return os.path.join(doc_sum_dir, pmid[-4:], pmid)
+    else:
+        return os.path.join(doc_sum_dir, db, pmid[-4:], pmid)
 
 def process_pmids(tar_out, seen, pmids, final=False):
     seen |= pmids
     to_convert = set()
 
     for pmid in list(pmids):
-        filename = doc_sum_location(pmid)
+        filename = doc_sum_location('pubmed', pmid)
         if os.path.exists(filename):
             to_convert.add(pmid)
             pmids.remove(pmid)
@@ -63,9 +71,9 @@ def process_pmids(tar_out, seen, pmids, final=False):
 
         for doc_sum in xml.xpath('DocSum'):
             pmid = doc_sum.xpath('Id')[0].text
-            filename = doc_sum_location(pmid)
+            filename = doc_sum_location('pubmed', pmid)
             if not os.path.exists(os.path.dirname(filename)):
-                os.makedires(os.path.dirname(filename))
+                os.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as f:
                 f.write(etree.tostring(doc_sum))
             to_convert.add(pmid)
@@ -87,7 +95,7 @@ DOC_SUM_MAP = {
 }
 
 def convert_doc_sum(pmid):
-    filename = doc_sum_location(pmid)
+    filename = doc_sum_location('pubmed', pmid)
     with open(filename, 'r') as f:
         xml = etree.parse(f)
 
@@ -107,8 +115,10 @@ def convert_doc_sum(pmid):
 
     if 'Pages' in items:
         pages = items['Pages'].split('-')
-        record['pageStart'], record['pageEnd'] = pages[0], pages[-1]
-        record['pages'] = '%s--%s' % (pages[0], pages[-1])
+        fpage, lpage = pages[0], pages[-1]
+        lpage = fpage[:-len(lpage)] + lpage
+        record['pageStart'], record['pageEnd'] = fpage, lpage
+        record['pages'] = '%s--%s' % (fpage, lpage)
     if 'PubDate' in items:
         dt = items['PubDate'].split('-')
         if len(dt) > 0: record['year'] = dt[0]
@@ -159,6 +169,9 @@ def convert_doc_sum(pmid):
         'recordList': records,
     }
     return dataset
+
+#def fetch_journal_data():
+#    for i in range
 
 if __name__ == '__main__':
 #    import cProfile, pstats
