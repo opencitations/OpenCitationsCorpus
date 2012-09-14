@@ -13,21 +13,24 @@
 #   - *.bbl into bbl/ folder
 #   - *.pdf ...
 #   - *.ps  
-#           
 #
-#                        
-#  +------+   unzip   +-------+   sort   +------+
-#  |  gz  |  -------> |  src  | -------> | tex  |
-#  +------+           +-------+    |     +------+
-#     |                cleanup     +---> | bbl  |
-#     |                merge       |     +------+
-#     +----------------------------+---->| pdf? |
-#       filetype pdf                     +......+
+#
+#                                                   extract
+#  +------+   unzip   +-------+   sort   +------+   bibitems     +-------------+ 
+#  |bucket| --------> |  src  | -------> | tex  |  ------------> | Ref Strings | 
+#  +------+           +-------+    |     +------+   copy         |             | <-+
+#     |                cleanup     +---> | bbl  |  ------------> |             |   |
+#     |                merge      ?|     +------+   pdfextract   +-------------+   | simple
+#     +----------------------------+---->| pdf  | -------------> | Ref - XML   | --+ convert
+#       filetype:pdf                     +------+                +-------------+
 # 
+#
+#
+#
 
 base_dir = '/home/heinrich/Desktop/related-work/arxiv_s3_buckets/'
 
-bucket_dir  = base_dir + '1001/'
+bucket_dir  = base_dir + '1201/'
 
 src_dir = base_dir + 'PROCESS/src/'
 tex_dir = base_dir + 'PROCESS/tex/'
@@ -63,7 +66,7 @@ def bulk_extract_gz(source_dir='./',target_dir='./'):
             
 
 
-def extract_gz(file_path, target_dir='./' , prefix=''): 
+def extract_gz(file_path, target_dir='./' , prefix='', avoid = []): 
     '''Extracts a single gz file into the given path. 
        The contents of the gz file can either be:
        - a tar archive which has not necessarily a proper extension
@@ -90,9 +93,7 @@ def extract_gz(file_path, target_dir='./' , prefix=''):
             content = fh.extractfile(curr_file)
             name = curr_file.name
             name = name.replace('/','_').lower()    # strip subdirs, convert to lower case
-
-#            if DEBUG: print 'from', file_path, 'extracting', name, 'to', target_dir + prefix + name
-
+            
             target = open(target_dir + prefix + name, 'wb')
             target.write( content.read() )
             target.close()
@@ -130,9 +131,10 @@ def clean_up_src(src_path):
     2) Restore File Extensions
     ''' 
 
-    remove_extensions = ['eps','png','jpg','gif','fig','eps3',       # Images
+    remove_extensions = ['eps','epsi','epsc','png','jpg', 'jpeg','gif','fig','eps3',       # Images
                         'sty','cls','clo','bst','log','toc',         # Latex
-                        'cry','bak','sh'                             # Other Garbarge
+                        'cry','bak','sh',                            # Other Garbarge
+                        'ps','pdf' # virtually only images here
                         ]
 
     known_extensions  = ['pdf','ps','bbl','tex']
@@ -152,7 +154,7 @@ def clean_up_src(src_path):
             os.rename(src_path + file_name, src_path + file_name + ext)
 
 
-def sort_files_away(src_dir, guide_book):
+def sort_files_by_extension(src_dir, guide_book):
     ''' Moves files from src_dir to directories specified in guide.
         Syntax: guide = { '.tex': '/path/to/tex/file/store/', 
                           '.xxx': '/path/to/xxx/file/store/'  }
@@ -243,7 +245,7 @@ if __name__ == '__main__':
         prepare_dirs([src_dir,tex_dir,pdf_dir,bbl_dir,tex_dir])
 
         # Take pdf files out of the way
-        sort_files_away(bucket_dir, guide_book={ 'pdf': pdf_dir })
+        sort_files_by_extension(bucket_dir, guide_book={ 'pdf': pdf_dir })
 
         # 1. Extracting
         bulk_extract_gz(bucket_dir, src_dir)
@@ -253,7 +255,7 @@ if __name__ == '__main__':
         merge_by_extension(src_dir,['.tex','.bbl'])
 
         # 3. Sorting
-        sort_files_away(src_dir, guide_book={
+        sort_files_by_extension(src_dir, guide_book={
                 'tex': tex_dir,
                 'bbl': bbl_dir
                 })

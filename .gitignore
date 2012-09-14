@@ -1,0 +1,14 @@
+# Data Buckets     #
+###################
+
+*.pkl
+
+arxiv_s3_buckets/buckets/*
+arxiv_s3_buckets/tools/*
+arxiv_s3_buckets/PROCESS/*
+arxiv_meta_importer/metadata_pkl/*
+
+
+# TEMP FILES
+*pyc
+*~
