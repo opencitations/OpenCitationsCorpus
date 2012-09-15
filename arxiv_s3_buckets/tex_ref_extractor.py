@@ -119,7 +119,7 @@ def bulk_extract_bibitems(bbl_dir,reflist,remove_bbl = False):
         # write bibitems to file reflist in format
         # ID| refitem
         for entry in get_bibtems(bbl_string):
-            buffer += file_name[:9] +"|"+ entry+"\n"
+            buffer += file_name[:18] +"|"+ entry+"\n"
 
 
     fh = open(reflist,'w')

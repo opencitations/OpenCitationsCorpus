@@ -42,10 +42,10 @@ def merge_by_extension(src_dir,ext_list):
     the same identifyer and an extension in ext_list 
     Example:
 
-    1001.1003_file_1.tex   \ 
-    1001.1003_file_2.tex    +==> 1001.1003.tex
-    1001.1003_file_3.tex   / 
-    1001.1004_file_1.tex    ==> 1001.1004.tex
+    1001.1003________file_1.tex   \ 
+    1001.1003________file_2.tex    +==> 1001.1003________.tex
+    1001.1003________file_3.tex   / 
+    1001.1004________file_1.tex    ==> 1001.1004_________.tex
     '''
     
     file_list = os.listdir(src_dir)
@@ -55,7 +55,7 @@ def merge_by_extension(src_dir,ext_list):
     file_with_id = {}
 
     for filename in file_list:
-        ID = filename[:9]
+        ID = filename[:18]
         if not ID in file_with_id:
             file_with_id[ID] = [filename]
         else:

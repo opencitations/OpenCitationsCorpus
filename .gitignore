@@ -5,10 +5,18 @@
 
 arxiv_s3_buckets/buckets/*
 arxiv_s3_buckets/tools/*
-arxiv_s3_buckets/PROCESS/*
+arxiv_s3_buckets/PROGRESS/*
 arxiv_meta_importer/metadata_pkl/*
+arxiv_meta_importer/reflists/*
+
 
 
 # TEMP FILES
 *pyc
 *~
+*#
+
+#Config files
+.metadata/*
+.project
+.pydevproject

@@ -22,7 +22,7 @@ def bulk_extract_gz(source_dir='./',target_dir='./', remove_gz=True):
         if DEBUG: print 'Extracting', filename
         extract_gz(source_dir + filename, 
                    target_dir, 
-                   prefix = filename[:-3] + '_',    # strip off ".gz" add "_"
+                   prefix = filename[:-3].ljust(18,'_'), # strip off ".gz" add "_"
                    avoid = avoid_extensions
                    )
 
