@@ -45,7 +45,7 @@ def main():
 
     base_dir = os.getcwd() + '/'
 
-    bucket_dir = base_dir + 'buckets/1001/'
+    bucket_dir = base_dir + 'buckets/EXTRACTED/'
     src_dir    = base_dir + 'PROGRESS/src/'
     tex_dir    = base_dir + 'PROGRESS/tex/'
     bbl_dir    = base_dir + 'PROGRESS/bbl/'
@@ -59,7 +59,7 @@ def main():
     sort_files_by_extension(bucket_dir, guide_book={ '.pdf': pdf_dir })
     
     # 1. Extracting
-    bulk_extract_gz(bucket_dir, src_dir, remove_gz = True )
+    bulk_extract_gz(bucket_dir, src_dir, remove_gz = False )
         
     # 2. Cleaning
     clean_up_src(src_dir)

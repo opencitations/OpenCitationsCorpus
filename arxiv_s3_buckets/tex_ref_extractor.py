@@ -137,6 +137,14 @@ import re
 clean_rx = re.compile('[^\w.,():/-]+')
 
 def get_bibtems(bbl_string):
+    # Problems still there:
+    # a lot of em's tt's it's
+    # \"a \"o not handled properly J o rgensen; K. G o ral, B.-G. Englert, and K. Rz c a . z ewski,
+    # \label{adwdaw} tags survive Hu (2004) lima2004a Lima 
+    # small Shakura N.L. Sunyaev R.A. 1973, A A 24 , 337 
+    # biield    binamefont R. W.  Dunfo
+    # 1001.2303_________|2001a 2001MNRAS.326..722B Baes M., Dejonghe H., 20
+
     tex_codes = [
         '\\it','\\bf','\\textbf','\\em','\\newblock','\\textsc',
         '\\emph',
@@ -145,7 +153,7 @@ def get_bibtems(bbl_string):
         ]
 
     remove_strings = '''
-        textbf endcsname providecommand newblock samestyle csname
+        textbf endcsname providecommand newblock samestyle csname 
         emph href textit author pages title textsc bf citenamefont sc
         bibnamefont bibfnamefont bibinfo BibitemOpen penalty0 bibfield
         '''.split()
