@@ -18,15 +18,100 @@
 #
 
 ref_file = 'arxiv_s3_buckets/reflist.txt'
-meta_db = 'arxiv_meta_importer/meta_records_2.db'
-match_file = 'matches.txt'
+meta_db = 'arxiv_meta_importer/test.db'
+match_file = 'matches_2.txt'
 
-from unicodedata import normalize
+import sys,re, os, time, pickle
 
 import sqlite3 as lite
-import sys,re
+
+from time import sleep
 from collections import defaultdict
-import time
+from unicodedata import normalize
+
+def MATCH():
+    DEBUG = 0
+    global author_id_dict, token_count
+    author_id_dict = get_author_id_dict(limit=1000000)
+#    token_count = get_title_token_count_dict(limit = 100000)
+
+    wh = open(match_file,'w')
+
+    fh = open(ref_file)
+    counter = 0
+    match_counter = 0
+    for line in fh:
+        counter += 1
+        if counter % 1000 == 0: 
+            print "Processing line %10d - matched %10d" % ( counter , match_counter )
+            wh.flush()
+
+        ID, rec = line.split('|')
+        ID = ID.strip('_')
+        rec = rec.strip()  # get rid of \n at the end
+        
+        if DEBUG: print "### Matchig ", rec
+
+        arxiv_id = guess_arxiv_id(rec)
+        if not arxiv_id is None:
+            if DEBUG: print "* found arxiv_id :", arxiv_id
+            if DEBUG: print "* Matched:       :", get_meta_record_by_id(arxiv_id)[:3]
+            match_counter += 1
+            wh.write('%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],arxiv_id, '-'))
+            continue
+
+        year    = guess_year(rec)
+        authors = guess_authors(rec)
+
+        if (not year is None) and (not authors == []):
+            if DEBUG: print "* year           :",year
+            if DEBUG: print "* authors        :",authors
+
+            if year < 1990:
+                if DEBUG: print "* SKIPPED by year"
+                continue
+
+            main_author = authors[0]
+
+            x_records=get_it_by_ay(main_author,year)
+            if DEBUG: print "* matches in db  :", len(x_records)
+            if DEBUG: print "* ratios         :", [ "%s...: %.3f" % (x_title[:10], match_p(x_title,rec)) for x_id, x_title in x_records]
+
+            for x_id,x_title in x_records:
+                if match_p(x_title,rec) > .7:
+                    if DEBUG: print "* MATCHED        :", x_id, x_title
+                    match_counter += 1
+                    wh.write('%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],x_id.ljust(18),x_title[:50]))
+                    if DEBUG: print 
+                    break
+            else: 
+                # Sometimes not Title is given. Check for all authors, then?
+                # e.g. C. Fuchs and H. H. Wolter, Eur. Phys. J. A  30 , 5 (2006).
+                pass
+                if DEBUG: print "* NO MATCH FOUND!"
+        else:
+            pass
+            if DEBUG: print "* SKIPPED do not have year and author", year, authors
+        
+        if DEBUG: BREAK()
+                    
+    fh.close()
+    wh.close()
+
+re_token = re.compile(r'([A-Za-z]+)')
+def match_p(s1,s2):
+    # tokens lists
+    t1 = re_token.findall(s1.lower())
+    t2 = re_token.findall(s2.lower())
+
+    if len(t1) == 0: return 0
+
+    isec = set(t1) & set(t2)
+    # print 'intersection',isec
+    
+    r1 = float(len(isec)) / len(t1)
+    
+    return r1
 
 
 def guess_arxiv_id(record):
@@ -42,7 +127,7 @@ def guess_arxiv_id(record):
     # Ex. arxiv:1023.1244, arxiv0213.1244, arXiv: 0123.4241, arXiv/ 1525.2144
     match = re.search(r'''
                 arxiv           # matches (non case-sensitive)
-                [:/]?            # : or maybe a slash / 
+                [:/]?           # : or maybe a slash / 
                 [\s]?           # whitespace might be omitted
                 (\d{4}\.\d{4})  # two four digit groups separated by '.'
                 ''',record,re.IGNORECASE + re.VERBOSE)
@@ -78,8 +163,6 @@ def guess_arxiv_id(record):
                 return group_name+'/'+number
             
 
-    # Found nothing?
-    return ''
 
 # for use in the above function
 arxiv_group_names = ['cond-mat', 'astro-ph', 'hep-ph', 'math', 'hep-th', 'quant-ph', 'gr-qc', 
@@ -119,10 +202,9 @@ def guess_year(record):
         if 1800 <= y and y <= 2020:
             return y
 
-    return 0
 
 
-def guess_authors(record, author_dict):
+def guess_authors(record):
     """
     Finds author name in record, using the following heuristics:
     * Author comes first in record (search in first 5 tokens)
@@ -150,34 +232,99 @@ def guess_authors(record, author_dict):
         if t in skip_authors: continue
 
         # Author in db?
-        if t in author_dict:
+        if t in author_id_dict:
             authors.append(t)
 
     return authors
             
 
+def get_author_id_dict(limit=1000, cache = False):
+    """
+    Lookup dict: authorname --> [ arxiv id's ]
+    """
+
+    cache_file = "cache/author_id_dict_%d.pkl" % limit
+    if cache and os.path.isfile(cache_file):
+        print "loading cached vesion"
+        fh = open(cache_file)
+        out = pickle.load(fh)
+        fh.close()
+        return out
+
+    con = lite.connect(meta_db)
+
+    author_dict = defaultdict(list)
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT arxiv_id, author FROM ayit_lookup LIMIT %d" % limit)
+        for ID, name in cur.fetchall():
+            author_dict[name].append(ID)
+
+    if cache:
+        print "writing cache"
+        fh = open(cache_file,'w')
+        pickle.dump(author_dict,fh)
+        fh.close()
+
+    return author_dict
+
+
+def get_it_by_ay(author,year, delta=2):
+    """
+    Get all records from author in  [year - delta , year]
+    """
+    con = lite.connect(meta_db)
+
+    recs = []
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT arxiv_id, title FROM ayit_lookup WHERE author='%s' AND '%d' <= year AND year <= '%d' " % (author,year-delta,year))
+        recs = [ (to_ascii(x_id), to_ascii(x_title)) for x_id,x_title in cur.fetchall()]
+
+    return recs
 
 
 
-def TEST():
-    from time import sleep
-    fh = open(ref_file)
-    counter = 0
-    for line in fh:
-        counter += 1
-        if not counter % 300 == 14:  continue 
-        ID, rec = line.split('|')
-        ID = ID.strip('_')
+def get_title_token_count_dict(limit=1000):
+    """
+    Count occurence of tokens = words in titles
+    """
+    token_count = defaultdict(int)
 
-        print rec[:-1]
-        print "### ARXIV ID: %s ###" % guess_arxiv_id(rec)
-        print "### YEAR: %d ####" % guess_year(rec)
-        print "### AUTHORS: %s ###" % ' and '.join(guess_authors(rec))
+    con = lite.connect(meta_db)
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT title FROM meta LIMIT %d" % limit)
+        
+        for title in cur.fetchall():
+            for token in re.findall(r'([A-Za-z]+)',title[0]):
+                token_count[token.lower()] += 1
 
-        sleep(.1)
+    return token_count
 
-    fh.close()
 
+def get_meta_record_by_id(arxiv_id):
+    con = lite.connect(meta_db)
+    tokens = defaultdict(int)
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT * FROM meta WHERE arxiv_id = '%s'" % arxiv_id)
+        rec = cur.fetchone()
+    return rec
+    
+
+
+def create_indices():
+    con = lite.connect(meta_db)
+    with con:
+        cur = con.cursor()
+        cur.execute("CREATE INDEX ay_index  ON ayit_lookup(author,year)")
+        cur.execute("CREATE INDEX arxiv_id  ON meta(arxiv_id,title)")
+
+
+
+
+############## DEPRECATED #############################
 
 
 
@@ -200,24 +347,6 @@ def write_arxiv_id_matches(ref_file, match_file):
     wh.close
 
 
-
-def create_indices():
-
-    # Initialize db
-    con = lite.connect(db_file)
-
-    # Write db scheme
-    with con:
-        cur = con.cursor()
-        cur.execute("CREATE INDEX ayt_index ON meta(author,year,title)")
-        cur.execute("")
-
-#
-# SQL CODE
-# CREATE INDEX autor_index ON meta(autor)
-# CREATE INDEX id_index ON meta(arxivid)
-#
-#
 
 
 
@@ -256,7 +385,6 @@ def main():
                     print "TOKEN MATCHING with", a_id, ": ", hit_ratio, "%" , hits 
                     print xt
 
-        BREAK()
 
         # Get tokens
         # 
@@ -274,17 +402,11 @@ def get_tokens(string, lmin = 2):
     tokens = clean_rec.split()
     return filter(lambda x: len(x) > lmin, tokens )
     
-def get_rec_by_arxiv_id(arxiv_id):
-    con = lite.connect(meta_db)
-    tokens = defaultdict(int)
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT * FROM meta WHERE arxivid = '%s'" % arxiv_id)
-        rec = cur.fetchone()
 
-    return rec
 
-def build_indices():
+
+
+def get_dicts():
     global author_recs, author_nrec, title_tokens_n
     
     author_recs = get_author_dict(max=1000000)
@@ -294,30 +416,13 @@ def build_indices():
 
 
 
-
-
-def get_author_dict(max=1000):
-    con = lite.connect(meta_db)
-
-    authors = defaultdict(list)
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT arxivid, autor FROM meta LIMIT %d" % max)
-        
-        for ID, a_string in cur.fetchall():
-            for name in a_string.split(' and '):
-                authors[name.split(',')[0]].append(ID)
-
-    return authors
-
-
-def get_title_tokens(max=1000):
+def get_title_token_count(limit=1000):
     con = lite.connect(meta_db)
 
     tokens = defaultdict(int)
     with con:
         cur = con.cursor()
-        cur.execute("SELECT titel FROM meta LIMIT %d" % max)
+        cur.execute("SELECT titel FROM meta LIMIT %d" % limit)
         
         for titels in cur.fetchall():
             titel = to_ascii(re.sub('[^A-Za-z\s]','',titels[0]))
@@ -325,6 +430,7 @@ def get_title_tokens(max=1000):
                 tokens[token] += 1
 
     return tokens
+
 
 
 def to_ascii(string):
@@ -341,7 +447,7 @@ if __name__ == '__main__':
     BREAK = pdb.set_trace
 
     try:
-#        main()
+        MATCH()
         pass
 
     except:

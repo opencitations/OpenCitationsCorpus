@@ -23,7 +23,7 @@ def main():
     txt_list_dir  = base_dir + 'reflists/'
     db_file       = base_dir + 'meta_records_2.db'
 
-    # bulk_pkl_to_db(pkl_dir,db_file)
+    # fill_db_from_pkl(pkl_dir,db_file)
     # bulk_pkl_to_txt(pkl_dir,txt_list_dir)
 
 
@@ -60,7 +60,7 @@ def get_entries_from_pkl_dir(pkl_dir):
 
     
 
-def bulk_pkl_to_db(pkl_dir,db_file):
+def fill_db_from_pkl(pkl_dir,db_file, max_batches = -1 ):
     """ 
     Creates a table meta in db_file and inserts records from pkl_files in pkl_dir 
     """
@@ -68,28 +68,94 @@ def bulk_pkl_to_db(pkl_dir,db_file):
     # Initialize db
     con = lite.connect(db_file)
 
-    # Write db scheme
+    # Write meta table
     with con:
         cur = con.cursor()
         cur.execute("DROP TABLE IF EXISTS meta")
         cur.execute("CREATE TABLE meta(arxiv_id TEXT, author TEXT, title TEXT, info TEXT, date TEXT, subject TEXT, year INT)")
+
+        cur.execute("DROP TABLE IF EXISTS ayit_lookup")
+        cur.execute("CREATE TABLE ayit_lookup(author TEXT, year INT, arxiv_id TEXT, title TEXT)")
+
+    # Read entries from pkl_dir 10.000 at a time
+    for batch_count, batch in enumerate(group_generator(get_entries_from_pkl_dir(pkl_dir),10000)):
+        if batch_count == max_batches: break
+        if DEBUG: print "Processing batch ", batch_count
+        meta_rows = []
+        ayit_rows = []
+
+        # convert entries to table schema
+        for rec_id, meta_dict in batch:
+             authors = ' and '.join(meta_dict['creator'])
+             title   = meta_dict['title'][0]
+             info    = ', '.join(meta_dict['identifier'][1:])
+             date    = meta_dict['date'][0] 
+             subject = ', '.join(meta_dict['subject'])
+             year    = date[0:4]
+
+             meta_rows.append(map(cleanup_rec,[rec_id, authors, title, info, date, subject, year]))
+             
+             for author in meta_dict['creator']:
+                 author = author.split(',')[0] # only take sir name in here
+                 ayit_rows.append(map(cleanup_rec,[author,year,rec_id, title]))
+
+        with con:
+            cur.executemany("INSERT INTO meta VALUES(?, ?, ?, ?, ?, ?, ?)", meta_rows)
+
+        with con:
+            cur.executemany("INSERT INTO ayit_lookup VALUES(?, ?, ?, ?)", ayit_rows)
+        
+
+
+
+clean_rx = re.compile(r'[\n|]')
+def cleanup_rec(string):
+    ''' 
+    converst to ascii and removes '\n' and '|' from string 
+    '''
+    return clean_rx.sub('',to_ascii(string))
+
     
-    # iterate over pkl-files in pkd_dir
-    for pkl_file_name in os.listdir(pkl_dir):
-        if not pkl_file_name.endswith('.pkl'): continue
+def to_ascii(unicode_string):
+    '''
+    Convertes a unicode string to ascii the brutal way
+    '''
+    try:
+        return normalize('NFKD', unicode_string).encode('ascii','ignore')
+    except TypeError:
+        return unicode_string.encode('ascii','ignore')
 
-        # extract records in batches of 10.0000
-        rec_batches = group_gen(oa_extract_recs(pkl_dir + pkl_file_name),10000)
 
-        # loop over batches
-        for batch_count, batch in enumerate(rec_batches):
-            if DEBUG: print "Processing ", pkl_file_name, " - ", batch_count
+def group_generator(generator, size):
+    count = 0
+    end_flag = False
+    while True:
+        if end_flag: break
+        batch = []
+        while True:
+            count += 1
+            if count % (size + 1) == 0: break
 
-            # append year = first 4 letters of date at the end of each rec
-            batch = [ rec + [ int(rec[4][:4]) ] for rec in batch ] 
-            with con:
-                cur.executemany("INSERT INTO meta VALUES(?, ?, ?, ?, ?, ?, ?)", batch)
+            try:
+                item = generator.next()
+            except StopIteration:
+                end_flag = True
+                break
 
+            batch.append(item)
+
+        if not batch == []:
+            yield batch
+
+
+
+
+
+
+
+
+#### TEXT FILE GENERATION #####
+# TODO: Use get_entries_from_pkl_dir here, too
 
 def bulk_pkl_to_txt(pkl_dir,txt_dir, batch_size = 10000 ):
     """ 
@@ -174,23 +240,6 @@ def oa_extract_recs(pkl_file_path):
         
         yield map(cleanup_rec,rec)
 
-
-clean_rx = re.compile(r'[\n|]')
-def cleanup_rec(string):
-    ''' 
-    converst to ascii and removes '\n' and '|' from string 
-    '''
-    return clean_rx.sub('',to_ascii(string))
-
-    
-def to_ascii(unicode_string):
-    '''
-    Convertes a unicode string to ascii the brutal way
-    '''
-    try:
-        return normalize('NFKD', unicode_string).encode('ascii','ignore')
-    except TypeError:
-        return unicode_string.encode('ascii','ignore')
         
 
 def group_list(lst, n):
@@ -200,27 +249,6 @@ def group_list(lst, n):
         end   = min( (i+1)*n, len(lst) )
         if not start == end:
             yield lst[start:end]
-
-def group_gen(generator, size):
-    count = 0
-    end_flag = False
-    while True:
-        if end_flag: break
-        batch = []
-        while True:
-            count += 1
-            if count % (size + 1) == 0: break
-
-            try:
-                item = generator.next()
-            except StopIteration:
-                end_flag = True
-                break
-
-            batch.append(item)
-
-        if not batch == []:
-            yield batch
             
     
     
