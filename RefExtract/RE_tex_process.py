@@ -1,6 +1,5 @@
 import re
 
-
 def extract_bibitems(tex_string):
     tex_string = clear_tex_comments(tex_string)
     tex_string = extract_tex_env(tex_string,'thebibliography')

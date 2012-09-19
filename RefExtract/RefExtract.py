@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     gz_path = parse_arguments()
     
-    sys.stdout.write(RefExtract(gz_path))
+    print RefExtract(gz_path)
     
     try:
         pass

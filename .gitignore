@@ -8,7 +8,7 @@ arxiv_s3_buckets/tools/*
 arxiv_s3_buckets/PROGRESS/*
 arxiv_meta_importer/metadata_pkl/*
 arxiv_meta_importer/reflists/*
-
+DATA/*
 
 
 # TEMP FILES

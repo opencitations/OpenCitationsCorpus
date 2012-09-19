@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Matching reference entries against our meta_database
 #
@@ -17,9 +18,7 @@
 # * V. Baran, it et al. , Phys. Rept.  410 , 335 (2005).
 #
 
-ref_file = 'arxiv_s3_buckets/reflist.txt'
-meta_db = 'arxiv_meta_importer/test.db'
-match_file = 'matches_2.txt'
+meta_db    = 'arxiv_meta.db'
 
 import sys,re, os, time, pickle
 
@@ -29,74 +28,81 @@ from time import sleep
 from collections import defaultdict
 from unicodedata import normalize
 
-def MATCH():
+def MATCH(ref_file):
     DEBUG = 0
+    if DEBUG: print "Initializing lookup hashes"
     global author_id_dict, token_count
     author_id_dict = get_author_id_dict(limit=1000000)
-#    token_count = get_title_token_count_dict(limit = 100000)
-
-    wh = open(match_file,'w')
 
     fh = open(ref_file)
+
+    out = ''
     counter = 0
     match_counter = 0
     for line in fh:
         counter += 1
-        if counter % 1000 == 0: 
-            print "Processing line %10d - matched %10d" % ( counter , match_counter )
-            wh.flush()
+#        if counter % 1000 == 152: 
+            # print "Processing line %10d - matched %10d" % ( counter , match_counter )
 
+
+        # Extract arxiv ID and reference line from reference file.
+        # Example record:
+        # line = '1001.0056_________|K. Behrend [ .... ] .  128 (1997), 45--88.\n'
         ID, rec = line.split('|')
         ID = ID.strip('_')
         rec = rec.strip()  # get rid of \n at the end
         
         if DEBUG: print "### Matchig ", rec
 
+        # 1. Try to find an arxiv id in rec-string.
         arxiv_id = guess_arxiv_id(rec)
         if not arxiv_id is None:
             if DEBUG: print "* found arxiv_id :", arxiv_id
-            if DEBUG: print "* Matched:       :", get_meta_record_by_id(arxiv_id)[:3]
+            if DEBUG: print "* Matched:       :", ', '.join(get_meta_record_by_id(arxiv_id)[:3])
             match_counter += 1
-            wh.write('%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],arxiv_id, '-'))
+            out += '%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],arxiv_id, '-')
             continue
 
+        # 2. Try to get author name and year
         year    = guess_year(rec)
-        authors = guess_authors(rec)
+        authors = guess_authors(rec, limit = 1)
 
-        if (not year is None) and (not authors == []):
-            if DEBUG: print "* year           :",year
-            if DEBUG: print "* authors        :",authors
+        if (year is None) or (authors == []):
+            if DEBUG: print "* SKIPPED do not have year (%s) and author (%s)" % (year, ', '.join(authors))
+            continue
 
-            if year < 1990:
-                if DEBUG: print "* SKIPPED by year"
-                continue
+        # found author and year both?
+        if DEBUG: print "* year           :",year
+        if DEBUG: print "* authors        :",authors
 
-            main_author = authors[0]
+        if year < 1990:
+            if DEBUG: print "* SKIPPED by year"
+            continue
 
-            x_records=get_it_by_ay(main_author,year)
-            if DEBUG: print "* matches in db  :", len(x_records)
-            if DEBUG: print "* ratios         :", [ "%s...: %.3f" % (x_title[:10], match_p(x_title,rec)) for x_id, x_title in x_records]
+        main_author = authors[0]
 
-            for x_id,x_title in x_records:
-                if match_p(x_title,rec) > .7:
-                    if DEBUG: print "* MATCHED        :", x_id, x_title
-                    match_counter += 1
-                    wh.write('%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],x_id.ljust(18),x_title[:50]))
-                    if DEBUG: print 
-                    break
-            else: 
-                # Sometimes not Title is given. Check for all authors, then?
-                # e.g. C. Fuchs and H. H. Wolter, Eur. Phys. J. A  30 , 5 (2006).
-                pass
-                if DEBUG: print "* NO MATCH FOUND!"
-        else:
+        # Lookup papers in db:
+        x_records=get_it_by_ay(main_author,year)
+
+        if DEBUG: print "* matches in db  :", len(x_records)
+        if DEBUG: print "* ratios         :", [ "%s...: %.3f" % (x_title[:10], match_p(x_title,rec)) for x_id, x_title in x_records]
+
+        for x_id,x_title in x_records:
+            # Is x_title and rec similar? Test using match_p
+            if match_p(x_title,rec) > .7:
+                if DEBUG: print "* MATCHED        :", x_id, x_title, "\n"
+                match_counter += 1
+                out += '%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],x_id.ljust(18),x_title[:50])
+                break
+        else: 
+            # Did not break out ot for loop?
+            # Sometimes not Title is given. Check for all authors, then?
+            # e.g. C. Fuchs and H. H. Wolter, Eur. Phys. J. A  30 , 5 (2006).
+            if DEBUG: print "* NO MATCH FOUND!"
             pass
-            if DEBUG: print "* SKIPPED do not have year and author", year, authors
-        
-        if DEBUG: BREAK()
                     
     fh.close()
-    wh.close()
+    return out
 
 re_token = re.compile(r'([A-Za-z]+)')
 def match_p(s1,s2):
@@ -116,23 +122,25 @@ def match_p(s1,s2):
 
 def guess_arxiv_id(record):
     '''
-    Finds arxiv ids in record - string, with some error tolerance
+    Finds arxiv ids in record string, with some error tolerance
     returns id's without leading 'arxiv:' E.g.
     * 1234.5123
     * hep-th/1234567
     '''
 
-
     # Check for new syntax first:
     # Ex. arxiv:1023.1244, arxiv0213.1244, arXiv: 0123.4241, arXiv/ 1525.2144
+    # Mixed versions: arXiv:math/0705.1653.
     match = re.search(r'''
                 arxiv           # matches (non case-sensitive)
-                [:/]?           # : or maybe a slash / 
-                [\s]?           # whitespace might be omitted
+                [:/\s]?         # : or maybe a slash / 
+                [a-z-]{0,9}     # leave room for wrongly put group definition
+                [/\s]?          # whitespace might be omitted
                 (\d{4}\.\d{4})  # two four digit groups separated by '.'
                 ''',record,re.IGNORECASE + re.VERBOSE)
         
-    if match != None:
+
+    if not match is None:
         # returns 1234.1234
         return match.group(1)
     
@@ -144,7 +152,7 @@ def guess_arxiv_id(record):
                  (\d{4}\.\d{4})     # ID part
                  ''', record, re.IGNORECASE + re.VERBOSE)
 
-    if match != None:
+    if not match is None:
         return match.group(1)
     
     
@@ -155,16 +163,18 @@ def guess_arxiv_id(record):
     # URLS are matched as well!
     # http://arxiv.org/abs/hep-th/9711162
     #
-    # Step 1) isolate '/1234567' - part; remember 10 chars before that
+    # Step 1) isolate '/1234567'-part; remember 10-chars x before that
+    # Step 2) check if x contains a valid arxiv group name
     match = re.findall(r'(.{10})/(\d{7})', record )
     for prefix,number in match:
         for group_name in arxiv_group_names:
             if group_name in prefix:
                 return group_name+'/'+number
+ 
             
 
 
-# for use in the above function
+# for use in the above function, Arxiv groups sorted by number of submissions
 arxiv_group_names = ['cond-mat', 'astro-ph', 'hep-ph', 'math', 'hep-th', 'quant-ph', 'gr-qc', 
                      'physics', 'nucl-th', 'hep-lat', 'hep-ex', 'cs', 'math', 'nlin', 'nucl-ex', 
                      'q-bio', 'chao-dyn', 'alg-geom', 'q-alg', 'cmp-lg', 'solv-int', 'dg-ga',
@@ -204,13 +214,13 @@ def guess_year(record):
 
 
 
-def guess_authors(record):
+def guess_authors(record, limit = 5):
     """
     Finds author name in record, using the following heuristics:
     * Author comes first in record (search in first 5 tokens)
     * two or more letters long
     * starts with a capital letter 
-    * Author occures in Author database (!) (needs author_dict to be set)
+    * Author occures in Author database (!) (needs author_id_dict to be set)
 
     To be implements:
     * If 'and' is present then before and afterwards comes probably and author
@@ -218,15 +228,16 @@ def guess_authors(record):
     """
     
     # Exclude some odd author names in db
-    skip_authors = ['The'] # Lett, Bull.
+    skip_authors = ['The'] # 'Lett', 'Bull.'
+    
     
     # generate a list of words = tokens of length >= 2
-    tokens = re.findall(r'[A-Za-z]{2,}',record) 
+    tokens = re.findall(r'[A-Za-z]{2,}',record)
 
     authors = []
     for t in tokens[:5]:
         # Starts with an upper case letter?
-        if t[0].islower(): continue 
+        if t[0].islower(): continue
         
         # Author in skiplist?
         if t in skip_authors: continue
@@ -235,21 +246,16 @@ def guess_authors(record):
         if t in author_id_dict:
             authors.append(t)
 
+            if len(authors) == limit:
+                return authors
+
     return authors
             
 
-def get_author_id_dict(limit=1000, cache = False):
+def get_author_id_dict(limit=1000):
     """
     Lookup dict: authorname --> [ arxiv id's ]
     """
-
-    cache_file = "cache/author_id_dict_%d.pkl" % limit
-    if cache and os.path.isfile(cache_file):
-        print "loading cached vesion"
-        fh = open(cache_file)
-        out = pickle.load(fh)
-        fh.close()
-        return out
 
     con = lite.connect(meta_db)
 
@@ -260,18 +266,12 @@ def get_author_id_dict(limit=1000, cache = False):
         for ID, name in cur.fetchall():
             author_dict[name].append(ID)
 
-    if cache:
-        print "writing cache"
-        fh = open(cache_file,'w')
-        pickle.dump(author_dict,fh)
-        fh.close()
-
     return author_dict
 
 
 def get_it_by_ay(author,year, delta=2):
     """
-    Get all records from author in  [year - delta , year]
+    Get all records from author in year-delta .. year
     """
     con = lite.connect(meta_db)
 
@@ -284,10 +284,9 @@ def get_it_by_ay(author,year, delta=2):
     return recs
 
 
-
 def get_title_token_count_dict(limit=1000):
     """
-    Count occurence of tokens = words in titles
+    Count occurence of tokens in titles
     """
     token_count = defaultdict(int)
 
@@ -304,6 +303,10 @@ def get_title_token_count_dict(limit=1000):
 
 
 def get_meta_record_by_id(arxiv_id):
+    """
+    Lookup arxiv_id in meta_db
+    """
+
     con = lite.connect(meta_db)
     tokens = defaultdict(int)
     with con:
@@ -315,121 +318,15 @@ def get_meta_record_by_id(arxiv_id):
 
 
 def create_indices():
+    """
+    Create indices in meta_db. Run this once!
+    """
+
     con = lite.connect(meta_db)
     with con:
         cur = con.cursor()
         cur.execute("CREATE INDEX ay_index  ON ayit_lookup(author,year)")
         cur.execute("CREATE INDEX arxiv_id  ON meta(arxiv_id,title)")
-
-
-
-
-############## DEPRECATED #############################
-
-
-
-def write_arxiv_id_matches(ref_file, match_file):
-    wh = open(match_file,'w')
-    fh = open(ref_file)
-    counter = 0
-    for line in fh:
-        counter += 1
-
-        ID, rec = line.split('|')
-        ID = ID.strip('_')
-        match = guess_arxiv_id(rec)
-        
-        if match != None:
-#            print "found %s in %03d: %s" % (match.ljust(12), counter ,rec)
-            wh.write('%s|%s\n' % (ID,match) )
-
-    fh.close
-    wh.close
-
-
-
-
-
-
-def main():
-    # build lookup dicts
-    author_recs = get_author_dict(max=10000000)
-    author_nrec = dict( (n,len(rs)) for n,rs in author_recs.items() )
-    title_tokens_n = get_title_tokens(max=10)
-    # Cache those arrays with Pickle
-    
-    fh = open(ref_file)
-    for line in fh:
-        print line
-        axiv_id,rec = line.split('|')
-
-        tokens = get_tokens(rec)
-
-        pred_authors = []
-        for w in tokens[:4]:
-            if w in author_nrec:
-                pred_authors.append(w)
-
-        print "Authors:", pred_authors
-
-        tokens = map( lambda x: x.lower() , tokens )
-
-        for p_author in pred_authors:
-            for a_id in author_recs[p_author]:
-                xid,xa,xt,xinf,xda,xsj = get_rec_by_arxiv_id(a_id)
-                title_tokens = get_tokens(xt)
-                hits = set(get_tokens(xt.lower())) & set(tokens)
-                hit_ratio = len(hits) / float(len(get_tokens(xt))) * 100
-                # weight by count of token 
-                if hit_ratio > 70:
-                    print "TOKEN MATCHING with", a_id, ": ", hit_ratio, "%" , hits 
-                    print xt
-
-
-        # Get tokens
-        # 
-        # Check which Tokens are authors
-        # 
-        # Lookup corresponding titles
-        # 
-        # for each title
-        #     check if words are contained in tokens
-        #     if ratio good enough
-        #        > print hit!
-
-def get_tokens(string, lmin = 2):
-    clean_rec = to_ascii(re.sub('[^A-Za-z\s]',' ',string))
-    tokens = clean_rec.split()
-    return filter(lambda x: len(x) > lmin, tokens )
-    
-
-
-
-
-def get_dicts():
-    global author_recs, author_nrec, title_tokens_n
-    
-    author_recs = get_author_dict(max=1000000)
-    author_nrec = dict( (n,len(rs)) for n,rs in author_recs.items() )
-    title_tokens_n = get_title_tokens(max=1000000)
-
-
-
-
-def get_title_token_count(limit=1000):
-    con = lite.connect(meta_db)
-
-    tokens = defaultdict(int)
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT titel FROM meta LIMIT %d" % limit)
-        
-        for titels in cur.fetchall():
-            titel = to_ascii(re.sub('[^A-Za-z\s]','',titels[0]))
-            for token in titel.split():
-                tokens[token] += 1
-
-    return tokens
 
 
 
@@ -441,35 +338,38 @@ def to_ascii(string):
     return out
     
 
+
+
 if __name__ == '__main__':   
     DEBUG = 1
     import ipdb as pdb
     BREAK = pdb.set_trace
 
+
     try:
-        MATCH()
-        pass
+        import argparse
+        
+        parser = argparse.ArgumentParser("Match references to database")
+        parser.add_argument('reffile', help = 'path to text file containing references', type=str)
+        parser.add_argument('-v','--verbose', help = 'Give detailed status information',type=int)
+
+        args = parser.parse_args()
+        if args.verbose:
+            DEBUG = 1
+
+        ref_file = args.reffile
+
+        if ref_file == '':
+            ref_file = 'reflist.txt'
+        
+        if not os.path.isfile(ref_file):
+            raise IOError('File not found: '+ ref_file)
+
+        print MATCH(ref_file)
 
     except:
-        import sys,  traceback
+        import sys, traceback
         type, value, tb = sys.exc_info()
         traceback.print_exc()
         pdb.post_mortem(tb)
 
-
-
-
-
-
-
-# def make_table( data, db_file, schema ):
-#    make_table( author_recs.items(), match_db, 'author_id(author TEXT, arxiv_id TEXT)' )
-#    make_table( author_nrec.items(), match_db, 'author_count(author TEXT, count INT)')
-#     BREAK()
-#     con = lite.connect(db_file)
-#     with con:
-#         table_name =  schema.split('(')[0]
-#         cur = con.cursor()
-#         cur.execute("DROP TABLE IF EXISTS " + table_name )
-#         cur.execute("CREATE TABLE " + schema )
-#         cur.executemany("INSERT INTO " + table_name + " VALUES(?, ?)", data )
