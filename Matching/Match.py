@@ -28,81 +28,99 @@ from time import sleep
 from collections import defaultdict
 from unicodedata import normalize
 
-def MATCH(ref_file):
-    DEBUG = 0
-    if DEBUG: print "Initializing lookup hashes"
-    global author_id_dict, token_count
-    author_id_dict = get_author_id_dict(limit=1000000)
+DEBUG = 0
+log = open('log.txt','a')
 
-    fh = open(ref_file)
+def FileMATCH(ref_file, not_matched = ''):
+    if DEBUG: print "Initializing lookup hashes"
+    global author_dict
+    author_dict = get_author_count_dict(limit=1000000)
+
+    try:
+        nfh = open(not_matched,'w')
+    except:
+        nfh = open('/dev/null','w')
+        
 
     out = ''
-    counter = 0
+    line_counter = 0
     match_counter = 0
-    for line in fh:
-        counter += 1
-#        if counter % 1000 == 152: 
-            # print "Processing line %10d - matched %10d" % ( counter , match_counter )
 
+    with open(ref_file) as fh:
+        for line in fh:
+            line_counter += 1
+            if line_counter % 100 == 0: 
+                log.write("Processing line %7d - matched %7d \n" % ( line_counter , match_counter ))
+                log.flush()
 
-        # Extract arxiv ID and reference line from reference file.
-        # Example record:
-        # line = '1001.0056_________|K. Behrend [ .... ] .  128 (1997), 45--88.\n'
-        ID, rec = line.split('|')
-        ID = ID.strip('_')
-        rec = rec.strip()  # get rid of \n at the end
-        
-        if DEBUG: print "### Matchig ", rec
+            # Extract arxiv ID and reference line from reference file.
+            # Example record:
+            # line = '1001.0056|K. Behrend [ .... ] .  128 (1997), 45--88.\n'
 
-        # 1. Try to find an arxiv id in rec-string.
-        arxiv_id = guess_arxiv_id(rec)
-        if not arxiv_id is None:
-            if DEBUG: print "* found arxiv_id :", arxiv_id
-            if DEBUG: print "* Matched:       :", ', '.join(get_meta_record_by_id(arxiv_id)[:3])
-            match_counter += 1
-            out += '%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],arxiv_id, '-')
-            continue
+            ID, rec = line.split('|')[:2]
 
-        # 2. Try to get author name and year
-        year    = guess_year(rec)
-        authors = guess_authors(rec, limit = 1)
+            match = MATCH(rec)
 
-        if (year is None) or (authors == []):
-            if DEBUG: print "* SKIPPED do not have year (%s) and author (%s)" % (year, ', '.join(authors))
-            continue
-
-        # found author and year both?
-        if DEBUG: print "* year           :",year
-        if DEBUG: print "* authors        :",authors
-
-        if year < 1990:
-            if DEBUG: print "* SKIPPED by year"
-            continue
-
-        main_author = authors[0]
-
-        # Lookup papers in db:
-        x_records=get_it_by_ay(main_author,year)
-
-        if DEBUG: print "* matches in db  :", len(x_records)
-        if DEBUG: print "* ratios         :", [ "%s...: %.3f" % (x_title[:10], match_p(x_title,rec)) for x_id, x_title in x_records]
-
-        for x_id,x_title in x_records:
-            # Is x_title and rec similar? Test using match_p
-            if match_p(x_title,rec) > .7:
-                if DEBUG: print "* MATCHED        :", x_id, x_title, "\n"
+            if match:
                 match_counter += 1
-                out += '%s:%s...|%s:%s...\n' % (ID.ljust(18),rec[:50],x_id.ljust(18),x_title[:50])
-                break
-        else: 
-            # Did not break out ot for loop?
-            # Sometimes not Title is given. Check for all authors, then?
-            # e.g. C. Fuchs and H. H. Wolter, Eur. Phys. J. A  30 , 5 (2006).
-            if DEBUG: print "* NO MATCH FOUND!"
-            pass
-                    
-    fh.close()
-    return out
+                print line +  "|" + match
+            else:
+                nfh.write(line)
+        
+    nfh.close()
+    log.write("Processed %d lines - matched %d records \n" % ( line_counter , match_counter ))
+    log.close()
+    return 
+
+
+def MATCH(rec):
+    if DEBUG: print "### Matchig ", rec
+    
+    # 1. Try to find an arxiv id in rec-string.
+    arxiv_id = guess_arxiv_id(rec)
+    if arxiv_id:
+        if DEBUG: print "* found arxiv_id :", arxiv_id
+        if DEBUG: print "* Matched:       :", ', '.join(get_meta_record_by_id(arxiv_id)[:3])
+        return arxiv_id
+
+    # 2. Try to get author name and year
+    year    = guess_year(rec)
+    authors = guess_authors(rec, limit = 1)
+
+    if (year is None) or (authors == []):
+        if DEBUG: print "* SKIPPED do not have year (%s) and author (%s)" % (year, ', '.join(authors))
+        return
+
+    # found author and year both?
+    if DEBUG: print "* year           :",year
+    if DEBUG: print "* authors        :",authors
+
+    if year < 1990:
+        if DEBUG: print "* SKIPPED by year"
+        # Remark: The arxiv exisits since 1991
+        return
+
+    main_author = authors[0]
+
+    # Lookup papers in db:
+    x_records=get_it_by_ay(main_author,year)
+
+    if DEBUG: print "* matches in db  :", len(x_records)
+    if DEBUG: print "* ratios         :", [ "%s...: %.3f" % (x_title[:10], match_p(x_title,rec)) for x_id, x_title in x_records]
+
+    for x_id,x_title in x_records:
+        # Is x_title and rec similar? Test using match_p
+        if match_p(x_title,rec) > .7:
+            if DEBUG: print "* MATCHED        :", x_id, x_title, "\n"
+            return x_id
+
+    # No match found, yet:
+    # Sometimes not Title is given. Check for all authors, then?
+    # e.g. C. Fuchs and H. H. Wolter, Eur. Phys. J. A  30 , 5 (2006).
+    if DEBUG: print "* NO MATCH FOUND!"
+
+
+
 
 re_token = re.compile(r'([A-Za-z]+)')
 def match_p(s1,s2):
@@ -220,7 +238,7 @@ def guess_authors(record, limit = 5):
     * Author comes first in record (search in first 5 tokens)
     * two or more letters long
     * starts with a capital letter 
-    * Author occures in Author database (!) (needs author_id_dict to be set)
+    * Author occures in Author database (!) (needs author_dict to be set)
 
     To be implements:
     * If 'and' is present then before and afterwards comes probably and author
@@ -243,7 +261,7 @@ def guess_authors(record, limit = 5):
         if t in skip_authors: continue
 
         # Author in db?
-        if t in author_id_dict:
+        if t in author_dict:
             authors.append(t)
 
             if len(authors) == limit:
@@ -282,6 +300,23 @@ def get_it_by_ay(author,year, delta=2):
         recs = [ (to_ascii(x_id), to_ascii(x_title)) for x_id,x_title in cur.fetchall()]
 
     return recs
+
+
+def get_author_count_dict(limit=1000):
+    """
+    Count number of paper by authors
+    """
+    author_count = defaultdict(int)
+
+    con = lite.connect(meta_db)
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT author FROM ayit_lookup LIMIT %d" % limit)
+        
+        for author in cur.fetchall():
+            author_count[to_ascii(author[0])] += 1
+
+    return author_count
 
 
 def get_title_token_count_dict(limit=1000):
@@ -338,10 +373,7 @@ def to_ascii(string):
     return out
     
 
-
-
 if __name__ == '__main__':   
-    DEBUG = 1
     import ipdb as pdb
     BREAK = pdb.set_trace
 
@@ -365,7 +397,7 @@ if __name__ == '__main__':
         if not os.path.isfile(ref_file):
             raise IOError('File not found: '+ ref_file)
 
-        print MATCH(ref_file)
+        print FileMATCH(ref_file, ref_file + '.not_matched.txt')
 
     except:
         import sys, traceback

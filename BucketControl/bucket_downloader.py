@@ -7,9 +7,9 @@ import ipdb
 BREAK = ipdb.set_trace
 
 contents_file = 's3_contents.txt'
-dl_dir = '/media/1TB-Segate/arxiv_buckets/'
+dl_dir = '/media/1TB-Segate/arxiv_src_buckets/'
 
-s3_cmd_ex = "/home/heinrich/Desktop/related-work/arxiv_s3_buckets/tools/s3cmd-1.0.0/s3cmd"
+s3_cmd_ex = "/home/heinrich/Desktop/related-work/OLD/arxiv_s3_buckets/tools/s3cmd-1.0.0/s3cmd"
 
 cur_dir = os.getcwd() + '/'
 os.chdir(dl_dir)
