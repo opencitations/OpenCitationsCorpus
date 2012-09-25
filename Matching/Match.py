@@ -18,63 +18,43 @@
 # * V. Baran, it et al. , Phys. Rept.  410 , 335 (2005).
 #
 
-meta_db    = 'arxiv_meta.db'
-
 import sys,re, os, time, pickle
-
 import sqlite3 as lite
-
 from time import sleep
 from collections import defaultdict
 from unicodedata import normalize
 
+# Akward shared import
+sys.path.append('../tools')
+from shared import to_ascii
+
+# Init global variables
 DEBUG = 0
-log = open('log.txt','a')
-
-def FileMATCH(ref_file, not_matched = ''):
-    if DEBUG: print "Initializing lookup hashes"
-    global author_dict
-    author_dict = get_author_count_dict(limit=1000000)
-
-    try:
-        nfh = open(not_matched,'w')
-    except:
-        nfh = open('/dev/null','w')
-        
-
-    out = ''
-    line_counter = 0
-    match_counter = 0
-
-    with open(ref_file) as fh:
-        for line in fh:
-            line_counter += 1
-            if line_counter % 100 == 0: 
-                log.write("Processing line %7d - matched %7d \n" % ( line_counter , match_counter ))
-                log.flush()
-
-            # Extract arxiv ID and reference line from reference file.
-            # Example record:
-            # line = '1001.0056|K. Behrend [ .... ] .  128 (1997), 45--88.\n'
-
-            ID, rec = line.split('|')[:2]
-
-            match = MATCH(rec)
-
-            if match:
-                match_counter += 1
-                print line +  "|" + match
-            else:
-                nfh.write(line)
-        
-    nfh.close()
-    log.write("Processed %d lines - matched %d records \n" % ( line_counter , match_counter ))
-    log.close()
-    return 
+meta_db = 'arxiv_meta.db'
 
 
-def MATCH(rec):
+#
+# Matching algorithm
+#
+
+def Match(rec):
+    """
+    Matches contenst of rec-string against metadatabase. 
+    * If a match is found the arxiv-id is returned
+    * If not, None is returned
+
+    Example:
+    >>> Match("Hartmann, Period and Mirror Maps for the Quartic K3, 2011")
+    '1101.4601'
+    >>> Match("Harxamn, XXX, 1911")
+    None
+    
+    Remark:
+    * The fist call initializes a author lookup table which takes a few seconds to load.
+    """
     if DEBUG: print "### Matchig ", rec
+    if not 'author_dict' in dir(Match):
+        Match.author_dict = get_author_count_dict(limit = -1)
     
     # 1. Try to find an arxiv id in rec-string.
     arxiv_id = guess_arxiv_id(rec)
@@ -120,9 +100,6 @@ def MATCH(rec):
     if DEBUG: print "* NO MATCH FOUND!"
 
 
-
-
-re_token = re.compile(r'([A-Za-z]+)')
 def match_p(s1,s2):
     # tokens lists
     t1 = re_token.findall(s1.lower())
@@ -136,7 +113,12 @@ def match_p(s1,s2):
     r1 = float(len(isec)) / len(t1)
     
     return r1
+re_token = re.compile(r'([A-Za-z]+)')
 
+
+#
+# Guessing subroutines
+#
 
 def guess_arxiv_id(record):
     '''
@@ -200,12 +182,6 @@ arxiv_group_names = ['cond-mat', 'astro-ph', 'hep-ph', 'math', 'hep-th', 'quant-
                      'atom-ph', 'acc-phys', 'plasm-ph', 'ao-sci', 'bayes-an' ] 
 
 
-def guess_DOI():
-    # NEED THIS
-    #  Doi 10.1063/1.1749604 
-    pass
-
-
 
 def guess_year(record):
     """
@@ -261,35 +237,42 @@ def guess_authors(record, limit = 5):
         if t in skip_authors: continue
 
         # Author in db?
-        if t in author_dict:
+        if t in Match.author_dict:
             authors.append(t)
 
             if len(authors) == limit:
                 return authors
 
     return authors
-            
+ 
+           
+def guess_DOI():
+    # NEED THIS
+    #  Doi 10.1063/1.1749604 
+    pass
 
-def get_author_id_dict(limit=1000):
+
+#
+# Database querries
+#
+
+def get_meta_record_by_id(arxiv_id):
     """
-    Lookup dict: authorname --> [ arxiv id's ]
+    Lookup arxiv_id in meta_db
     """
 
     con = lite.connect(meta_db)
-
-    author_dict = defaultdict(list)
+    tokens = defaultdict(int)
     with con:
         cur = con.cursor()
-        cur.execute("SELECT arxiv_id, author FROM ayit_lookup LIMIT %d" % limit)
-        for ID, name in cur.fetchall():
-            author_dict[name].append(ID)
-
-    return author_dict
+        cur.execute("SELECT * FROM meta WHERE arxiv_id = '%s'" % arxiv_id)
+        rec = cur.fetchone()
+    return rec    
 
 
 def get_it_by_ay(author,year, delta=2):
     """
-    Get all records from author in year-delta .. year
+    Get arxiv_id (i) and title (t) of all papers from author (a) in in year (y) + [-delta..0]
     """
     con = lite.connect(meta_db)
 
@@ -298,7 +281,6 @@ def get_it_by_ay(author,year, delta=2):
         cur = con.cursor()
         cur.execute("SELECT arxiv_id, title FROM ayit_lookup WHERE author='%s' AND '%d' <= year AND year <= '%d' " % (author,year-delta,year))
         recs = [ (to_ascii(x_id), to_ascii(x_title)) for x_id,x_title in cur.fetchall()]
-
     return recs
 
 
@@ -318,90 +300,4 @@ def get_author_count_dict(limit=1000):
 
     return author_count
 
-
-def get_title_token_count_dict(limit=1000):
-    """
-    Count occurence of tokens in titles
-    """
-    token_count = defaultdict(int)
-
-    con = lite.connect(meta_db)
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT title FROM meta LIMIT %d" % limit)
-        
-        for title in cur.fetchall():
-            for token in re.findall(r'([A-Za-z]+)',title[0]):
-                token_count[token.lower()] += 1
-
-    return token_count
-
-
-def get_meta_record_by_id(arxiv_id):
-    """
-    Lookup arxiv_id in meta_db
-    """
-
-    con = lite.connect(meta_db)
-    tokens = defaultdict(int)
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT * FROM meta WHERE arxiv_id = '%s'" % arxiv_id)
-        rec = cur.fetchone()
-    return rec
-    
-
-
-def create_indices():
-    """
-    Create indices in meta_db. Run this once!
-    """
-
-    con = lite.connect(meta_db)
-    with con:
-        cur = con.cursor()
-        cur.execute("CREATE INDEX ay_index  ON ayit_lookup(author,year)")
-        cur.execute("CREATE INDEX arxiv_id  ON meta(arxiv_id,title)")
-
-
-
-def to_ascii(string):
-    try:
-        out= normalize('NFKD', string).encode('ascii','ignore')
-    except TypeError:
-        out= string.encode('ascii','ignore')
-    return out
-    
-
-if __name__ == '__main__':   
-    import ipdb as pdb
-    BREAK = pdb.set_trace
-
-
-    try:
-        import argparse
-        
-        parser = argparse.ArgumentParser("Match references to database")
-        parser.add_argument('reffile', help = 'path to text file containing references', type=str)
-        parser.add_argument('-v','--verbose', help = 'Give detailed status information',type=int)
-
-        args = parser.parse_args()
-        if args.verbose:
-            DEBUG = 1
-
-        ref_file = args.reffile
-
-        if ref_file == '':
-            ref_file = 'reflist.txt'
-        
-        if not os.path.isfile(ref_file):
-            raise IOError('File not found: '+ ref_file)
-
-        print FileMATCH(ref_file, ref_file + '.not_matched.txt')
-
-    except:
-        import sys, traceback
-        type, value, tb = sys.exc_info()
-        traceback.print_exc()
-        pdb.post_mortem(tb)
 
