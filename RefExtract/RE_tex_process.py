@@ -13,15 +13,19 @@ def extract_bibitems(tex_string):
 
 def remove_tex_tags(s):
     # Problems still there:
-    # a lot of em's tt's it's
-    # \"a \"o not handled properly J o rgensen; K. G o ral, B.-G. Englert, and K. Rz c a . z ewski,
-    # \label{adwdaw} tags survive Hu (2004) lima2004a Lima 
+    # a lot of em's tt's it's (ok)
+    # \"a \"o not handled properly J o rgensen; K. G o ral, B.-G. Englert, and K. Rz c a . z ewski, (ok now)
+    # \label{adwdaw} tags survive Hu (2004) lima2004a Lima (ok now)
     # small Shakura N.L. Sunyaev R.A. 1973, A A 24 , 337 
-    # biield    binamefont R. W.  Dunfo
+    # biield    binamefont R. W.  Dunfo(ok now)
     # 2001a 2001MNRAS.326..722B Baes M., Dejonghe H., 20
+    # \bibitem[{\citenamefont{Roy}(2008)}]{roy2008}
+    # \bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Roy}},
+    # \bibinfo{howpublished}{e-print arXiv:0803.2868} (\bibinfo{year}{2008}). (ok now)
+
         
     # Remove label and bibinfo tags
-    s = re.sub(r'''\\(label|bibinfo)\{.+\}''',' ',s,re.VERBOSE)
+    s = re.sub(r'''\\(label|bibinfo)\{.+?\}''',' ',s,re.VERBOSE)
 
     # Replace \"a by a and \"u by u
     s = re.sub(r'\\"','',s)
@@ -34,7 +38,7 @@ def remove_tex_tags(s):
 
     remove_strings = '''
         endcsname providecommand newblock samestyle csname
-        href  author pages title citenamefont 
+        href  author pages title citenamefont bibnamefont
         BibitemOpen penalty0 bibfield
         '''.split()
 
