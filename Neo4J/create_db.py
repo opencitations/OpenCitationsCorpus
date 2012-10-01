@@ -98,6 +98,8 @@
 
 import os
 os.environ['NEO4J_PYTHON_JVMARGS'] = '-Xms512M -Xmx1024M'
+os.environ['CLASSPATH'] = 'usr/lib/jvm/java-6-openjdk/jre/lib/'
+os.environ['JAVA_HOME'] = 'usr/lib/jvm/java-6-openjdk/jre/'
 
 from neo4j import GraphDatabase, INCOMING, Evaluation
 import sys
@@ -121,6 +123,8 @@ def main():
 #    import os
 #    meta_fill_db(limit = -1)
 #    reference_fill_db()
+#    write_caches()
+#    write_cite_rank()
 #    db.shutdown()
     pass
     
@@ -229,7 +233,6 @@ def reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
 
     start = time()
     rel_count = 0
-    stepping = False
     for batch_count, batch in enumerate(group_generator(in_iter,10000)):
         sys.stderr.write('Processing reference %d x 10000. Elapsed time %d sec. Relations created %d. \n' % (batch_count, time() - start, rel_count))
         with db.transaction:
@@ -240,7 +243,6 @@ def reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
                     print 'Skipped line: not not enough separators "|". ',  line[:20]
                     continue
 
-                if stepping: BREAK()
                 # .single property is broken! Have to loop through results (which should be a single one)
                 for source_node in source_idx['id']['arxiv:' + source_id]: 
                     break
@@ -268,7 +270,8 @@ def reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
 
 def unmatched_reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
     """
-    Reads references from match_file and creates corresponding links in db
+    Findes lines in match_file, where the target cannot be found, and adds
+    the corresponding reference strings to 'unknown_references' list in the source.
     """
    
     in_iter = open(match_file)
@@ -276,7 +279,6 @@ def unmatched_reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
 
     start = time()
     rel_count = 0
-    stepping = True
     last_id = ''
     ref_buffer = []
     for batch_count, batch in enumerate(group_generator(in_iter,10000)):
@@ -288,7 +290,6 @@ def unmatched_reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
                 except ValueError:
                     print 'Skipped line: not not enough separators "|". ',  line[:20]
                     continue
-                if stepping: BREAK()
 
                 if not target_id == '':
                     # Lookup target_id in the index
@@ -323,7 +324,6 @@ def unmatched_reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
                 ref_buffer = [ref_string]
 
 
-stepping = True
 def write_caches():
     start = time()
     for i, batch in enumerate(group_generator(PAPER.type.incoming, 1000)):
@@ -332,13 +332,42 @@ def write_caches():
             for paper_rel in batch:
                 paper_node = paper_rel.startNode
 
+                ref_count = 0
+                for ref in paper_node.ref.outgoing:
+                    ref_count += 1 
+
                 cite_count = 0
                 for ref in paper_node.ref.incoming:
                     cite_count += 1 
 
+                paper_node['c_reference_count'] = ref_count
                 paper_node['c_citation_count'] = cite_count
                 paper_node['c_authors'] = ' and '.join([ a_rel.endNode['name'] for a_rel in paper_node.author ])
 
+def write_cite_rank(iterations=4):
+    start = time()
+    # damping factor
+    d = 0.85 
+    # initial value
+    cr_0 = 1.
+
+    for iteration in range(iterations):
+        for batch_count, batch in enumerate(group_generator(PAPER.type.incoming, 1000)):
+            print "Calculating CiteRank. Iteration %d. Processed %d papers in %d sec." % (iteration, batch_count*1000, time()-start)
+            with db.transaction:
+                for paper_rel in batch:
+                    paper_node = paper_rel.startNode
+                    
+                    cr = (1 - d)
+                    for cite_rel in paper_node.ref.incoming:
+                        cite_node = cite_rel.startNode
+                        try:
+                            cr_node = cite_node['c_cite_rank']
+                        except KeyError:
+                            cr_node = cr_0                            
+                        cr += d * cr_node / cite_node['c_reference_count']
+
+                    paper_node['c_cite_rank'] = cr
 
 if __name__ == '__main__':
 

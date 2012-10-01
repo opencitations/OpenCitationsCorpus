@@ -1,17 +1,36 @@
+import os, sys
+os.environ['NEO4J_PYTHON_JVMARGS'] = '-Xms512M -Xmx1024M'
+os.environ['CLASSPATH'] = '/usr/lib/jvm/java-6-openjdk/jre/lib/'
+os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-6-openjdk/jre/'
+
 from os import curdir, sep
 from re import findall
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from BaseHTTPServer import BaseHTTPRequestHandler
 from neo4j import GraphDatabase
 from unicodedata import normalize
 
-db = GraphDatabase('db_folder')
+def application(environ, start_response):
+    # to be called from Apache mod-WSGI
+    sys.stdout = environ['wsgi.errors']
+    try: 
+        db
+    except:
+        print "##################### RESTART #######################"
+        print "Initializing db. From PID %d in dir %s" % (os.getpid(), os.getcwd())
+        init_globals()
+        
+    status = '200 OK' 
+    output = get_html(environ['PATH_INFO'])
+    response_headers = [('Content-type', 'text/html'),
+                        ('Content-Length', str(len(output)))]
+    start_response(status, response_headers)
 
-import ipdb
-BREAK=ipdb.set_trace
-
+    return [output]
 
 
 def main():
+    # serve stand alone server if called from the command line
+    from BaseHTTPServer import HTTPServer
     try:
         init_globals()
         server = HTTPServer(('', 8000), MyHandler)
@@ -34,11 +53,13 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_error(404,'File Not Found: %s' % self.path)
 
 
-
-def init_globals(db=db):
+def init_globals():
     '''Restore global varibales on a running db'''
+    global db
     global ROOT, PAPER, AUTHOR
     global author_idx, source_idx, label_idx
+
+    db = GraphDatabase('db_folder')
     
     label_idx  = db.node.indexes.get('label_idx')
     source_idx = db.node.indexes.get('source_idx')
@@ -49,6 +70,19 @@ def init_globals(db=db):
     ROOT   = db.reference_node
 
 
+class CacheDecorator():
+	def __init__ (self, f):
+		self.f = f
+		self.mem = {}
+	def __call__ (self, *args, **kwargs):
+		if (args, str(kwargs)) in self.mem:
+			return self.mem[args, str(kwargs)]
+		else:
+			tmp = self.f(*args, **kwargs)
+			self.mem[args, str(kwargs)] = tmp
+			return tmp
+
+@CacheDecorator
 def get_html(path):
     if path.endswith('.ico'): return ''
     if path.split('/')[-2] == 'author':
@@ -91,13 +125,14 @@ def get_html(path):
         reference_count = paper_node['c_reference_count'],
         )
         
-    return to_ascii(css + html)
+    return to_ascii(css + analytics + html)
+
 
 def get_author_html(paper_node):
     authors = paper_node['c_authors'].split(" and ")
     authors.sort()
     return ' and '.join(
-        '''<a href="{href}"> {name} </a>'''.format(
+        u'''<a href="{href}"> {name} </a>'''.format(
             href = '/author/'+name.replace(' ','_'),
             name = abbrev_full_name(name))
         for name in authors)
@@ -158,7 +193,7 @@ def get_autor_page(author_name):
         references = ref_string,
         )       
 
-    return to_ascii(css + html)
+    return to_ascii(css + analytics + html)
 
 
 
@@ -319,6 +354,21 @@ html_template = u'''
 </body>
 '''
 
+
+analytics = '''
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29989314-4']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>'''
 
 
 
