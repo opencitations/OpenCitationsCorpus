@@ -84,7 +84,10 @@ class CacheDecorator():
 
 @CacheDecorator
 def get_html(path):
+    print 'called:', path
     if path.endswith('.ico'): return ''
+    if path == '/':
+        return get_front_page()
     if path.split('/')[-2] == 'author':
         return get_autor_page(path.split('/')[-1])
         
@@ -196,9 +199,34 @@ def get_autor_page(author_name):
     return to_ascii(css + analytics + html)
 
 
+def get_front_page():
+    html =front_template.format(
+        title = '<a href="#">Related-Work.net</a>',
+        author = '<a href="http://heinrich-hartmann.net"> Hartmann, Heinrich</a> and <a href="http://rene-pickhardt.de">Pickhardt, Rene</a>',
+        abstract = '''
+This is an inofficial demo of our web project <a href='http://blog.related-work.net'>related-work.net</a>. 
+The ultimate aim is to create a new website for the scientific community which brings together people reading the same article. 
+An essential feature is the availability of reference data, which allows the user to find related work easily. 
+So far we have extracted reference data from the <a href='http://arxiv.org'>arxiv</a> and made it browsable. Currently our database contains:
+<ul>
+<li>ca. 750.000 articles</li>
+<li>ca. 16.000.000 reference entries </li>
+<li>ca. 2.000.000 links between articles.</li>
+</ul>
+We follow a strict openness principle by making available the <a href='http://code.google.com/p/reference-retrieval/'> source code </a> and 
+the data we collect.  For further information we kindly refer you to our <a href='http://blog.related-work.net'>proposal</a>.''',
+        examples = '''
+<ul>
+<li><a href="http://dev.related-work.net/author/Kontsevich,_Maxim"> Author: Kontsevich, Maxim </a></li>
+<li><a href="http://dev.related-work.net/author/Witten,_Edward"> Author: Witten, Edward</a></li>
+<li><a href="/arxiv:hep-th_9711200">Maldacena  J.  M., The Large N Limit of Superconformal Field Theories and Supergravity, 1997 (citations: 2992)</a></li> 
+<li><a href="/arxiv:hep-th_9802150">Witten  E., Anti De Sitter Space And Holography, 1998 (citations: 2448)</a></li> 
+<li><a href="/arxiv:hep-th_9802109">Gubser  S.  S. and Klebanov  I.  R. and Polyakov  A.  M., Gauge Theory Correlators from Non-Critical String Theory, 1998 (citations: 2207)</a></li> 
+</ul>
+'''
+        )
 
-
-
+    return to_ascii(css + analytics + html)
 
 
 
@@ -297,7 +325,7 @@ margin-top: 5;
 author_template = u'''
 <body>
 <div id='headder'>
-    <h1 style='display:inline'> <a href='http://related-work.net'>Related-Work.net</a> </h1> 
+    <h1 style='display:inline'> <a href='http://dev.related-work.net'>Related-Work.net</a> </h1> 
     <h2 style='display:inline'>
       >
       author
@@ -318,10 +346,35 @@ author_template = u'''
 '''
 
 
+front_template = u'''
+<body class="tex2jax_ignore">
+<div id='headder'>
+    <h1 style='display:inline'> <a href='http://dev.related-work.net'>Related-Work.net</a> </h1> 
+</div>
+<div align='center' id='body'>
+    <div id='meta'>
+         <h1 class='tex2jax_process'>{title}</h1>
+         <h2>by:{author}</h2>
+         <div id='abstract' class='tex2jax_process'>
+             <h2 class='abstract'>Abstract:</h2>{abstract}
+         </div>
+         <div>
+         <div class='references'>
+              <h2>Examples:</h2>
+              {examples}
+         </div>
+         <div>
+
+    </div>
+</div>
+</body>
+'''
+
+
 html_template = u'''
 <body class="tex2jax_ignore">
 <div id='headder'>
-    <h1 style='display:inline'> <a href='http://related-work.net'>Related-Work.net</a> </h1> 
+    <h1 style='display:inline'> <a href='http://dev.related-work.net'>Related-Work.net</a> </h1> 
     <h2 style='display:inline'> 
       >
       arxiv
