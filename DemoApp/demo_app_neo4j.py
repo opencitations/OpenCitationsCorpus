@@ -10,7 +10,7 @@ from urllib import unquote
 from BaseHTTPServer import BaseHTTPRequestHandler
 from neo4j import GraphDatabase
 from unicodedata import normalize
-from templates import (front_html, main_template,
+from templates import (front_html, main_template, 
                        author_template, search_template,
                        html_head)
 
@@ -97,9 +97,9 @@ def get_html(path):
         return get_front_page()
     if path.startswith('/search?q='):
         return get_search_page(path.split('?q=')[-1])
-    if path.split('/')[-2] == 'author':
+    if path.startswith('/author/'):
         return get_autor_page(path.split('/')[-1])
-        
+
     RW_ID = path.split('/')[-1]
     RW_ID=RW_ID.replace('_','/')
 
@@ -109,19 +109,18 @@ def get_html(path):
         return "Id %s not found" % RW_ID
 
 
-    ref_list = [ (get_ref_html(ref.endNode),ref.endNode['c_citation_count']) for ref in islice(paper_node.ref.outgoing,0,50) ]
-    # sort by cite rank
-    ref_list = sorted( ref_list, key = lambda x: x[1], reverse=True)
+    ref_nodes = ( ref.endNode for ref in paper_node.ref.outgoing )
+    ref_list  = ( get_ref_html(node) for node in sorted(ref_nodes, key=lambda node: node['c_citation_count'], reverse = True) )
+
     ref_string = '<ul>'
-    ref_string += '\n'.join( entry[0] for entry in ref_list )
+    ref_string += '\n'.join( ref_list )
     ref_string += '\n'.join( '<li>' + u_ref_string + '</li>' for u_ref_string in paper_node['unknown_references'][1:] )
     ref_string += '</ul>'
 
-    cite_list = [ (get_ref_html(ref.startNode),ref.startNode['c_citation_count']) for ref in islice(paper_node.ref.incoming,0,50) ]
-    # sort by cite rank
-    cite_list = sorted( cite_list, key = lambda x: x[1], reverse=True)
+    cite_nodes = ( ref.startNode for ref in paper_node.ref.incoming )
+    cite_list  = ( get_ref_html(node) for node in sorted(cite_nodes, key=lambda node: node['c_citation_count'], reverse = True) )
     cite_string = '<ul>'
-    cite_string += '\n'.join([ entry[0] for entry in cite_list ])
+    cite_string += '\n'.join(cite_list)
     cite_string += '</ul>'
 
     html = main_template.format(
@@ -152,7 +151,7 @@ def get_author_html(paper_node):
 
 def get_ref_html(node):
     return to_ascii(u'''
-           <li><a href="{href}">{authors}, {title}, {year} (citations: {citation_count})</a></li> \n
+           <li><a href="{href}">{authors}, <em> {title} </em>, {year} (citations: {citation_count})</a></li> \n
     '''.format(
             href           = '/' + node['source_id'].replace('/','_'),
             authors        = get_author_names(node),
@@ -187,9 +186,9 @@ def to_ascii(string):
     return out
 
 
-def get_search_page(search_string, limit = 10):
+def get_search_page(search_string, limit = None):
     search_string = unquote(search_string).decode('utf8')
-    search_string  = sub('\W+',' AND ', search_string)
+    search_string  = sub('[^\w*]+',' AND ', search_string)
     author_html = u'<ul>'
     for author_node in islice(search_idx.query('author',search_string),0,limit): 
         author_html += u'''<li> <a href='%s'> %s </a> </li>''' % ("/author/" + author_node['name'].replace(' ','_'), author_node['name'] )

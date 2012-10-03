@@ -43,31 +43,30 @@ css = '''
 body {
 margin:0;
 padding: 0;
+font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;
+font-size: 90%;
 }
 
+a:link { color:#000070; text-decoration:none; }
+a:hover { text-decoration:underline; }
+a:visited { color:#551A8B; text-decoration:none; }
 
 h1 {
-font-size:30px; font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;
 font-size: x-large;
 font-weight: bold;
 line-height: 150%;
 }
 
 h2 {
-font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;
 font-size: medium;
 line-height: 180%;
-}
-
-.text {
-font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;
-font-size: 90%;
-line-height: 130%;
 }
 
 #abstract {
 width: 100%;
 text-align:justify;
+font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;
+line-height:140%;
 }
 
 h2.abstract {
@@ -75,9 +74,6 @@ display: inline;
 line-height: 100%;
 }
 
-a:link { color:#000070; text-decoration:none; }
-a:hover { text-decoration:underline; }
-a:visited { color:#551A8B; text-decoration:none; }
 
 
 #meta {
@@ -94,8 +90,6 @@ background-color: #EEEEEE;
 }
 
 .references {
-font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;
-font-size: 90%;
 line-height: 130%;
 text-align:left;
 float:left; 
@@ -146,55 +140,37 @@ head_template = u'''
 </div>
 '''
 
-
-front_template = u'''
-<body class="tex2jax_ignore">
-''' + head_template.format(
-    breadcrumbs = ''
-    ) + u'''
-<div align='center' id='body'>
-    <div id='meta'>
-         <h1 class='tex2jax_process'>{title}</h1>
-         <h2>by:{author}</h2>
-         <div id='abstract' class='tex2jax_process'>
-             <h2 class='abstract'>Abstract:</h2>{abstract}
-         </div>
-         <div>
-         <div class='references'>
-              <h2>Examples:</h2>
-              {examples}
-         </div>
-         <div>
-
+front_html = u'''
+<body>
+  <div id='headder'>
+    <h1 style='display:inline'> <a href='/'>Related-Work.net</a></h1> 
+  </div>
+  <div align='center' id='body'>
+    <div style='width: 60%; margin-top:50px; align:center;'>
+      <h1><a href='/'>Related-Work.net</a></h1>
+      <span style='line-height: 250%;font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;font-size: 90%;'>
+	An open scientific discussion and reference plattform. <a href='http://blog.related-work.net'>Read more.</a>
+      </span>
+      <form action="/search" method="get" style='margin:40 0 0 0'>
+	<input name='q' type='text' size=50>
+	<input type="submit" value="search">
+      </form>
+      <div style='width:100%; text-align:left; margin-top:50px; line-height:150%'>
+	<h2 style=line-height:100%'>Examples:</h2>
+	<ul>
+	  <li>Search: <a href='/search?q=Operads'>Operads</a></li>
+	  <li>Search: <a href='/search?q=Triangulated+Categories'> Triangulated Categories</a></li>
+	  <li>Search: <a href='/search?q=Mukai'> Mukai</a></li>
+	  <li>Author: <a href='/author/Witten,_Edward'> Witten, Edward </a></li>
+	  <li>Author: <a href='/author/Kontsevich,_Maxim'> Kontsevich, Maxim </a></li>
+	  <li>Paper: <a href='/arxiv:0707.2348'> Pandharipande and Thomas, <em>Curve counting via stable pairs</em></a></li>
+	  <li>Paper: <a href='/arxiv:math_0212237'> Bridgeland, <em>Stability conditions on triangulated categories</em></a></li>
+	  <li>Paper: <a href='/arxiv:0907.3987'> Gaiotte, Moore and Neitzke, <em>Wall-crossing, Hitchin Systems, and the WKB Approximation</em></a></li>
+	</ul>
+      </div>
     </div>
-</div>
 </body>
 '''
-
-front_html = front_template.format(
-        title = '<a href="#">Related-Work.net</a>',
-        author = '<a href="http://heinrich-hartmann.net"> Hartmann, Heinrich</a> and <a href="http://rene-pickhardt.de">Pickhardt, Rene</a>',
-        abstract = '''
-This is an inofficial demo of our web project <a href='http://blog.related-work.net'>related-work.net</a>. 
-The ultimate aim is to create a new website for the scientific community which brings together people reading the same article. 
-An essential feature is the availability of reference data, which allows the user to find related work easily. 
-So far we have extracted reference data from the <a href='http://arxiv.org'>arxiv</a> and made it browsable. Currently our database contains:
-<ul>
-<li>ca. 750.000 articles</li>
-<li>ca. 16.000.000 reference entries </li>
-<li>ca. 2.000.000 links between articles.</li>
-</ul>
-We follow a strict openness principle by making available the <a href='http://code.google.com/p/reference-retrieval/'> source code </a> and 
-the data we collect.  For further information we kindly refer you to our <a href='http://blog.related-work.net'>proposal</a>.''',
-        examples = '''
-<ul>
-<li><a href="http://dev.related-work.net/author/Kontsevich,_Maxim"> Author: Kontsevich, Maxim </a></li>
-<li><a href="http://dev.related-work.net/author/Witten,_Edward"> Author: Witten, Edward</a></li>
-<li><a href="/arxiv:hep-th_9711200">Maldacena  J.  M., The Large N Limit of Superconformal Field Theories and Supergravity, 1997 (citations: 2992)</a></li> 
-<li><a href="/arxiv:hep-th_9802150">Witten  E., Anti De Sitter Space And Holography, 1998 (citations: 2448)</a></li> 
-<li><a href="/arxiv:hep-th_9802109">Gubser  S.  S. and Klebanov  I.  R. and Polyakov  A.  M., Gauge Theory Correlators from Non-Critical String Theory, 1998 (citations: 2207)</a></li> 
-</ul>
-''')
 
 
 
