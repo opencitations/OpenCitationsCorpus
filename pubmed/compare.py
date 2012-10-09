@@ -58,7 +58,13 @@ def compare_integer(a, b, weight=1):
     else:
         return (0, 0)
 
-def compare(a, b):
+class AttributeDict(dict):
+    def __getattr__(self, key):
+        return self.get(key)
+
+def compare(a, b, records):
+    a, b = map(AttributeDict, (a, b))
+
     cs = []
     if a.doi and b.doi:
         cs.append((0.2, 1 if a.doi == b.doi else 0))

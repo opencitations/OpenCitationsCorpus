@@ -181,6 +181,19 @@ def seen_before(seen):
         return filename not in seen
     return seen_filter
 
+def reis(directory, filename):
+    return filename == 'PLoS_Negl_Trop_Dis-2-4-2292260.nxml.xml'
+
+def subset(directory, filename):
+    return directory in SUBSET_DIRECTORIES
+SUBSET_DIRECTORIES = set([
+    'BMC_Med_Res_Methodol', 'PLoS_Comput_Biol', 'PLoS_Med', 'PLoS_Negl_Trop_Dis',
+    'BMC_Int_Health_Hum_Rights', 'BMC_Bioinformatics', 'J_Biomed_Semantics',
+    'BMC_Infect_Dis', 'Nucleic_Acids_Res',
+])
+
+print SUBSET_DIRECTORIES - set(os.listdir('../data'))
+
 def run(input_directory, articles_filename):
     seen = set()
     parse_lock_filename = os.path.join(os.path.expanduser('~'), '.pubmed', 'parse.lock')
@@ -211,7 +224,7 @@ def run(input_directory, articles_filename):
     last_journal, i, j, started = None, 0, 0, time.time()
     url_mapping = get_source_url_mapping()
 
-    for journal, filename, xml in get_graphs(input_directory, filter=seen_before(seen)):
+    for journal, filename, xml in get_graphs(input_directory, filter=subset): #seen_before(seen)):
         if last_journal != journal:
             last_journal, i, duration = journal, i + 1, time.time() - started
             if last_journal:
@@ -259,7 +272,7 @@ def run(input_directory, articles_filename):
 
         tar_info = tarfile.TarInfo('pmc_open_access/%s/%s' % (journal, filename.replace('.nxml', '.json')))
         data = StringIO.StringIO()
-        simplejson.dump(dataset, data)
+        simplejson.dump(dataset, data, indent='  ')
         tar_info.size = data.len
         data.seek(0)
         tar.addfile(tar_info, data)

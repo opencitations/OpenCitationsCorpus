@@ -99,6 +99,9 @@ def convert_doc_sum(pmid):
     with open(filename, 'r') as f:
         xml = etree.parse(f)
 
+    with open('../parsed/%s.xml' % pmid, 'w') as f:
+        f.write(etree.tostring(xml))
+
     items = {}
     for element in xml.xpath("Item[@Name]"):
         if element.text:

@@ -2,7 +2,7 @@ import os, stat, traceback, sys, time
 from datetime import datetime
 from lxml import etree
 
-def get_graphs(input_directory, filter=lambda:True):
+def get_graphs(input_directory, filter=lambda directory,filename:True):
     #directories = sorted(os.listdir('out'), key=lambda x:max([0]+[os.stat(os.path.join('out', x, y))[stat.ST_MTIME] for y in os.listdir(os.path.join('out', x))]), reverse=True)
     directories = os.listdir(input_directory)
     directories.sort()
