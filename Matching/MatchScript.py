@@ -62,8 +62,6 @@ def main():
     
 
 
-
-
 def get_match(line):
     # Example record:
     # line = '1001.0056|K. Behrend [ .... ] .  128 (1997), 45--88.\n'

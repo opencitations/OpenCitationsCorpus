@@ -30,8 +30,6 @@ def BatchExtractReferences(gz_dir,ref_dir,remove_sources):
             print "Error processing", file_name
 
 
-
-
 if __name__ == '__main__':   
     import ipdb as pdb
     BREAK = pdb.set_trace

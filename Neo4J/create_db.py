@@ -96,10 +96,11 @@
 # *   Coauthor relation
 # *   Timing decorators
 
+
 import os
 os.environ['NEO4J_PYTHON_JVMARGS'] = '-Xms512M -Xmx1024M'
-os.environ['CLASSPATH'] = 'usr/lib/jvm/java-6-openjdk/jre/lib/'
-os.environ['JAVA_HOME'] = 'usr/lib/jvm/java-6-openjdk/jre/'
+#os.environ['CLASSPATH'] = 'usr/lib/jvm/java-6-openjdk/jre/lib/'
+#os.environ['JAVA_HOME'] = 'usr/lib/jvm/java-6-openjdk/jre/'
 
 from neo4j import GraphDatabase, INCOMING, Evaluation
 import sys
@@ -200,7 +201,6 @@ def meta_fill_db(db=db,limit = -1):
                 
                     # create a relation paper_node --[author]--> author_node
                     paper_node.author(author_node)
-
             print 'closing transaction'
 
 
@@ -213,8 +213,9 @@ def add_get_author(author_name):
     # Needs to be inside a db transaction
 
     # check for existence
-    node = author_idx['name'][author_name].single
-    if not node:
+    for node in author_idx['name'][author_name]:
+        break
+    else:
         # Adding the node, create type relation to AUTHOR node, update index
         node = db.node(name=author_name, label='author_node ' + author_name)
         node.type(AUTHOR)
@@ -368,6 +369,35 @@ def write_cite_rank(iterations=4):
                         cr += d * cr_node / cite_node['c_reference_count']
 
                     paper_node['c_cite_rank'] = cr
+
+
+def build_search_index():
+    start = time()
+    try:
+        search_idx = db.nodes.indexes.get('search_idx')
+#        with db.transaction:
+#            search_idx.delete()
+    except ValueError:
+        pass
+    
+#    search_idx = db.nodes.indexes.create('search_idx',type='fulltext')
+
+    # Loop through papers
+    for batch_count, batch in enumerate(group_generator(PAPER.type.incoming, 1000)):
+        print "Building search index. Processing paper %d. Elapsed time %d sec," % ( batch_count*1000, time()-start)
+        with db.transaction:
+            for paper_rel in batch:
+                paper_node = paper_rel.startNode
+                search_idx['title'][paper_node['title']]=paper_node
+
+    for batch_count, batch in enumerate(group_generator(AUTHOR.type.incoming, 1000)):
+        print "Building search index. Processing paper %d. Elapsed time %d sec," % ( batch_count*1000, time()-start)
+        with db.transaction:
+            for author_rel in batch:
+                author_node = author_rel.startNode
+                name  = author_node['name'].replace(',',' ')
+                search_idx['author'][name]=author_node
+
 
 if __name__ == '__main__':
 
