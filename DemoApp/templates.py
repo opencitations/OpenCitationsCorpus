@@ -1,8 +1,10 @@
-
+#
+# HTML templates
+#
 
 #
 #
-# Helper and Syles
+#  Helper and Syles
 #
 #
 
@@ -149,7 +151,7 @@ front_html = u'''
     <div style='width: 60%; margin-top:50px; align:center;'>
       <h1><a href='/'>Related-Work.net</a></h1>
       <span style='line-height: 250%;font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;font-size: 90%;'>
-	An open scientific discussion and reference plattform. <a href='http://blog.related-work.net'>Read more.</a>
+	An open scientific discussion and reference platform. <a href='http://blog.related-work.net'>Read more.</a>
       </span>
       <form action="/search" method="get" style='margin:40 0 0 0'>
 	<input name='q' type='text' size=50>
