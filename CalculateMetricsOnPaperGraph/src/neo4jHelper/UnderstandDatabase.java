@@ -1,18 +1,28 @@
 package neo4jHelper;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 public class UnderstandDatabase {
-	EmbeddedGraphDatabase graphDB;
+	private EmbeddedGraphDatabase graphDB;
 	public UnderstandDatabase(String path){
 		graphDB = new EmbeddedGraphDatabase(path);
 	}
 	
+	public EmbeddedGraphDatabase getGraphDB() {
+		return graphDB;
+	}
+
+	public void setGraphDB(EmbeddedGraphDatabase graphDatabaseService) {
+		this.graphDB = graphDatabaseService;
+	}
+
 	public void countAverageNodeDegrees(int max){		
 		int refEdges=0;
 		int paperCnt=0;
@@ -55,6 +65,18 @@ public class UnderstandDatabase {
 		return properties;
 	}
 
+	public HashMap<String,Double> showPageRankValues(){
+		HashMap<String,Double> properties= new HashMap<String, Double>();
+		for(Node n:graphDB.getAllNodes()){
+			if (!n.hasProperty("pageRankValue"))continue;
+			Double pr = (Double)n.getProperty("pageRankValue");
+			String name = (String)n.getProperty("label");
+			if (pr>50)	System.out.println(name + "\t" + pr);
+			else continue;
+			properties.put(name, pr);
+		}
+		return properties;		
+	}
 	
 	public void shutDown() {
 		graphDB.shutdown();		
