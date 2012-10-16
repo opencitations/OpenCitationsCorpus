@@ -22,6 +22,7 @@ import java.util.Properties;
  */
 public class Config extends Properties {
 	public String neo4jDbPath; 
+	public Integer pageRankIterations;
 	private static final long serialVersionUID = -4439565094382127683L;
 
 	static Config instance = null;
