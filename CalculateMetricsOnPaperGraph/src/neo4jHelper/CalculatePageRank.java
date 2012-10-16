@@ -56,7 +56,10 @@ public class CalculatePageRank {
 
 		for (int i = 0; i < iterationen; i++) {
 			System.out.println("iteration number: \t" + i);
-
+			for (Long key:newPageRankValues.keySet()){
+				newPageRankValues.put(key,newPageRankValues.get(key)*0.15);
+			}
+			
 			for (Entry<Long, Double> e : nodeIndex.entrySet()) {
 				Node n = db.getNodeById(e.getKey());
 

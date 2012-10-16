@@ -71,7 +71,8 @@ public class UnderstandDatabase {
 			if (!n.hasProperty("pageRankValue"))continue;
 			Double pr = (Double)n.getProperty("pageRankValue");
 			String name = (String)n.getProperty("label");
-			if (pr>50)	System.out.println(name + "\t" + pr);
+			if (pr>2)	
+			System.out.println(name + "\t" + pr);
 			else continue;
 			properties.put(name, pr);
 		}

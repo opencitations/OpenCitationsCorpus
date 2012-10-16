@@ -17,7 +17,7 @@ public class EntryPoint {
 //		ud.countAverageNodeDegrees(50);
 		System.out.println("calculate pagerank with 5 iterations");
 //		CalculatePageRank cp = new CalculatePageRank(ud.getGraphDB());
-//		cp.dcalculatePageRank(0.85, 2);
+//		cp.dcalculatePageRank(0.85, 3);
 //		ud.setGraphDB(cp.getGraphDb());
 		ud.showPageRankValues();
 		ud.shutDown();
