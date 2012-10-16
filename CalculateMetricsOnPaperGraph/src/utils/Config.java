@@ -27,18 +27,22 @@ public class Config extends Properties {
 	static Config instance = null;
 
 	public Config() {
-		String file = "config.txt";
+		String file = "confi1g.txt";
 		try {
 			BufferedInputStream stream = new BufferedInputStream(
 					new FileInputStream(file));
 			this.load(stream);
 			stream.close();
 		} catch (IOException e) {
+			System.out.println("the file: " + file + " does not exist in you current project folder. make sure it exists and has entries according to the class in CalculateMetricsOnPaperGraph/src/utils/Config.java\n\n one such entry coudld be:\n neo4jDbPath = /var/lib/datasets/... \n\n the file will respect comments starting with a #.");
 			e.printStackTrace();
+			System.exit(1);
 		}
 		try {
 			this.initialize();
 		} catch (IllegalArgumentException e) {
+			System.out.println("the file: " + file + " does not have the argument you where just accessing. make sure all public fields of this class in CalculateMetricsOnPaperGraph/src/utils/Config.java are entries in that file one such entry coudld be:\n neo4jDbPath = /var/lib/datasets/... \n\n the file will respect comments starting with a #.");
+			System.exit(1);
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
