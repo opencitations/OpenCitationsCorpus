@@ -28,7 +28,7 @@ public class Config extends Properties {
 	static Config instance = null;
 
 	public Config() {
-		String file = "confi1g.txt";
+		String file = "config.txt";
 		try {
 			BufferedInputStream stream = new BufferedInputStream(
 					new FileInputStream(file));
