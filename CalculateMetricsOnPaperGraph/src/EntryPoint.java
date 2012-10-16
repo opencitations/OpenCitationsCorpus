@@ -5,6 +5,8 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
+import utils.Config;
+
 
 public class EntryPoint {
 
@@ -12,7 +14,7 @@ public class EntryPoint {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		UnderstandDatabase ud = new UnderstandDatabase("/var/lib/datasets/rawdata/relatedwork/db_folder");
+		UnderstandDatabase ud = new UnderstandDatabase(Config.get().neo4jDbPath);
 //		ud.listProperties(50);
 //		ud.countAverageNodeDegrees(50);
 		System.out.println("calculate pagerank with 5 iterations");
