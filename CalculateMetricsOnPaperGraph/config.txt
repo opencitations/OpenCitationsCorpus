@@ -1,0 +1,10 @@
+# this is the config file for related work. 
+# by using # you can comment out a line.
+# each line represents one parameter
+# parameters can be strings or integers
+
+#make sure every line starts with the same name as the public fields in Config.java
+
+#make sure not to comitt changes of config.txt and leave it in .gitignore
+
+neo4jDbPath = /var/lib/datasets/rawdata/relatedwork/db_folder
