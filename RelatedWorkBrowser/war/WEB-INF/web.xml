@@ -6,6 +6,17 @@
          xmlns="http://java.sun.com/xml/ns/javaee">
   
   <!-- Default page to serve -->
+  
+	<servlet>
+		<servlet-name>StaticAutoCompleteServlet</servlet-name>
+		<servlet-class>net.relatedwork.server.StaticAutoCompleteServiceImpl</servlet-class>
+	</servlet>
+  
+	<servlet-mapping>
+		<servlet-name>StaticAutoCompleteServlet</servlet-name>
+		<url-pattern>/autocomplete/suggest</url-pattern>
+	</servlet-mapping>
+  
   <welcome-file-list>
     <welcome-file>RelatedWorkBrowser.html</welcome-file>
   </welcome-file-list>

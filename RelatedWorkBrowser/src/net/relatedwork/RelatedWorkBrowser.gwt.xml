@@ -16,6 +16,8 @@
   <!-- Specify the app entry point class.                         -->
   <entry-point class='net.relatedwork.client.RelatedWorkBrowser'/>
 
+
+
   <!-- Specify the paths for translatable code                    -->
   <source path='client'/>
   <source path='shared'/>

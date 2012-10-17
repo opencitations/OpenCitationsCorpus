@@ -82,4 +82,15 @@ public class UnderstandDatabase {
 	public void shutDown() {
 		graphDB.shutdown();		
 	}
+
+	public void search(String string) {
+		for (Node n:graphDB.getAllNodes()){
+			if (n.hasProperty("title")){	
+				String label = (String)n.getProperty("title");
+				if (label.contains(string))
+					System.out.println(label);
+			}
+			
+		}
+	}
 }

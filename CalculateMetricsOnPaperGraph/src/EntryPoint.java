@@ -18,10 +18,11 @@ public class EntryPoint {
 //		ud.listProperties(50);
 //		ud.countAverageNodeDegrees(50);
 		System.out.println("calculate pagerank with "+Config.get().pageRankIterations+" iterations");
-		CalculatePageRank cp = new CalculatePageRank(ud.getGraphDB());
-		cp.dcalculatePageRank(0.85, Config.get().pageRankIterations);
-		ud.setGraphDB(cp.getGraphDb());
-		ud.showPageRankValues();
+//		CalculatePageRank cp = new CalculatePageRank(ud.getGraphDB());
+//		cp.dcalculatePageRank(0.85, Config.get().pageRankIterations);
+//		ud.setGraphDB(cp.getGraphDb());
+//		ud.showPageRankValues();
+		ud.search("Stability conditions on K3 surfaces");
 		ud.shutDown();
 		
 	}
