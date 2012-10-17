@@ -12,7 +12,11 @@ import org.neo4j.kernel.EmbeddedReadOnlyGraphDatabase;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
+/**
+ * 
+ * @author rpickhardt
+ *
+ */
 public class StaticAutoCompleteServiceImpl extends RemoteServiceServlet
 		implements RWAutoCompleteService {
 
@@ -36,7 +40,10 @@ public class StaticAutoCompleteServiceImpl extends RemoteServiceServlet
 	private List<ItemSuggestion> getSuggestions(String query, int k) {
 		List<ItemSuggestion> suggestions = new ArrayList<ItemSuggestion>();
 		
-		EmbeddedReadOnlyGraphDatabase graphDB = new EmbeddedReadOnlyGraphDatabase("/var/lib/datasets/rawdata/relatedwork/db_folder");
+		//we can call getServletContext since we are extending RemoteServiceServlet
+		EmbeddedReadOnlyGraphDatabase graphDB = ContextListener.getNeo4jInstance(getServletContext());
+		
+		if (graphDB==null)return null;
 		
 		for (Node n:graphDB.getAllNodes()){
 			if (n.hasProperty("title")){
@@ -52,11 +59,9 @@ public class StaticAutoCompleteServiceImpl extends RemoteServiceServlet
 				}
 			}
 			if (suggestions.size()>k){
-				graphDB.shutdown();
 				return suggestions;
 			}
 		}
-		graphDB.shutdown();
 		return suggestions;
 	}
 }

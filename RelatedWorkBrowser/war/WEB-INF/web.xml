@@ -17,6 +17,13 @@
 		<url-pattern>/autocomplete/suggest</url-pattern>
 	</servlet-mapping>
   
+          <listener>
+                <listener-class>
+                        net.relatedwork.server.ContextListener
+        </listener-class>
+        </listener>
+  
+  
   <welcome-file-list>
     <welcome-file>RelatedWorkBrowser.html</welcome-file>
   </welcome-file-list>
