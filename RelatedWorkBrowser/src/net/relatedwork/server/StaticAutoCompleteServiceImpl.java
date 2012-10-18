@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.relatedwork.client.ItemSuggestion;
 import net.relatedwork.client.RWAutoCompleteService;
+import net.relatedwork.server.SuggestTree.SuggestionList;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
@@ -12,10 +13,11 @@ import org.neo4j.kernel.EmbeddedReadOnlyGraphDatabase;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+
 /**
  * 
  * @author rpickhardt
- *
+ * 
  */
 public class StaticAutoCompleteServiceImpl extends RemoteServiceServlet
 		implements RWAutoCompleteService {
@@ -39,28 +41,15 @@ public class StaticAutoCompleteServiceImpl extends RemoteServiceServlet
 
 	private List<ItemSuggestion> getSuggestions(String query, int k) {
 		List<ItemSuggestion> suggestions = new ArrayList<ItemSuggestion>();
-		
-		//we can call getServletContext since we are extending RemoteServiceServlet
-		EmbeddedReadOnlyGraphDatabase graphDB = ContextListener.getNeo4jInstance(getServletContext());
-		
-		if (graphDB==null)return null;
-		
-		for (Node n:graphDB.getAllNodes()){
-			if (n.hasProperty("title")){
-				String tmp = (String)n.getProperty("title");
-				if (tmp.startsWith(query)){
-					suggestions.add(new ItemSuggestion(tmp));
-				}
-			}
-			if (n.hasProperty("name")){
-				String tmp = (String)n.getProperty("name");
-				if (tmp.startsWith(query)){
-					suggestions.add(new ItemSuggestion(tmp));
-				}
-			}
-			if (suggestions.size()>k){
-				return suggestions;
-			}
+
+		// we can call getServletContext since we are extending
+		// RemoteServiceServlet
+		SuggestTree<Double> tree = ContextListener
+				.getAutoCompleteTree(getServletContext());
+		SuggestionList list = tree.getBestSuggestions(query);
+		for (int i = 0; i < list.length(); i++) {
+			suggestions.add(new ItemSuggestion(list.get(i).replace(query,
+					"<b>" + query + "</b>")));
 		}
 		return suggestions;
 	}
