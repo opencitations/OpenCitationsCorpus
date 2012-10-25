@@ -110,12 +110,22 @@ class Reference(object):
     def __init__(self,xml):
         # store values
         self.xml = xml
+        self.tag = self.xml.tag
 
-        # Find type of publication: journal-article / book / other
+        # Find type of publication: journal-article / book / other.
+        # We distinguish two cases:
+        # * citation tag uses citation-type attribute
+        # * mixed-ciatin tag uses publication-type attribute
         try:
-            self.type = xml.attrib['publication-type']
+            if self.tag == 'citation': 
+                self.type = xml.attrib['citation-type']
+            else: 
+                # e.g. tag = 'mixed-citation'
+                self.type = xml.attrib['publication-type']
+
         except KeyError:
-            raise SyntaxError('Publication-type not defined.')
+            raise SyntaxError('Could not determine publication type.')
+
 
         # Fill in meta-dict in bibjson standard
         self.meta   = self._get_meta_dict(xml)
@@ -194,7 +204,7 @@ class Reference(object):
                         )
                     ))
 
-        return ref_string.encode('UTF-8')
+        return ref_string.strip().encode('UTF-8')
 
 
 #
