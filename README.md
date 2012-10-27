@@ -3,4 +3,6 @@ The goal is to make scientific data better accessable and the whole publishing a
 All of the source code and the collected data is available under a public license. 
 Find more information about this project in our initial blogpost at: http://blog.related-work.net/
 
+if you want to join pleas have a look at the roadmap in our wiki: https://github.com/renepickhardt/related-work.net/wiki/Roadmap
+
 If you want to contribute contact us and keep in mind that we use the following branching model for developement http://nvie.com/posts/a-successful-git-branching-model/
