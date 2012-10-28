@@ -9,8 +9,8 @@
 import os
 from time import sleep
 
-dir_name = 'DATA/REF/'
-out_file = 'DATA/REF/AGGREGATE.txt'
+dir_name = '../DATA/REF/'
+out_file = '../DATA/ALL_REF.txt'
 
 while True:
     files = os.listdir(dir_name)

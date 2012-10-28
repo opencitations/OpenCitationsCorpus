@@ -109,24 +109,20 @@ from MetaRead import get_meta_from_pkl
 sys.path.append('../tools')
 from shared import group_generator
 
-import ipdb as pdb
-BREAK = pdb.set_trace
-
 from time import time
 
 DEBUG = 1
 db    = GraphDatabase('db_folder')
-ROOT = None
+ROOT  = None
 
+match_file = '../DATA/ALL_MATCH.txt'
 
 def main():
-
-#    import os
-#    meta_fill_db(limit = -1)
-#    reference_fill_db()
-#    write_caches()
-#    write_cite_rank()
-#    db.shutdown()
+    meta_fill_db(limit = -1)
+    reference_fill_db()
+    write_caches()
+    write_cite_rank()
+    db.shutdown()
     pass
     
 def setup_db(db=db):
@@ -224,7 +220,7 @@ def add_get_author(author_name):
     return node
 
 
-def reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
+def reference_fill_db(match_file = match_file , db=db):
     """
     Reads references from match_file and creates corresponding links in db
     """

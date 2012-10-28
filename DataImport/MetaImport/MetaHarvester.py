@@ -20,6 +20,8 @@ import oaipmh.client, oaipmh.metadata
 import pickle, time, argparse, os
 from datetime import date, datetime, timedelta
 
+pkl_dir = '../DATA/META/PKL/'
+
 #
 # Setup configuration
 #
@@ -36,7 +38,7 @@ arg_parser.add_argument('--url', default = 'http://export.arxiv.org/oai2',
                         help='URL of OA Server')
 arg_parser.add_argument('--prefix', default = 'oai_dc', 
                         help='Metadata format format')
-arg_parser.add_argument('--export-dir', default = '/home/web/Desktop/share/arxiv_meta/', dest = 'export',
+arg_parser.add_argument('--export-dir', default = pkl_dir, dest = 'export',
                         help='Write files to this directory')
 
 args = arg_parser.parse_args()
@@ -54,7 +56,8 @@ delta_months = args.delta
 # Export to directory
 export_dir = args.export
 if not os.path.exists(export_dir): 
-    raise IOError('Directory not found')
+    print "Creating %s" % export_dir
+    os.makedirs(export_dir)
 
 
 # Print Status

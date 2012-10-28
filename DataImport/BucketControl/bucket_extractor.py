@@ -4,36 +4,61 @@
 # 
 
 from nb_input import nbRawInput
-import os
 from subprocess import call
+import os, sys
+
+sys.path.append('../tools')
 import file_queue as fq
 
-extraction_queue = '/home/heinrich/Desktop/related-work/BucketControl/extraction_queue.txt'
-extract_dir = '/media/ram/RWDATA/'
-tmp_dir = '/media/ram/tmp/'
+# non-blocking RawInput
+from nb_input import nbRawInput
 
-DEBUG = 1
+extraction_queue = './extraction_queue.txt'
+bucket_dir = '../DATA/BUCKETS/'
+extract_dir = '../DATA/SOURCES/'
+tmp_dir = './tmp/'
+
+# Resume switch
+RESUME = True
 
 def main():
     print 'Press "x" to break'
+
+
+    if not os.path.exists(tmp_dir):
+        os.mkdir(tmp_dir)
+
+    if not os.path.exists(extract_dir):
+        os.mkdir(extract_dir)
+
+    if not os.path.exists(extraction_queue) or not RESUME:
+        call('find {source_dir} -type f > {target_file}'.format(
+                source_dir = bucket_dir,
+                target_file = extraction_queue 
+                ) , shell = True)
+
     while True:
         file_name = fq.get(extraction_queue)
         if file_name is None: break
 
-        if DEBUG: print "Extracting" , file_name
-        a = call(['tar','xf',file_name,'-C',tmp_dir])
-        b = call('find %s -name *.gz -type f -exec mv {} %s \;' % (tmp_dir, extract_dir), shell = True)
-        c = call('rm -R ' + tmp_dir + '*', shell=True)
-
-        if a == 0 and b == 0 and c == 0:
-            fq.pop(extraction_queue)
-        else:
-            print "ERROR"
+        print "Extracting bucket" , file_name
+        if call(['tar','xf',file_name,'-C',tmp_dir]):
+            # call returns 1 on error.
             break
 
-        # break if <esc> was pressed
+        if call('find %s -name *.gz -type f -exec mv {} %s \;' % (tmp_dir, extract_dir), shell = True):
+            break
+
+        if call('rm -R ' + tmp_dir + '*', shell=True):
+            break
+
+        fq.pop(extraction_queue)
+
+        # break if x was pressed
         if nbRawInput('',timeout=1) == 'x':
+            print "Extraction suspended. Restart script to resume."
             break
+
 
 if __name__ == '__main__':   
     main()

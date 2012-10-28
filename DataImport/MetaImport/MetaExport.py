@@ -1,17 +1,22 @@
 #
 # Takes pickled oa-metadata entries lying in a folder and writes writes them to:
 #
-# 1. Text files with entries:
+# 1. Print records in format to the console in the format:
 #    id | authors | title | comments | date | subject
 #
 #    Example: 
 #    1010.5365|Melnikov, ...|Heterotic Si... |JHEP 1109:065,2011, doi:10.1007/JHEP09(2011)065|2010-10-26|High Energy Physics - Theory
 #
-# 2. Creates a sqlite3 db with schema:
+# 2. Stores metadata in an sqlite table with schema:
 #
 #    meta(arxivid TEXT, autor TEXT, titel TEXT, info TEXT, date TEXT, subject TEXT, year INT)
 #
 #    We append year as an int field to allow the creation of efficient searching
+#
+# 3. Stores another list in an s1lite table with schema:
+#
+#    ayit_lookup(author TEXT, year INT, arxiv_id TEXT, title TEXT)
+#
 #
  
 import sys, os, pickle, re
@@ -22,16 +27,16 @@ from MetaRead import get_meta_from_pkl
 sys.path.append('../tools')
 from shared import to_ascii, group_generator
 
-base_dir      = os.getcwd() + '/'
-pkl_dir       = base_dir + 'metadata_pkl/'
-txt_list_dir  = base_dir + 'reflists/'
-db_file       = base_dir + 'meta_records_2.db'
+pkl_dir       = '../DATA/META/PKL/'
+db_file       = '../DATA/META/arxiv_meta.db'
 
 def main():
+    print "Writing", db_file
     # print_records()
-    # fill_db_from_pkl(pkl_dir,db_file)
-    # fill_production_db_from_pkl(pkl_dir,db_file)
-    # bulk_pkl_to_txt(pkl_dir,txt_list_dir)
+    print "Writing meta table"
+    fill_meta_table(db_file,pkl_dir)
+    print "Writing author lookup table"
+    fill_author_table(db_file,pkl_dir)
     pass
 
 
@@ -84,7 +89,7 @@ def fill_meta_table(db_file, pkl_dir = pkl_dir, max_batch = -1):
 
         
 
-def fill_ayit_table(db_file,pkl_dir=pkl_dir, max_batch = -1):
+def fill_author_table(db_file,pkl_dir=pkl_dir, max_batch = -1):
     """ 
     Creates a lookup table with schema: author, year, arxiv_id, title
     All elements from each 'creator' value in meta_dict give rows of the ayit table.
@@ -136,16 +141,13 @@ def cleanup_rec(string):
 if __name__ == '__main__':   
     DEBUG = 1
 
-    import ipdb as pdb
-    BREAK = pdb.set_trace
-
     try:
         main()
 
     except:
         print "EROOR"
 
-        import sys, traceback
+        import sys, traceback, pdb
         type, value, tb = sys.exc_info()
         traceback.print_exc()
         pdb.post_mortem(tb)

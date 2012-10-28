@@ -1,25 +1,39 @@
 import os
 from subprocess import call
 
+import sys
+sys.path.append('../tools')
 import file_queue as fq
+from nb_input import nbRawInput
 
-import ipdb
-BREAK = ipdb.set_trace
+# We change the directory later on. Therefore all paths have to be absolute here.
+cur_dir = os.getcwd()
 
-contents_file = 's3_contents.txt'
-dl_dir = '/media/1TB-Segate/arxiv_src_buckets/'
+contents_file = cur_dir + '/s3_contents.txt'
+s3_cmd_ex     = cur_dir + "/s3cmd-1.0.0/s3cmd"
+dl_dir        = cur_dir + '/../DATA/BUCKETS/'
 
-s3_cmd_ex = "/home/heinrich/Desktop/related-work/OLD/arxiv_s3_buckets/tools/s3cmd-1.0.0/s3cmd"
+if not os.path.exists(dl_dir):
+    os.makedirs(dl_dir)
 
-cur_dir = os.getcwd() + '/'
 os.chdir(dl_dir)
 
-for line in fq.queue(cur_dir + contents_file):
+print "Press 'x' to suspend after the current download."
+while True:
+    line = fq.get(contents_file)
+    if line == None: 
+        break
+
     print "Processing ", line
     
     return_code = call([s3_cmd_ex,'get','--add-header=x-amz-request-payer: requester',line])
 
     if return_code != 0:
-        print "ERROR processing", line 
+        print "ERROR downloading", line 
         break
 
+    fq.pop(contents_file)
+    # break if x was pressed
+    if nbRawInput('',timeout=1) == 'x':
+        print "Download suspended. Restart script to resume."
+        break

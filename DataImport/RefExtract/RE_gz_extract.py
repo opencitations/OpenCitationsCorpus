@@ -1,5 +1,8 @@
 import gzip, cStringIO, tarfile
-import tools.pymagic.magic as magic
+
+import sys
+sys.path.append('../tools')
+import pymagic.magic as magic
 FileTypeDetector = magic.Magic()
 
 def gz_extract(gz_path):

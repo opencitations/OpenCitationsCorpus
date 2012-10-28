@@ -30,7 +30,7 @@ from shared import to_ascii
 
 # Init global variables
 DEBUG = 0
-meta_db = 'arxiv_meta.db'
+meta_db = '../DATA/META/arxiv_meta.db'
 
 
 #

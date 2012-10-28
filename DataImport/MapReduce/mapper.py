@@ -1,16 +1,38 @@
-from RefExtract import RefExtract
+#
+# Automated reference extraction using a hands on map-reduce workflow.
+#
 
-import os
+import os, sys
+import argparse
 import multiprocessing as mp
 from time import sleep
+
+sys.path.append('../')
+from RefExtract import RefExtract
+
 
 gz_queue = mp.Queue()
 out_queue = mp.Queue()
 
-data_dir = '/media/ram/RWDATA/'
-ref_dir  = 'DATA/REF/'
+data_dir = '../DATA/SOURCES/'
+ref_dir  = '../DATA/REF/'
 
 queued = {}
+ 
+def main():
+    if not os.path.exists(ref_dir):
+        os.mkdir(ref_dir)
+
+    # Number of Workers
+    M = 1
+    
+    # Init Workers
+    Workers = [ mp.Process(target=worker,args=(gz_queue,)) for i in range(M) ]
+    for w in Workers: w.start()
+    
+    while True:
+        fill_queue(gz_queue)
+        sleep(3)
 
 
 
@@ -38,8 +60,8 @@ def worker(gz_queue):
             wh = open(ref_dir + ref_file_name,'w')
             wh.write(ref_text)
             wh.close()
-        except:
-            print "Error processing", gz_file_name
+        except IOError as e:
+            print "Error processing", gz_path, e
             continue
 
         try:
@@ -47,55 +69,15 @@ def worker(gz_queue):
         except:
             pass
 
- 
- 
-def main():
-    M = 6 # Number of Workers
- 
-    
-    # Init Workers
-    Workers = [ mp.Process(target=worker,args=(gz_queue,)) for i in range(M) ]
-    for w in Workers: w.start()
-    
-    while True:
-        fill_queue(gz_queue)
-        sleep(3)
-
 
 
 if __name__ == '__main__':   
-    import os, sys
-    import argparse
-
-
-    import ipdb as pdb
-    BREAK = pdb.set_trace
-    
     try:
         main()
-        pass
 
     except:
-        import sys, traceback
+        import sys, traceback, pdb
         type, value, tb = sys.exc_info()
         traceback.print_exc()
         pdb.post_mortem(tb)
 
-
-def old_fill_queue(gz_queue):
-    counter  = 0
-    for (dir_path,sub_dirs,files) in os.walk(data_dir):
-        if dir_path == '.': continue # skip root
-        if dir_path.endswith('REF'): continue
-
-        gz_files = filter(lambda x: x.endswith('.gz'), files)
-        
-        for file_name in gz_files:
-            f_path = dir_path + '/' + file_name
-            if f_path in queued: continue
-
-            gz_queue.put(f_path)
-            queued[f_path] = 1
-            counter += 1
-
-    print "%d files in Queue. Added %d. " % (gz_queue.qsize(), counter)

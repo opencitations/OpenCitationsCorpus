@@ -13,15 +13,21 @@ from shared import yield_lines_from_dir, yield_lines_from_file
 DEBUG = 0
 LOG = sys.stderr
 
+
+
 def main():
     global DEBUG
     # 
     # Parse commandline arguments
     #
     
+    ref_file = "../DATA/ALL_REF.txt"
+    match_file = "../DATA/ALL_MATCH.txt"
+
     # Setup Parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('reffile', nargs='?', help = 'path to text file/text dir containing references', type=str)
+    parser.add_argument('reffile', nargs='?', help = 'path to text file/text dir containing references', type=str, default=ref_file)
+    parser.add_argument('matchfile', nargs='?', help = 'write output here', type=str, default=match_file)
     parser.add_argument('--stream', help = 'read input from stdin', action="store_true", default=False)
     parser.add_argument('-m', help = 'number of parallel processes', type=int, default=1)
     parser.add_argument('-v','--verbose', help = 'Give detailed status information',type=int)
@@ -31,8 +37,10 @@ def main():
         DEBUG = 1
 
     ref_file = args.reffile
+    match_file = args.matchfile
     num_proc = args.m
-    print num_proc
+    print """\n\nReading reference strings from {0}.\nMatching using {1} parallel processes.\nWriting to {1}.\n""".format(
+        ref_file, match_file, num_proc)
 
     #
     # Execute program
@@ -55,11 +63,13 @@ def main():
     else:
         out_iter = get_match(in_iter)
 
-    for i, line in enumerate(out_iter):
-        if i % 100 == 0:
-            LOG.write( 'Matching line %d \n' % i )
-        print line
-    
+
+    with open(match_file,'w') as out_fh:
+        for i, line in enumerate(out_iter):
+            if i % 1000 == 0:
+                LOG.write( 'Matching line %d \n' % i )
+
+            out_fh.write(line + "\n")
 
 
 def get_match(line):
