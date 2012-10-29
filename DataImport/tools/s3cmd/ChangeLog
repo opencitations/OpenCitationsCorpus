@@ -1,0 +1,1462 @@
+2011-06-06  Michal Ludvig  <mludvig@logix.net.nz>
+
+===== Migrated to GIT =====
+
+No longer keeping ChangeLog up to date, use git log instead!
+
+Two "official" repositories (both the same content):
+
+* git://github.com/s3tools/s3cmd.git (primary)
+* git://s3tools.git.sourceforge.net/gitroot/s3tools/s3cmd.git
+
+2011-04-11  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/S3Uri.py: Fixed cf:// uri parsing.
+	* S3/CloudFront.py: Don't fail if there are no cfinval
+	  requests.
+
+2011-04-11  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/PkgInfo.py: Updated to 1.1.0-beta1
+	* NEWS: Updated.
+	* s3cmd.1: Regenerated.
+
+2011-04-11  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/Config.py: Increase socket_timeout from 10 secs to 5 mins.
+
+2011-04-10  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/CloudFront.py, S3/S3Uri.py: Support for checking 
+	  status of CF Invalidation Requests [cfinvalinfo].
+	* s3cmd, S3/CloudFront.py, S3/Config.py: Support for CloudFront
+	  invalidation using [sync --cf-invalidate] command.
+	* S3/Utils.py: getDictFromTree() now recurses into
+	  sub-trees.
+
+2011-03-30  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/CloudFront.py: Fix warning with Python 2.7
+	* S3/CloudFront.py: Cmd._get_dist_name_for_bucket() moved to
+	  CloudFront class.
+
+2011-01-13  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/FileLists.py: Move file/object listing functions
+	  to S3/FileLists.py
+
+2011-01-09  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* Released version 1.0.0
+	  ----------------------
+
+	* S3/PkgInfo.py: Updated to 1.0.0
+	* NEWS: Updated.
+
+2011-01-02  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Improved r457 (Don't crash when file disappears
+	  before checking MD5).
+	* s3cmd, s3cmd.1, format-manpage.pl: Improved --help text
+	  and manpage.
+	* s3cmd: Removed explicit processing of --follow-symlinks
+	  (is cought by the default / main loop).
+
+2010-12-24  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Set 10s socket timeout for read()/write().
+	* s3cmd: Added --(no-)check-md5 for [sync].
+	* run-tests.py, testsuite.tar.gz: Added testsuite for
+	  the above.
+	* NEWS: Document the above.
+	* s3cmd: Don't crash when file disappears before
+	  checking MD5.
+
+2010-12-09  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* Released version 1.0.0-rc2
+	  --------------------------
+
+	* S3/PkgInfo.py: Updated to 1.0.0-rc2
+	* NEWS, TODO, s3cmd.1: Updated.
+
+2010-11-13  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Added support for remote-to-remote sync.
+	  (Based on patch from Sundar Raman - thanks!)
+	* run-tests.py: Testsuite for the above.
+
+2010-11-12  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Fixed typo in "s3cmd du" error path.
+
+2010-11-12  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* format-manpage.pl: new manpage auto-formatter
+	* s3cmd.1: Updated using the above helper script
+	* setup.py: Warn if manpage is too old.
+
+2010-10-27  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* run-tests.py, testsuite.tar.gz: Keep the testsuite in
+	  SVN as a tarball. There's too many "strange" things 
+	  in the directory for it to be kept in SVN.
+
+2010-10-27  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* TODO: Updated.
+	* upload-to-sf.sh: Updated for new SF.net system
+
+2010-10-26  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* Released version 1.0.0-rc1
+	  --------------------------
+
+	* S3/PkgInfo.py: Updated to 1.0.0-rc1
+	* NEWS, TODO: Updated.
+
+2010-10-26  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/CloudFront.py, S3/Config.py: Added support
+	  for CloudFront DefaultRootObject. Thanks to Luke Andrew.
+
+2010-10-25  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Improved 'fixbucket' command. Thanks to Srinivasa
+	  Moorthy.
+	* s3cmd: Read config file even if User Profile directory on 
+	  Windows contains non-ascii symbols. Thx Slava Vishnyakov
+
+2010-10-25  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Don't fail when a local node is a directory
+	  and we expected a file. (as if for example /etc/passwd 
+	  was a dir)
+
+2010-10-25  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/S3.py: Ignore inaccessible (and missing) files
+	  on upload.
+	* run-tests.py: Extended [sync] test to verify correct
+	  handling of inaccessible files.
+	* testsuite/permission-tests: New testsuite files.
+
+2010-10-24  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/S3.py: "Stringify" all headers. Httplib should do
+	  it but some Python 2.7 users reported problems that should
+	  now be fixed.
+	* run-tests.py: Fixed test #6
+
+2010-07-25  Aaron Maxwell  <amax@resymbol.net>
+
+	* S3/Config.py, testsuite/etc/, run-tests.py, s3cmd.1, s3cmd:
+	  Option to follow local symlinks for sync and 
+	  put (--follow-symlinks option), including tests and documentation
+	* run-tests.py: --bucket-prefix option, to allow different 
+	  developers to run tests in their own sandbox
+
+2010-07-08  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* run-tests.py, testsuite/crappy-file-name.tar.gz:
+	  Updated testsuite, work around a problem with [s3cmd cp]
+	  when the source file contains '?' or '\x7f' 
+	  (where the inability to copy '?' is especially annoying).
+
+2010-07-08  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/Utils.py, S3/S3Uri.py: Fixed names after moving 
+	  functions between modules.
+
+2010-06-29  Timothee Groleau <kde@timotheegroleau.com>
+
+	* S3/ACL.py: Fix isAnonRead method on Grantees
+	* ChangeLog: Update name of contributor for Timothee Groleau
+
+2010-06-13  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/CloudFront.py: Both [accesslog] and [cfmodify] 
+	  access logging can now be disabled with --no-access-logging
+
+2010-06-13  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/CloudFront.py: Allow s3:// URI as well as cf:// URI 
+	  for most CloudFront-related commands.
+
+2010-06-12  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/CloudFront.py, S3/Config.py: Support access 
+	  logging for CloudFront distributions.
+	* S3/S3.py, S3/Utils.py: Moved some functions to Utils.py
+	  to make them available to CloudFront.py
+	* NEWS: Document the above.
+
+2010-05-27  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/S3.py: Fix bucket listing for buckets with
+	  over 1000 prefixes. (contributed by Timothee Groleau)
+	* S3/S3.py: Fixed code formating.
+
+2010-05-21  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/S3.py: Added support for bucket locations
+	  outside US/EU (i.e. us-west-1 and ap-southeast-1 as of now).
+
+2010-05-21  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/S3.py, S3/Config.py: Added --reduced-redundancy
+	  switch for Reduced Redundancy Storage.
+
+2010-05-20  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/ACL.py, S3/Config.py: Support for --acl-grant
+	  and --acl-revoke (contributed by Timothee Groleau)
+	* s3cmd: Couple of fixes on top of the above commit.
+	* s3cmd: Pre-parse ACL parameters in OptionS3ACL()
+
+2010-05-20  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/Exceptions.py, S3/S3.py: Some HTTP_400 exceptions 
+	  are retriable.
+
+2010-03-19  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd, S3/ACL.py: Print all ACLs for a Grantee
+	(one Grantee can have multiple different Grant entries)
+
+2010-03-19  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Enable bucket-level ACL setting
+	* s3cmd, S3/AccessLog.py, ...: Added [accesslog] command.
+	* s3cmd: Fix imports from S3.Utils
+
+2009-12-10  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* s3cmd: Path separator conversion on Windows hosts.
+
+2009-10-08  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* Released version 0.9.9.91
+	  -------------------------
+
+	* S3/PkgInfo.py: Updated to 0.9.9.91
+	* NEWS: News for 0.9.9.91
+
+2009-10-08  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/S3.py: fixed reference to _max_retries.
+
+2009-10-06  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* Released version 0.9.9.90
+	  -------------------------
+
+	* S3/PkgInfo.py: Updated to 0.9.9.90
+	* NEWS: News for 0.9.9.90
+
+2009-10-06  Michal Ludvig  <mludvig@logix.net.nz>
+
+	* S3/S3.py: Introduce throttling on upload only after
+	  second failure. I.e. first retry at full speed.
+	* TODO: Updated with new ideas.
+
+2009-06-02  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: New [fixbucket] command for fixing invalid object
+	  names in a given Bucket. For instance names with &#x08; in
+	  them (not sure how people manage to upload them but they do).
+	* S3/S3.py, S3/Utils.py, S3/Config.py: Support methods for 
+	  the above, plus advise user to run 'fixbucket' when XML parsing 
+	  fails.
+	* NEWS: Updated.
+	
+2009-05-29  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Utils.py: New function replace_nonprintables()
+	* s3cmd: Filter local filenames through the above function
+	  to avoid problems with uploaded filenames containing invalid 
+	  XML entities, eg &#08; 
+	* S3/S3.py: Warn if a non-printables char is passed to
+	  urlencode_string() - they should have been replaced earlier 
+	  in the processing.
+	* run-tests.py, TODO, NEWS: Updated.
+	* testsuite/crappy-file-name.tar.gz: Tarball with a crappy-named
+	  file. Untar for the testsuite.
+
+2009-05-29  Michal Ludvig  <michal@logix.cz>
+
+	* testsuite/blahBlah/*: Added files needed for run-tests.py
+
+2009-05-28  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Utils.py (dateS3toPython): Be more relaxed about
+	  timestamps format.
+
+2009-05-28  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, run-test.py, TODO, NEWS: Added --dry-run
+	  and --exclude/--include for [setacl].
+	* s3cmd, run-test.py, TODO, NEWS: Added --dry-run
+	  and --exclude/--include for [del].
+
+2009-05-28  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Support for recursive [cp] and [mv], including
+	  multiple-source arguments, --include/--exclude,
+	  --dry-run, etc.
+	* run-tests.py: Tests for the above.
+	* S3/S3.py: Preserve metadata (eg ACL or MIME type) 
+	  during [cp] and [mv].
+	* NEWS, TODO: Updated.
+
+2009-05-28  Michal Ludvig  <michal@logix.cz>
+
+	* run-tests.py: Added --verbose mode.
+
+2009-05-27  Michal Ludvig  <michal@logix.cz>
+
+	* NEWS: Added info about --verbatim.
+	* TODO: Added more tasks.
+
+2009-05-27  Michal Ludvig  <michal@logix.cz>
+
+	* S3/SortedDict.py: Add case-sensitive mode.
+	* s3cmd, S3/S3.py, S3/Config.py: Use SortedDict() in 
+	  case-sensitive mode to avoid dropping filenames
+	  differing only in capitalisation
+	* run-tests.py: Testsuite for the above.
+	* NEWS: Updated.
+
+2009-03-20  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Re-sign requests before retrial to avoid 
+	  RequestTimeTooSkewed errors on failed long-running
+	  uploads.
+	  BTW 'request' now has its own class S3Request.
+
+2009-03-04  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/Config.py, S3/S3.py: Support for --verbatim.
+
+2009-02-25  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Fixed "put file.ext s3://bkt" (ie just the bucket name).
+	* s3cmd: Fixed reporting of ImportError of S3 modules.
+	* s3cmd: Fixed Error: global name 'real_filename' is not defined
+
+2009-02-24  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: New command [sign]
+	* S3/Utils.py: New function sign_string()
+	* S3/S3.py, S3/CloudFront.py: Use sign_string().
+	* NEWS: Updated.
+
+2009-02-17  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9
+	  ----------------------
+
+	* S3/PkgInfo.py: Updated to 0.9.9
+	* NEWS: Compile a big news list for 0.9.9
+
+2009-02-17  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd.1: Document all the new options and commands.
+	* s3cmd, S3/Config.py: Updated some help texts. Removed
+	  option --debug-syncmatch along the way (because --dry-run
+	  with --debug is good enough).
+	* TODO: Updated.
+
+2009-02-16  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Check Python version >= 2.4 as soon as possible.
+
+2009-02-14  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/Config.py, S3/S3.py: Added --add-header option.
+	* NEWS: Documented --add-header.
+	* run-tests.py: Fixed for new messages.
+
+2009-02-14  Michal Ludvig  <michal@logix.cz>
+
+	* README: Updated for 0.9.9
+	* s3cmd, S3/PkgInfo.py, s3cmd.1: Replaced project 
+	  URLs with http://s3tools.org
+	* NEWS: Improved message.
+
+2009-02-12  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Added --list-md5 for 'ls' command.
+	* S3/Config.py: New setting list_md5
+
+2009-02-12  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Set Content-Length header for requests with 'body'.
+	* s3cmd: And send it for requests with no body as well...
+
+2009-02-02  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9-rc3
+	  --------------------------
+
+	* S3/PkgInfo.py, NEWS: Updated for 0.9.9-rc3
+
+2009-02-01  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Exceptions.py: Correct S3Exception.__str__() to
+	  avoid crash in S3Error() subclass. Reported by '~t2~'.
+	* NEWS: Updated.
+
+2009-01-30  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9-rc2
+	  --------------------------
+
+	* S3/PkgInfo.py, NEWS, TODO: Updated for 0.9.9-rc2
+
+2009-01-30  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Under some circumstance s3cmd crashed
+	  when put/get/sync had 0 files to transmit. Fixed now.
+
+2009-01-28  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Output 'delete:' in --dry-run only when
+	  used together with --delete-removed. Otherwise
+	  the user will think that without --dry-run it
+	  would really delete the files.
+
+2009-01-27  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9-rc1
+	  --------------------------
+
+	* S3/PkgInfo.py, NEWS, TODO: Updated for 0.9.9-rc1
+
+2009-01-26  Michal Ludvig  <michal@logix.cz>
+
+	* Merged CloudFront support from branches/s3cmd-airlock
+	  See the ChangeLog in that branch for details.
+
+2009-01-25  W. Tell  <w_tell -at- sourceforge>
+
+	* s3cmd: Implemented --include and friends.
+
+2009-01-25  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Enabled --dry-run and --exclude for 'put' and 'get'.
+	* S3/Exceptions.py: Remove DeprecationWarning about 
+	  BaseException.message in Python 2.6
+	* s3cmd: Rewritten gpg_command() to use subprocess.Popen()
+	  instead of os.popen4() deprecated in 2.6
+	* TODO: Note about failing GPG.
+
+2009-01-22  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Config.py: guess_mime_type = True (will affect new 
+	  installations only).
+
+2009-01-22  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9-pre5
+	  ---------------------------
+
+	* S3/PkgInfo.py, NEWS, TODO: Updated for 0.9.9-pre5
+
+2009-01-22  Michal Ludvig  <michal@logix.cz>
+
+	* run-tests.py: Updated paths for the new sync
+	  semantics.
+	* s3cmd, S3/S3.py: Small fixes to make testsuite happy.
+
+2009-01-21  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Migrated 'sync' local->remote to the new
+	  scheme with fetch_{local,remote}_list().
+	  Enabled --dry-run for 'sync'.
+
+2009-01-20  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Migrated 'sync' remote->local to the new
+	  scheme with fetch_{local,remote}_list().
+	  Changed fetch_remote_list() to return dict() compatible
+	  with fetch_local_list().
+	  Re-implemented --exclude / --include processing.
+	* S3/Utils.py: functions for parsing RFC822 dates (for HTTP
+	  header responses).
+	* S3/Config.py: placeholders for --include.
+
+2009-01-15  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3Uri.py, NEWS: Support for recursive 'put'.
+
+2009-01-13  Michal Ludvig  <michal@logix.cz>
+
+	* TODO: Updated.
+	* s3cmd: renamed (fetch_)remote_keys to remote_list and
+	  a few other renames for consistency.
+
+2009-01-08  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Some errors during file upload were incorrectly 
+	  interpreted as MD5 mismatch. (bug #2384990)
+	* S3/ACL.py: Move attributes from class to instance.
+	* run-tests.py: Tests for ACL.
+	* s3cmd: Minor messages changes.
+
+2009-01-07  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: New command 'setacl'.
+	* S3/S3.py: Implemented set_acl().
+	* S3/ACL.py: Fill in <Owner/> tag in ACL XML.
+	* NEWS: Info about 'setacl'.
+
+2009-01-07  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Factored remote_keys generation from cmd_object_get()
+	  to fetch_remote_keys().
+	* s3cmd: Display Public URL in 'info' for AnonRead objects.
+	* S3/ACL.py: Generate XML from a current list of Grantees
+
+2009-01-07  Michal Ludvig  <michal@logix.cz>
+
+	* S3/ACL.py: Keep ACL internally as a list of of 'Grantee' objects.
+	* S3/Utils.py: Fix crash in stripNameSpace() when the XML has no NS.
+
+2009-01-07  Michal Ludvig  <michal@logix.cz>
+
+	* S3/ACL.py: New object for handling ACL issues.
+	* S3/S3.py: Moved most of S3.get_acl() to ACL class.
+	* S3/Utils.py: Reworked XML helpers - remove XMLNS before 
+	  parsing the input XML to avoid having all Tags prefixed
+	  with {XMLNS} by ElementTree.
+
+2009-01-03  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Don't fail when neither $HOME nor %USERPROFILE% is set.
+	  (fixes #2483388)
+
+2009-01-01  W. Tell  <w_tell -at- sourceforge>
+
+	* S3/S3.py, S3/Utils.py: Use 'hashlib' instead of md5 and sha 
+	  modules to avoid Python 2.6 warnings.
+
+2008-12-31  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9-pre4
+	  ---------------------------
+
+2008-12-31  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Reworked internal handling of unicode vs encoded filenames.
+	  Should replace unknown characters with '?' instead of baling out.
+
+2008-12-31  Michal Ludvig  <michal@logix.cz>
+
+	* run-tests.py: Display system encoding in use.
+	* s3cmd: Print a nice error message when --exclude-from
+	  file is not readable.
+	* S3/PkgInfo.py: Bumped up version to 0.9.9-pre4
+	* S3/Exceptions.py: Added missing imports.
+	* NEWS: Updated.
+	* testsuite: reorganised UTF-8 files, added GBK encoding files,
+	  moved encoding-specific files to 'tar.gz' archives, removed 
+	  unicode dir.
+	* run-tests.py: Adapted to the above change.
+	* run-tests.sh: removed.
+	* testsuite/exclude.encodings: Added.
+	* run-tests.py: Don't assume utf-8, use preferred encoding 
+	  instead.
+	* s3cmd, S3/Utils.py, S3/Exceptions.py, S3/Progress.py,
+	  S3/Config.py, S3/S3.py: Added --encoding switch and 
+	  Config.encoding variable. Don't assume utf-8 for filesystem
+	  and terminal output anymore.
+	* s3cmd: Avoid ZeroDivisionError on fast links.
+	* s3cmd: Unicodised all info() output.
+
+2008-12-30  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Replace unknown Unicode characters with '?'
+	  to avoid UnicodeEncodeError's. Also make all output strings
+	  unicode.
+	* run-tests.py: Exit on failed test. Fixed order of tests.
+
+2008-12-29  Michal Ludvig  <michal@logix.cz>
+
+	* TODO, NEWS: Updated
+	* s3cmd: Improved wildcard get.
+	* run-tests.py: Improved testsuite, added parameters support
+	  to run only specified tests, cleaned up win/posix integration.
+	* S3/Exception.py: Python 2.4 doesn't automatically set 
+	  Exception.message.
+
+2008-12-29  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, run-tests.py: Make it work on Windows.
+
+2008-12-26  Michal Ludvig  <michal@logix.cz>
+
+	* setup.cfg: Remove explicit install prefix. That should fix
+	  Mac OS X and Windows "setup.py install" runs.
+
+2008-12-22  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py, S3/Progress.py: Display "[X of Y]"
+	  in --progress mode.
+	* s3cmd, S3/Config.py: Implemented recursive [get].
+	  Added --skip-existing option for [get] and [sync]. 
+
+2008-12-17  Michal Ludvig  <michal@logix.cz>
+
+	* TODO: Updated
+
+2008-12-14  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Progress.py: Restructured import Utils to avoid import
+	  conflicts.
+
+2008-12-12  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Better Exception output. Print sys.path on ImportError,
+	  don't print backtrace on KeyboardInterrupt
+
+2008-12-11  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Support for multiple sources in 'get' command.
+
+2008-12-10  Michal Ludvig  <michal@logix.cz>
+
+	* TODO: Updated list.
+	* s3cmd: Don't display download/upload completed message
+	  in --progress mode.
+	* S3/S3.py: Pass src/dst names down to Progress class.
+	* S3/Progress.py: added new class ProgressCR - apparently 
+	  ProgressANSI doesn't work on MacOS-X (and perhaps elsewhere).
+	* S3/Config.py: Default progress meter is now ProgressCR
+	* s3cmd: Updated email address for reporting bugs.
+
+2008-12-02  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py, NEWS: Support for (non-)recursive 'ls'
+
+2008-12-01  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9-pre3
+	  ---------------------------
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.9-pre3
+
+2008-12-01  Michal Ludvig  <michal@logix.cz>
+
+	* run-tests.py: Added a lot of new tests.
+	* testsuite/etc/logo.png: New file.
+
+2008-11-30  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: object_get() -- make start_position argument optional.
+
+2008-11-29  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Delete local files with "sync --delete-removed"
+
+2008-11-25  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/Progress.py: Fixed Unicode output in Progress meter.
+	* s3cmd: Fixed 'del --recursive' without prefix (i.e. all objects).
+	* TODO: Updated list.
+	* upload-to-sf.sh: Helper script.
+	* S3/PkgInfo.py: Bumped up version to 0.9.9-pre2+svn
+
+2008-11-24  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.9-pre2
+	  ------------------------
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.9-pre2
+	* NEWS: Added 0.9.9-pre2
+
+2008-11-24  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, s3cmd.1, S3/S3.py: Display or don't display progress meter
+	  default depends on whether we're on TTY (console) or not.
+
+2008-11-24  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Fixed 'get' conflict.
+	* s3cmd.1, TODO: Document 'mv' command.
+
+2008-11-24  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py, s3cmd, S3/Config.py, s3cmd.1: Added --continue for
+	  'get' command, improved 'get' failure resiliency.
+	* S3/Progress.py: Support for progress meter not starting in 0.
+	* S3/S3.py: improved retrying in send_request() and send_file()
+
+2008-11-24  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py, NEWS: "s3cmd mv" for moving objects
+
+2008-11-24  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Utils.py: Common XML parser.
+	* s3cmd, S3/Exeptions.py: Print info message on Error.
+
+2008-11-21  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Support for 'cp' command.
+	* S3/S3.py: Added S3.object.copy() method.
+	* s3cmd.1: Document 'cp' command.
+	* NEWS: Let everyone know ;-)
+	Thanks Andrew Ryan for a patch proposal!
+	https://sourceforge.net/forum/forum.php?thread_id=2346987&forum_id=618865
+
+2008-11-17  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Progress.py: Two progress meter implementations.
+	* S3/Config.py, s3cmd: New --progress / --no-progress parameters
+	  and Config() members.
+	* S3/S3.py: Call Progress() in send_file()/recv_file()
+	* NEWS: Let everyone know ;-)
+
+2008-11-16  Michal Ludvig  <michal@logix.cz>
+
+	* NEWS: Fetch 0.9.8.4 release news from 0.9.8.x branch.
+
+2008-11-16  Michal Ludvig  <michal@logix.cz>
+
+	Merge from 0.9.8.x branch, rel 251:
+	* S3/S3.py: Adjusting previous commit (orig 249) - it's not a good idea 
+	  to retry ALL failures. Especially not those code=4xx where AmazonS3 
+	  servers are not happy with our requests.
+	Merge from 0.9.8.x branch, rel 249:
+	* S3/S3.py, S3/Exception.py: Re-issue failed requests in S3.send_request()
+	Merge from 0.9.8.x branch, rel 248:
+	* s3cmd: Don't leak open filehandles in sync. Thx Patrick Linskey for report.
+	Merge from 0.9.8.x branch, rel 247:
+	* s3cmd: Re-raise the right exception.
+	Merge from 0.9.8.x branch, rel 246:
+	* s3cmd, S3/S3.py, S3/Exceptions.py: Don't abort 'sync' or 'put' on files
+	  that can't be open (e.g. Permision denied). Print a warning and skip over
+	  instead.
+	Merge from 0.9.8.x branch, rel 245:
+	* S3/S3.py: Escape parameters in strings. Fixes sync to and 
+	  ls of directories with spaces. (Thx Lubomir Rintel from Fedora Project)
+	Merge from 0.9.8.x branch, rel 244:
+	* s3cmd: Unicode brainfuck again. This time force all output
+	  in UTF-8, will see how many complaints we'll get...
+
+2008-09-16  Michal Ludvig  <michal@logix.cz>
+
+	* NEWS: s3cmd 0.9.8.4 released from branches/0.9.8.x SVN branch.
+
+2008-09-16  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Don't run into ZeroDivisionError when speed counter
+	  returns 0s elapsed on upload/download file.
+
+2008-09-15  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py, S3/Utils.py, S3/S3Uri.py, S3/Exceptions.py:
+	  Yet anoter Unicode round. Unicodised all command line arguments 
+	  before processing.
+
+2008-09-15  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: "s3cmd mb" can create upper-case buckets again
+	  in US. Non-US (e.g. EU) bucket names must conform to strict
+	  DNS-rules.
+	* S3/S3Uri.py: Display public URLs correctly for non-DNS buckets.
+
+2008-09-10  Michal Ludvig  <michal@logix.cz>
+
+	* testsuite, run-tests.py: Added testsuite with first few tests.
+
+2008-09-10  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3Uri.py, S3/S3.py: All internal representations of
+	  S3Uri()s are Unicode (i.e. not UTF-8 but type()==unicode). It 
+	  still doesn't work on non-UTF8 systems though.
+
+2008-09-04  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Rework UTF-8 output to keep sys.stdout untouched (or it'd
+	  break 's3cmd get' to stdout for binary files).
+
+2008-09-03  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py, S3/Config.py: Removed --use-old-connect-method
+	  again. Autodetect the need for old connect method instead.
+
+2008-09-03  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py: Make --verbose mode more useful and default 
+	  mode less verbose.
+
+2008-09-03  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/Config.py: [rb] Allow removal of non-empty buckets
+	  with --force.
+	  [mb, rb] Allow multiple arguments, i.e. create or remove
+	  multiple buckets at once.
+	  [del] Perform recursive removal with --recursive (or -r).
+
+2008-09-01  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Refuse 'sync' together with '--encrypt'.
+	* S3/S3.py: removed object_{get,put,delete}_uri() functions
+	  and made object_{get,put,delete}() accept URI instead of 
+	  bucket/object parameters.
+
+2008-09-01  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.9-pre1
+
+2008-09-01  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py, S3/Config.py: Allow access to upper-case
+	  named buckets again with --use-old-connect-method 
+	  (uses http://s3.amazonaws.com/bucket/object instead of
+	  http://bucket.s3.amazonaws.com/object)
+
+2008-08-19  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Always output UTF-8, even on output redirects.
+
+2008-08-01  Michal Ludvig  <michal@logix.cz>
+
+	* TODO: Add some items
+
+2008-07-29  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.8.3
+	  ------------------------
+
+2008-07-29  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.8.3
+	* NEWS: Added 0.9.8.3
+
+2008-07-29  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Utils.py (hash_file_md5): Hash files in 32kB chunks
+	  instead of reading it all up to a memory first to avoid
+	  OOM on large files.
+
+2008-07-07  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd.1: couple of syntax fixes from Mikhail Gusarov
+
+2008-07-03  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.8.2
+	  ------------------------
+
+2008-07-03  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.8.2
+	* NEWS: Added 0.9.8.2
+	* s3cmd: Print version info on 'unexpected error' output.
+
+2008-06-30  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Re-upload when Amazon doesn't send ETag
+	  in PUT response. It happens from time to time for
+	  unknown reasons. Thanks "Burtc" for report and
+	  "hermzz" for fix.
+
+2008-06-27  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.8.1
+	  ------------------------
+
+2008-06-27  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.8.1
+	* NEWS: Added 0.9.8.1
+	* s3cmd: make 'cfg' global
+	* run-tests.sh: Sort-of testsuite
+
+2008-06-23  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.8
+	  ----------------------
+
+2008-06-23  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.8
+	* NEWS: Added 0.9.8
+	* TODO: Removed completed tasks
+
+2008-06-23  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Last-minute compatibility fixes for Python 2.4
+	* s3cmd, s3cmd.1: --debug-exclude is an alias for --debug-syncmatch
+	* s3cmd: Don't require $HOME env variable to be set.
+	  Fixes #2000133
+	* s3cmd: Wrapped all execution in a try/except block
+	  to catch all exceptions and ask for a report.
+
+2008-06-18  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Version 0.9.8-rc3
+
+2008-06-18  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Bucket name can't contain upper-case letters (S3/DNS limitation).
+
+2008-06-12  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Version 0.9.8-rc2
+
+2008-06-12  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, s3cmd.1: Added GLOB (shell-style wildcard) exclude, renamed
+	  orig regexp-style --exclude to --rexclude
+
+2008-06-11  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Version 0.9.8-rc1
+
+2008-06-11  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Remove python 2.5 specific code (try/except/finally 
+	  block) and make s3cmd compatible with python 2.4 again.
+	* s3cmd, S3/Config.py, s3cmd.1: Added --exclude-from and --debug-syncmatch
+	  switches for sync.
+
+2008-06-10  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Added --exclude switch for sync.
+	* s3cmd.1, NEWS: Document --exclude
+
+2008-06-05  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.7
+	  ----------------------
+
+2008-06-05  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Bumped up version to 0.9.7
+	* NEWS: Added 0.9.7
+	* TODO: Removed completed tasks
+	* s3cmd, s3cmd.1: Updated help texts, 
+	  removed --dry-run option as it's not implemented.
+	
+2008-06-05  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Config.py: Store more file attributes in sync to S3.
+	* s3cmd: Make sync remote2local more error-resilient.
+
+2008-06-04  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Implemented cmd_sync_remote2local() for restoring
+	  backup from S3 to a local filesystem
+	* S3/S3.py: S3.object_get_uri() now requires writable stream 
+	  and not a path name.
+	* S3/Utils.py: Added mkdir_with_parents()
+
+2008-06-04  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Refactored cmd_sync() in preparation 
+	  for remote->local sync.
+
+2008-04-30  Michal Ludvig  <michal@logix.cz>
+
+	* s3db, S3/SimpleDB.py: Implemented almost full SimpleDB API.
+
+2008-04-29  Michal Ludvig  <michal@logix.cz>
+
+	* s3db, S3/SimpleDB.py: Initial support for Amazon SimpleDB. 
+	  For now implements ListDomains() call and most of the 
+	  infrastructure required for request creation.
+
+2008-04-29  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Exceptions.py: Exceptions moved out of S3.S3
+	* S3/SortedDict.py: rewritten from scratch to preserve
+	  case of keys while still sorting in case-ignore mode.
+
+2008-04-28  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: send_file() now computes MD5 sum of the file
+	  being uploaded, compares with ETag returned by Amazon
+	  and retries upload if they don't match.
+
+2008-03-05  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/S3.py, S3/Utils.py: Throttle upload speed and retry 
+	  when upload failed.
+	  Report download/upload speed and time elapsed.
+
+2008-02-28  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.6
+	  ----------------------
+
+2008-02-28  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: bumped up version to 0.9.6
+	* NEWS: What's new in 0.9.6
+
+2008-02-27  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, s3cmd.1: Updated help and man page.
+	* S3/S3.py, S3/Utils.py, s3cmd: Support for 's3cmd info' command.
+	* s3cmd: Fix crash when 'sync'ing files with unresolvable owner uid/gid.
+	* S3/S3.py, S3/Utils.py: open files in binary mode (otherwise windows
+	  users have problems).
+	* S3/S3.py: modify 'x-amz-date' format (problems reported on MacOS X). 
+	  Thanks Jon Larkowski for fix.
+
+2008-02-27  Michal Ludvig  <michal@logix.cz>
+
+	* TODO: Updated wishlist.
+
+2008-02-11  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Properly follow RedirectPermanent responses for EU buckets
+	* S3/S3.py: Create public buckets with -P (#1837328)
+	* S3/S3.py, s3cmd: Correctly display public URL on uploads.
+	* S3/S3.py, S3/Config.py: Support for MIME types. Both 
+	default and guessing. Fixes bug #1872192 (Thanks Martin Herr)
+
+2007-11-13  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.5
+	  ----------------------
+
+2007-11-13  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Support for buckets stored in Europe, access now 
+	  goes via <bucket>.s3.amazonaws.com where possible.
+
+2007-11-12  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Support for storing file attributes (like ownership, 
+	  mode, etc) in sync operation.
+	* s3cmd, S3/S3.py: New command 'ib' to get information about 
+	  bucket (only 'LocationConstraint' supported for now).
+
+2007-10-01  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Fix typo in argument name (patch
+	  from Kim-Minh KAPLAN, SF #1804808)
+
+2007-09-25  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Exit with error code on error (patch
+	  from Kim-Minh KAPLAN, SF #1800583)
+
+2007-09-25  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Don't fail if bucket listing doesn't have
+	  <IsTruncated> node.
+	* s3cmd: Create ~/.s3cfg with 0600 permissions.
+
+2007-09-13  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Improved 'sync'
+	* S3/S3.py: Support for buckets with over 1000 objects.
+
+2007-09-03  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Small tweaks to --configure workflow.
+
+2007-09-02  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Initial support for 'sync' operation. For
+	  now only local->s3 direction. In this version doesn't
+	  work well with non-ASCII filenames and doesn't support
+	  encryption.
+
+2007-08-24  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/Util.py: More ElementTree imports cleanup
+
+2007-08-19  Michal Ludvig  <michal@logix.cz>
+
+	* NEWS: Added news for 0.9.5
+
+2007-08-19  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Better handling of multiple arguments for put, get and del
+
+2007-08-14  Michal Ludvig  <michal@logix.cz>
+
+	* setup.py, S3/Utils.py: Try import xml.etree.ElementTree
+	  or elementtree.ElementTree module.
+
+2007-08-14  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd.1: Add info about --encrypt parameter.
+
+2007-08-14  Michal Ludvig  <michal@logix.cz>
+
+	* S3/PkgInfo.py: Bump up version to 0.9.5-pre
+
+2007-08-13  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.4
+	  ----------------------
+
+2007-08-13  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py: Added function urlencode_string() that encodes
+	  non-ascii characters in object name before sending it to S3.
+
+2007-08-13  Michal Ludvig  <michal@logix.cz>
+
+	* README: Updated Amazon S3 pricing overview
+
+2007-08-13  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd, S3/Config.py, S3/S3.py: HTTPS support
+
+2007-07-20  Michal Ludvig  <michal@logix.cz>
+
+	* setup.py: Check correct Python version and ElementTree availability.
+
+2007-07-05  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: --configure support for Proxy
+	* S3/S3.py: HTTP proxy support from
+	  John D. Rowell <jdrowell@exerciseyourbrain.com>
+
+2007-06-19  Michal Ludvig  <michal@logix.cz>
+
+	* setup.py: Check for S3CMD_PACKAGING and don't install
+	  manpages and docs if defined.
+	* INSTALL: Document the above change.
+	* MANIFEST.in: Include uncompressed manpage
+
+2007-06-17  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Added encryption key support to --configure
+	* S3/PkgInfo.py: Bump up version to 0.9.4-pre
+	* setup.py: Cleaned up some rpm-specific stuff that 
+	  caused problems to Debian packager Mikhail Gusarov
+	* setup.cfg: Removed [bdist_rpm] section
+	* MANIFEST.in: Include S3/*.py
+
+2007-06-16  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd.1: Syntax fixes from Mikhail Gusarov <dottedmag@dottedmag.net>
+
+2007-05-27  Michal Ludvig  <michal@logix.cz>
+
+	* Support for on-the-fly GPG encryption.
+
+2007-05-26  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd.1: Add info about "s3cmd du" command.
+
+2007-05-26  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.3
+	  ----------------------
+
+2007-05-26  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Patch from Basil Shubin <basil.shubin@gmail.com>
+	  adding support for "s3cmd du" command.
+	* s3cmd: Modified output format of "s3cmd du" to conform
+	  with unix "du".
+	* setup.cfg: Require Python 2.5 in RPM. Otherwise it needs
+	  to require additional python modules (e.g. ElementTree)
+	  which may have different names in different distros. It's 
+	  indeed still possible to manually install s3cmd with 
+	  Python 2.4 and appropriate modules.
+
+2007-04-09  Michal Ludvig  <michal@logix.cz>
+
+	* Released version 0.9.2
+	  ----------------------
+
+2007-04-09  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd.1: Added manpage
+	* Updated infrastructure files to create "better"
+	  distribution archives.
+
+2007-03-26  Michal Ludvig  <michal@logix.cz>
+
+	* setup.py, S3/PkgInfo.py: Move package info out of setup.py
+	* s3cmd: new parameter --version
+	* s3cmd, S3/S3Uri.py: Output public HTTP URL for objects
+	  stored with Public ACL.
+	  
+2007-02-28  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Verify supplied accesskey and secretkey
+	  in interactive configuration path.
+	* S3/Config.py: Hide access key and secret key
+	  from debug output.
+	* S3/S3.py: Modify S3Error exception to work
+	  in python 2.4 (=> don't expect Exception is
+	  a new-style class).
+	* s3cmd: Updated for the above change.
+
+2007-02-19  Michal Ludvig  <michal@logix.cz>
+
+	* NEWS, INSTALL, README, setup.py: Added
+	  more documentation.
+
+2007-02-19  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py, s3cmd: New feature - allow "get" to stdout
+
+2007-02-19  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3fs.py: Removed (development moved to branch s3fs-devel).
+
+2007-02-08  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3fs.py: 
+	  - Implemented mknod()
+	  - Can create directory structure
+	  - Rewritten to use SQLite3. Currently can create
+	    the filesystem, and a root inode.
+
+2007-02-07  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd (from /s3py:74): Renamed SVN top-level project
+	  s3py to s3cmd
+
+2007-02-07  Michal Ludvig  <michal@logix.cz>
+
+	* setup.cfg: Only require Python 2.4, not 2.5
+	* S3/Config.py: Removed show_uri - no longer needed,
+	  it's now default
+
+2007-02-07  Michal Ludvig  <michal@logix.cz>
+
+	* setup.py
+	  - Version 0.9.1
+
+2007-02-07  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd: Change all "exit()" calls to "sys.exit()"
+	  and allow for python 2.4
+	* S3/S3.py: Removed dependency on hashlib -> allow for python 2.4
+
+2007-01-27  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py, S3/S3Uri.py: Case insensitive regex in S3Uri.py
+
+2007-01-26  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3fs.py: Added support for stroing/loading inodes.
+	  No data yet however.
+
+2007-01-26  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3fs.py: Initial version of S3fs module. 
+	  Can create filesystem via "S3fs.mkfs()"
+
+2007-01-26  Michal Ludvig  <michal@logix.cz>
+
+	* S3/BidirMap.py, S3/Config.py, S3/S3.py, S3/S3Uri.py,
+	  S3/SortedDict.py, S3/Utils.py, s3cmd: Added headers with
+	  copyright to all files
+	* S3/S3.py, S3/S3Uri.py: Removed S3.compose_uri(), introduced
+	  S3UriS3.compose_uri() instead.
+
+2007-01-26  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py, S3/S3Uri.py, s3cmd: 
+	  - Converted all users of parse_uri to S3Uri class API
+	  - Removed "cp" command again. Will have to use 'put'
+	    and 'get' for now.
+
+2007-01-25  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3Uri.py: New module S3/S3Uri.py
+	* S3/S3.py, s3cmd: Converted "put" operation to use
+	  the new S3Uri class.
+
+2007-01-24  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py
+	* s3cmd
+	  - Added 'cp' command
+	  - Renamed parse_s3_uri to parse_uri (this will go away anyway)
+
+2007-01-19  Michal Ludvig  <michal@logix.cz>
+
+	* setup.cfg
+	* setup.py
+	  - Include README into tarballs
+
+2007-01-19  Michal Ludvig  <michal@logix.cz>
+
+	* README
+	  - Added comprehensive README file
+
+2007-01-19  Michal Ludvig  <michal@logix.cz>
+
+	* setup.cfg
+	* setup.py
+	  - Added configuration for setup.py sdist
+
+2007-01-19  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Config.py
+	* s3cmd
+	  - Added interactive configurator (--configure)
+	  - Added config dumper (--dump-config)
+	  - Improved --help output
+
+2007-01-19  Michal Ludvig  <michal@logix.cz>
+
+	* setup.cfg
+	* setup.py
+	  Added info for building RPM packages.
+
+2007-01-18  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Config.py
+	* S3/S3.py
+	* s3cmd
+	  Moved class Config from S3/S3.py to S3/Config.py
+
+2007-01-18  Michal Ludvig  <michal@logix.cz>
+
+	* S3/Config.py (from /s3py/trunk/S3/ConfigParser.py:47)
+	* S3/ConfigParser.py
+	* S3/S3.py
+	  Renamed S3/ConfigParser.py to S3/Config.py
+
+2007-01-18  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd
+	  Added info about homepage
+
+2007-01-17  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py
+	* s3cmd
+	  - Use prefix for listings if specified.
+	  - List all commands in --help
+
+2007-01-16  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py
+	* s3cmd
+	  Major rework of Config class:
+	  - Renamed from AwsConfig to Config
+	  - Converted to Singleton (see Config.__new__() and an article on
+	    Wikipedia)
+	  - No more explicit listing of options - use introspection to get them
+	    (class variables that of type str, int or bool that don't start with
+	    underscore)
+	  - Check values read from config file and verify their type.
+	  
+	  Added OptionMimeType and -m/-M options. Not yet implemented
+	  functionality in the rest of S3/S3.py
+
+2007-01-15  Michal Ludvig  <michal@logix.cz>
+
+	* S3/S3.py
+	* s3cmd
+	  - Merged list-buckets and bucket-list-objects operations into
+	    a single 'ls' command.
+	  - New parameter -P for uploading publicly readable objects
+
+2007-01-14  Michal Ludvig  <michal@logix.cz>
+
+	* s3.py
+	* setup.py
+	  Renamed s3.py to s3cmd (take 2)
+
+2007-01-14  Michal Ludvig  <michal@logix.cz>
+
+	* s3cmd (from /s3py/trunk/s3.py:45)
+	  Renamed s3.py to s3cmd
+
+2007-01-14  Michal Ludvig  <michal@logix.cz>
+
+	* S3
+	* S3/S3.py
+	* s3.py
+	* setup.py
+	  All classes from s3.py go to S3/S3.py
+	  Added setup.py
+
+2007-01-14  Michal Ludvig  <michal@logix.cz>
+
+	* s3.py
+	  Minor fix S3.utils -> S3.Utils
+
+2007-01-14  Michal Ludvig  <michal@logix.cz>
+
+	* .svnignore
+	* BidirMap.py
+	* ConfigParser.py
+	* S3
+	* S3/BidirMap.py (from /s3py/trunk/BidirMap.py:35)
+	* S3/ConfigParser.py (from /s3py/trunk/ConfigParser.py:38)
+	* S3/SortedDict.py (from /s3py/trunk/SortedDict.py:35)
+	* S3/Utils.py (from /s3py/trunk/utils.py:39)
+	* S3/__init__.py
+	* SortedDict.py
+	* s3.py
+	* utils.py
+	  Moved modules to their own package
+
+2007-01-12  Michal Ludvig  <michal@logix.cz>
+
+	* s3.py
+	  Added "del" command
+	  Converted all (?) commands to accept s3-uri
+	  Added -u/--show-uri parameter
+
+2007-01-11  Michal Ludvig  <michal@logix.cz>
+
+	* s3.py
+	  Verify MD5 on received files
+	  Improved upload of multiple files
+	  Initial S3-URI support (more tbd)
+
+2007-01-11  Michal Ludvig  <michal@logix.cz>
+
+	* s3.py
+	  Minor fixes:
+	  - store names of parsed files in AwsConfig
+	  - Print total size with upload/download
+
+2007-01-11  Michal Ludvig  <michal@logix.cz>
+
+	* s3.py
+	* utils.py
+	  Added support for sending and receiving files.
+
+2007-01-11  Michal Ludvig  <michal@logix.cz>
+
+	* ConfigParser.py
+	* s3.py
+	  List all Objects in all Buckets command
+	  Yet another logging improvement
+	  Version check for Python 2.5 or higher
+
+2007-01-11  Michal Ludvig  <michal@logix.cz>
+
+	* ConfigParser.py
+	* s3.py
+	* utils.py
+	  Added ConfigParser
+	  Improved setting logging levels
+	  It can now quite reliably list buckets and objects
+
+2007-01-11  Michal Ludvig  <michal@logix.cz>
+
+	* .svnignore
+	  Added ignore list
+
+2007-01-11  Michal Ludvig  <michal@logix.cz>
+
+	* .svnignore
+	* BidirMap.py
+	* SortedDict.py
+	* s3.py
+	* utils.py
+	  Initial import

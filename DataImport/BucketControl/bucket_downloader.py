@@ -10,7 +10,7 @@ from nb_input import nbRawInput
 cur_dir = os.getcwd()
 
 contents_file = cur_dir + '/s3_contents.txt'
-s3_cmd_ex     = cur_dir + "/s3cmd-1.0.0/s3cmd"
+s3_cmd_ex     = cur_dir + "/../tools/s3cmd/s3cmd"
 dl_dir        = cur_dir + '/../DATA/BUCKETS/'
 
 if not os.path.exists(dl_dir):
@@ -26,7 +26,7 @@ while True:
 
     print "Processing ", line
     
-    return_code = call([s3_cmd_ex,'get','--add-header=x-amz-request-payer: requester',line])
+    return_code = call([s3_cmd_ex,'get','--add-header=x-amz-request-payer: requester','--skip-existing',line])
 
     if return_code != 0:
         print "ERROR downloading", line 
@@ -34,6 +34,6 @@ while True:
 
     fq.pop(contents_file)
     # break if x was pressed
-    if nbRawInput('',timeout=1) == 'x':
+    if 'x' in nbRawInput('',timeout=1):
         print "Download suspended. Restart script to resume."
         break
