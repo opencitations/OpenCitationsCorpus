@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.relatedwork.client.ItemSuggestion;
-import net.relatedwork.client.RWAutoCompleteService;
+import net.relatedwork.client.StaticAutoCompleteService;
 import net.relatedwork.server.SuggestTree.SuggestionList;
 
 import org.neo4j.graphdb.Node;
@@ -20,7 +20,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  * 
  */
 public class StaticAutoCompleteServiceImpl extends RemoteServiceServlet
-		implements RWAutoCompleteService {
+		implements StaticAutoCompleteService {
 
 	private static final long serialVersionUID = 4017728426934645380L;
 

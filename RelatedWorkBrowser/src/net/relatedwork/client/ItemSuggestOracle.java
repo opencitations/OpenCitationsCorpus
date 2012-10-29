@@ -15,7 +15,7 @@ public class ItemSuggestOracle extends SuggestOracle {
     }
 
     public void requestSuggestions(SuggestOracle.Request req,SuggestOracle.Callback callback) {
-        RWAutoCompleteService.Util.getInstance().getSuggestions(req, new ItemSuggestCallback(req, callback));
+        StaticAutoCompleteService.Util.getInstance().getSuggestions(req, new ItemSuggestCallback(req, callback));
     }
 
     class ItemSuggestCallback implements AsyncCallback {

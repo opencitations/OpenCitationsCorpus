@@ -3,10 +3,16 @@ package neo4jHelper;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.index.impl.lucene.LuceneIndex;
+import org.neo4j.index.lucene.QueryContext;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 public class UnderstandDatabase {
@@ -92,5 +98,104 @@ public class UnderstandDatabase {
 			}
 			
 		}
+	}
+	public void putPageRankToLucence(){
+		Index<Node> ix = graphDB.index().forNodes("pageRank");
+		
+		Transaction tx = graphDB.beginTx();
+		try {
+			int cnt = 0;
+			for (Node n:graphDB.getAllNodes()){
+				if (n.hasProperty("pageRankValue")){
+					if (n.hasProperty("title")){
+						//String tmp = (String)n.getProperty("title");
+						Double pr = - (Double)n.getProperty("pageRankValue");
+						ix.add(n, "pr", pr);
+					}
+					if (n.hasProperty("name")){
+						//String tmp = (String)n.getProperty("name");
+						Double pr = - (Double)n.getProperty("pageRankValue");
+						ix.add(n, "pr", pr);
+					}
+				}
+				if (cnt++%10000==0){
+					System.out.println(cnt);
+					tx.success();
+					tx.finish();
+					tx = graphDB.beginTx();
+				}
+			}
+			tx.success();
+		}catch (Exception e){
+			e.printStackTrace();
+		}finally{
+			tx.finish();
+		}
+	}
+	
+	public void getNodesWithHighPageRank(){
+		Index<Node> ix = graphDB.index().forNodes("pageRank");
+		QueryContext c = new QueryContext(new Object());
+		
+		IndexHits<Node> hits;
+        hits = ix.query("pr", new QueryContext("*").sort("pr").top(200));
+        for (Node hit: hits){
+        	System.out.println(hit.getProperty("pageRankValue"));
+        }
+	}
+
+	public void searchBenchMark() {
+		Index<Node> test = graphDB.index().forNodes("prsearch_idx");
+		((LuceneIndex<Node>) test).setCacheCapacity("title", 300000);
+
+		for (int j = 1; j < 3; j++) {
+			System.out.println("\n\n\t\t" + j + " round.\n");
+			String[] array = { "Witten*", "Lehn*", "Hartmann*", "Vois*",
+					"*Peter", "Scholz*", "Leib*", "Maier*", "Hitchin*",
+					"Higgs*" };
+
+			for (int i = 0; i < 10; i++) {
+				Sort s = new Sort();
+				s.setSort(new SortField("pr", SortField.DOUBLE, true));
+				long start = System.currentTimeMillis();
+				IndexHits<Node> res = test.query(new QueryContext("title:"
+						+ array[i]).sort(s));
+				if (res == null)
+					continue;
+				for (Node n : res) {
+					if (n.hasProperty("name")) {
+						// System.out.println((Double)n.getProperty("pageRankValue")
+						// + "\t" +(String)n.getProperty("name"));
+					}
+					if (n.hasProperty("title")) {
+						// System.out.println((Double)n.getProperty("pageRankValue")
+						// + "\t" +(String)n.getProperty("title"));
+					}
+				}
+				long end = System.currentTimeMillis();
+				System.out.println("search for: " + array[i]
+						+ "\nindexlookup: " + (end - start)
+						+ "ms \t number of elements: " + res.size() + "\n");
+			}
+		}		
+	}
+	public void testAuthorIndex(String id){
+		Index<Node> index = graphDB.index().forNodes("author_idx");
+
+		
+		String q = id.replace(' ', '?');
+		IndexHits<Node> hits = index.get("name", "*");
+		//if (author == null)return;
+for(Node author:hits){
+		System.out.println( (String) author.getProperty("name"));		
+		
+		for (Relationship rel:author.getRelationships()){
+			System.out.println(rel.getType().name());
+			Node otherNode = rel.getOtherNode(author);
+			if (otherNode.hasProperty("title")){// i found a paper
+				System.out.println((String)otherNode.getProperty("title"));
+			}
+		}
+}
 	}
 }

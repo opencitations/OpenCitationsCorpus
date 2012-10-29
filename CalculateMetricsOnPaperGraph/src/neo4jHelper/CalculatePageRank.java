@@ -8,6 +8,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.index.lucene.ValueContext;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import utils.Parallelizer;
@@ -90,60 +92,6 @@ public class CalculatePageRank {
 
 	}
 
-	public void calculateParallelPageRank(Double _d, int iterationen) {
-		d = _d;
-		HashMap<Long, Double> nodeIndex = getNodesToIndex();
-		final HashMap<Long, Double> newPageRankValues = new HashMap<Long, Double>(
-				nodeIndex);
-
-		for (int i = 0; i < iterationen; i++) {
-			System.out.println("iteration number: \t" + i);
-			Parallelizer pll = new Parallelizer(3);
-
-			for (final Entry<Long, Double> e : nodeIndex.entrySet()) {
-
-				pll.run(new Runnable() {
-					@Override
-					public void run() {
-						Node n = db.getNodeById(e.getKey());
-
-						int degree = 1;
-						for (Relationship rel : n.getRelationships(Direction.OUTGOING)) {
-							degree++;
-						}
-
-						Double currentPageRank = e.getValue();
-						// this amout of PR is given to all nodes the current node links
-						// to.
-						Double delta = d * currentPageRank.doubleValue() / degree;
-
-						for (Relationship rel : n.getRelationships(Direction.OUTGOING)) {
-							Long otherNodeId = rel.getEndNode().getId();
-							if (otherNodeId == null)
-								continue;
-							Double currentPRValueOfOtherNode = newPageRankValues
-									.get(otherNodeId);
-							newPageRankValues.put(otherNodeId,
-									currentPRValueOfOtherNode + delta);
-						}
-
-					}
-				});
-			}
-			try {
-				pll.join();
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-
-			nodeIndex = newPageRankValues;
-		}
-
-		updatePageRankValues(nodeIndex);
-
-	}
-
 	private void updatePageRankValues(HashMap<Long, Double> nodeIndex) {
 		System.out.println("start to hit the disk");
 		int cnt = 0;
@@ -172,6 +120,36 @@ public class CalculatePageRank {
 			nodeIndex.put(n.getId(), 1.0);
 		}
 		return nodeIndex;
+	}
+	
+	public Index<Node> putToIndex(String indexName){
+		Index<Node> searchIndex = db.index().forNodes(indexName);
+		Transaction tx = db.beginTx();
+		try {
+			Index<Node> search = db.index().forNodes("search_idx");
+			long start = System.currentTimeMillis();
+			int cnt = 0;
+			for (Node n:db.getAllNodes()){
+				if (n.hasProperty("title") && n.hasProperty("pageRankValue")){
+					searchIndex.add(n, "title", (String)n.getProperty("title"));
+					searchIndex.add(n, "pr", new ValueContext((Double)n.getProperty("pageRankValue")).indexNumeric());
+				}
+				if (n.hasProperty("name")){
+					searchIndex.add(n, "title", (String)n.getProperty("name"));
+					searchIndex.add(n, "pr", new ValueContext((Double)n.getProperty("pageRankValue")).indexNumeric());
+				}
+				if (cnt++%5000==0){
+					System.out.println(cnt);
+					tx.success();
+					tx.finish();
+					tx = db.beginTx();
+				}
+			}
+			tx.success();
+		}finally{
+			tx.finish();
+		}
+		return searchIndex;
 	}
 
 }
