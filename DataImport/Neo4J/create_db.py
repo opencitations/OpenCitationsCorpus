@@ -99,8 +99,8 @@
 
 import os
 os.environ['NEO4J_PYTHON_JVMARGS'] = '-Xms512M -Xmx1024M'
-#os.environ['CLASSPATH'] = 'usr/lib/jvm/java-6-openjdk/jre/lib/'
-#os.environ['JAVA_HOME'] = 'usr/lib/jvm/java-6-openjdk/jre/'
+os.environ['CLASSPATH'] = '/usr/lib/jvm/java-6-openjdk/jre/lib/'
+os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-6-openjdk/jre/'
 
 from neo4j import GraphDatabase, INCOMING, Evaluation
 import sys
@@ -116,12 +116,21 @@ db    = GraphDatabase('db_folder')
 ROOT  = None
 
 match_file = '../DATA/ALL_MATCH.txt'
+meta_pkl_dir = '../DATA/META/PKL/'
 
 def main():
-    meta_fill_db(limit = -1)
+    if not db.node.indexes.exists('author_idx'):
+        print "Setup new db"
+        setup_db()
+    else:
+        print "Reading db"
+        init_globals()
+
+    meta_fill_db()
     reference_fill_db()
-    write_caches()
-    write_cite_rank()
+    unmatched_reference_fill_db()
+    #write_caches()
+    #write_cite_rank()
     db.shutdown()
     pass
     
@@ -169,10 +178,12 @@ def meta_fill_db(db=db,limit = -1):
     # Create Paper Nodes
     # 
     start = time()
-    for batch_count, batch in enumerate(group_generator(get_meta_from_pkl('../MetaImport/metadata_pkl/', limit = limit),1000)):
+    for batch_count, batch in enumerate(group_generator(get_meta_from_pkl(meta_pkl_dir, limit = limit),1000)):
         print 'Processing metadata batch %d. Time elapsed: %d sec.' % (batch_count, time() - start)
         with db.transaction:
             for rec_id, meta_dict in batch:
+                continue
+
                 # create a new node
                 paper_node = db.node(
                     label           = 'paper_node arxiv:'+rec_id,
@@ -182,11 +193,11 @@ def meta_fill_db(db=db,limit = -1):
                     date            = meta_dict['date'][0],
                     source_url      = meta_dict['identifier'][0], # Check if really works?
                     source_id       = 'arxiv:'+rec_id,
-                    arxiv_meta_dict = [ x for k,v in meta_dict.items() for x in (k, "|".join(v)) ],
+                    # arxiv_meta_dict = [ x for k,v in meta_dict.items() for x in (k, "|".join(v)) ],
                     )
 
                 # add a relation paper_node --[type]--> PAPER
-                paper_node.type(PAPER)
+                # paper_node.type(PAPER)
 
                 # register in source_id index
                 source_idx['id'][paper_node['source_id']] = paper_node
@@ -240,7 +251,10 @@ def reference_fill_db(match_file = match_file , db=db):
                     print 'Skipped line: not not enough separators "|". ',  line[:20]
                     continue
 
+                continue
+
                 # .single property is broken! Have to loop through results (which should be a single one)
+                # equivalent to: source_node = source_idx['id']['arxiv:' + source_id].single
                 for source_node in source_idx['id']['arxiv:' + source_id]: 
                     break
                 else: 
@@ -261,11 +275,13 @@ def reference_fill_db(match_file = match_file , db=db):
                         continue
 
                 # Found nothing?
-                # .append is not working!
+                # append to unknown_references .append is not working!
+                # This is much faster, if we aggregate all unknown_references for one node,
+                # as done in the subsequent function
                 # source_node['unknown_references'] += [ref_string]
 
 
-def unmatched_reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
+def unmatched_reference_fill_db(match_file = match_file , db=db):
     """
     Findes lines in match_file, where the target cannot be found, and adds
     the corresponding reference strings to 'unknown_references' list in the source.
@@ -287,6 +303,8 @@ def unmatched_reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
                 except ValueError:
                     print 'Skipped line: not not enough separators "|". ',  line[:20]
                     continue
+
+                continue
 
                 if not target_id == '':
                     # Lookup target_id in the index
@@ -319,6 +337,7 @@ def unmatched_reference_fill_db(match_file = '../DATA/ALL_MATCHES.txt' , db=db):
                 last_node['unknown_references'] += ref_buffer                
                 last_id = source_id
                 ref_buffer = [ref_string]
+
 
 
 def write_caches():
@@ -398,15 +417,10 @@ def build_search_index():
 if __name__ == '__main__':
 
     try:
-        if not db.node.indexes.exists('author_idx'):
-            setup_db()
-        else:
-            init_globals()
-
         main()
 
     except:
-        import sys, traceback
+        import sys, traceback, pdb
         type, value, tb = sys.exc_info()
         traceback.print_exc()
         pdb.post_mortem(tb)

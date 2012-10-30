@@ -3,7 +3,6 @@
 # (CC BY-SA 3.0) 2012 Heinrich Hartmann
 # 
 
-from nb_input import nbRawInput
 from subprocess import call
 import os, sys
 
