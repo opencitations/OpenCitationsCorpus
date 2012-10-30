@@ -28,13 +28,12 @@ and reference information about all stored papers.
 
 ### Apology
 
-    This process is obviously way more complicated than it needs to
-    be.  Part of the complexity overhead is due to my experiments with
-    e.g. multiprocessing techonologies, furthermore the scripts
-    evolved over a period of a month or so gradually transforming the
-    data.
+This process is obviously way more complicated than it needs to be.
+Part of the complexity overhead is due to my experiments with
+e.g. multiprocessing techonologies, furthermore the scripts evolved
+over a period of a month or so gradually transforming the data.
 
-    On the plus side, I tried to keep the individual scripts as simple
-    as possible and write good documentation. I hope to streamline the
-    workflow as the integration of other data sources comes along.
+On the plus side, I tried to keep the individual scripts as simple as
+possible and write good documentation. I hope to streamline the
+workflow as the integration of other data sources comes along.
     

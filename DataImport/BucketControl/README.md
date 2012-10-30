@@ -11,10 +11,14 @@ convenience.  It was patched
 (cf. [http://arxiv.org/help/bulk_data_s3](arxiv bulk donload)) in
 order to work with the arxiv repositoty.
 
-__OTHERWISE WE DID NOT MODIFY s3cmd AT ALL. CREDITS GO TO s3tools.org!__
+__DISCLAIMER__
+The programm s3cmd is released under GNU Public License v2 (GPLv2) by
+s3tools.org and we included it here for convenience.  
+Apart from the small patch we did not modify s3cmd at all. 
+CREDITS GO TO s3tools.org!
 
-Youu will still have to run 's3cmd --configure' with your amazon
-account details.
+You will have to run 's3cmd --configure' and enter yout amazon account
+details.
 
 The file list 's3_contentes.txt' will be used as a checklist, addings
 '#' on all lines which we have started to dowload.  We filled the file
@@ -29,7 +33,13 @@ Will download all (unchecked) files listed in 's3_contents.txt' to the
 
 ## bucket_extractor.py
 
-Will extract all files in 'BUCKET' folder to the 'DATA' folder. This
-script es managed by a checklist 'extraction_queue.txt' which enables
-you to interrupt this script (by pressing 'x') and continue where you
-left of. Delete the file if you want to extract everything again.
+Will extract all files in 'BUCKET' folder to the 'DATA/SOURCES'
+folder. This script es managed by a checklist 'extraction_queue.txt'
+which enables you to interrupt this script (by pressing 'x') and
+continue where you left of. Delete the file if you want to extract
+everything again.
+
+This script will create several 100.000's of files inside 'DATA/SOURCES'
+which causes considerable stress to the file system. It is therefore
+recommended to start the next step, reference extraction via the MapReduce 
+scripts, in parallel.

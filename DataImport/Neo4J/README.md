@@ -6,23 +6,19 @@ directory and stores them in a neo4j graph database.
 
 ## Install guide:
 
-If you don't have neo4j already installed on your system try the following:
+If you don't have the neo4j python packages installed on your system try the following:
 
-*   sudo apt-get install python-jpype
-*   git clone https://github.com/neo4j/python-embedded.git 
-*   sudo python setup.py install
-*   edit .bash.rc:   
-    export CLASSPATH=/usr/lib/jvm/java-6-openjdk/jre/lib/
-    export JAVA_HOME=/usr/lib/jvm/java-6-openjdk/jre/
+*   sudo apt-get install openjdk-6-jdk
+*   sudo pip install neo4j-embedded
 
 
 ## DB Structure diagram:
                            
->    PAPER <---[type]------ P1  <--[ref]-->  P2 
->                            |               |
->                            |[author]       |[author]
->                            v               v
->    AUTHOR <--[type]------ A1              A2
+    PAPER <---[type]------ P1  <--[ref]-->  P2 
+                            |               |
+                            |[author]       |[author]
+                            v               v
+    AUTHOR <--[type]------ A1              A2
 
 ## Description:
 
@@ -65,9 +61,11 @@ If you don't have neo4j already installed on your system try the following:
 *   git clone https://github.com/neo4j/python-embedded.git 
 *   sudo python setup.py install
 *   edit .bash.rc:   
-    > export CLASSPATH=/usr/lib/jvm/java-6-openjdk/jre/lib/
-    > export JAVA_HOME=/usr/lib/jvm/java-6-openjdk/jre/
-
+    <pre>
+    export CLASSPATH=/usr/lib/jvm/java-6-openjdk/jre/lib/
+    export JAVA_HOME=/usr/lib/jvm/java-6-openjdk/jre/
+    </pre>
+  
 ## Remark:
 
 *   We use the embeded-python neo4j library. 
@@ -80,6 +78,8 @@ If you don't have neo4j already installed on your system try the following:
 ## References:
 *   [Neo4J docs](http://docs.neo4j.org/chunked/milestone/python-embedded.html)
 *   [Github repositoty](https://github.com/neo4j/python-embedded)
+
+
  
 ## Open Questions:
 
