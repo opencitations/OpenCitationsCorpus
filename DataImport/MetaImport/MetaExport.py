@@ -18,26 +18,34 @@
 #    ayit_lookup(author TEXT, year INT, arxiv_id TEXT, title TEXT)
 #
 #
+# 4. Todo (by hand right now): create indices:
+#    CREATE INDEX ay_index  ON ayit_lookup(author,year)
+#    CREATE INDEX arxiv_id  ON meta(arxiv_id,title)
+#
  
-import sys, os, pickle, re
+import sys, os, pickle, json, re
 import sqlite3 as lite
 from MetaRead import get_meta_from_pkl
+
 
 # Akward tools import
 sys.path.append('../tools')
 from shared import to_ascii, group_generator
 
 pkl_dir       = '../DATA/META/PKL/'
+json_dir       = '../DATA/META/JSON/'
 db_file       = '../DATA/META/arxiv_meta.db'
 
 def main():
-    print "Writing", db_file
     # print_records()
+    print "JSON export"
+    json_export()
+
+    print "Writing", db_file
     print "Writing meta table"
     fill_meta_table(db_file,pkl_dir)
     print "Writing author lookup table"
     fill_author_table(db_file,pkl_dir)
-    pass
 
 
 def print_records(pkl_dir=pkl_dir):
@@ -83,7 +91,7 @@ def fill_meta_table(db_file, pkl_dir = pkl_dir, max_batch = -1):
     # Write rows, 10.000 per transaction
     for batch_count, batch in enumerate(group_generator(rows,10000)):
         if batch_count == max_batch: break
-        if DEBUG: print "Processing batch ", batch_count
+        if DEBUG: print "Writing meta row ", batch_count*10000
         with con:
             cur.executemany("INSERT INTO meta VALUES(?, ?, ?, ?, ?, ?, ?)", batch)
 
@@ -121,10 +129,20 @@ def fill_author_table(db_file,pkl_dir=pkl_dir, max_batch = -1):
     # Write rows, 10.000 per transaction
     for batch_count, batch in enumerate(group_generator(rows,10000)):
         if batch_count == max_batch: break
-        if DEBUG: print "Processing batch ", batch_count
+        if DEBUG: print "Writing author info", batch_count*10000
         with con:
             cur.executemany("INSERT INTO ayit_lookup VALUES(?, ?, ?, ?)", batch)
         
+
+
+def json_export(json_dir = json_dir, pkl_dir = pkl_dir):
+    if not os.path.exists(json_dir):
+        os.makedirs(json_dir)
+
+    for i, batch in enumerate(group_generator(get_meta_from_pkl(pkl_dir),10000)):
+        fh = open(json_dir + 'META_%03d.json' % i, 'w')
+        json.dump(batch,fh)
+        fh.close()
 
 
 def cleanup_rec(string):

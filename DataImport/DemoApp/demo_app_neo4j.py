@@ -17,6 +17,8 @@ from pages import get_front_page, get_paper_page, get_search_page, get_autor_pag
 import ipdb
 BREAK = ipdb.set_trace
 
+neo4j_db_folder = '../DATA/NEO4J'
+
 def application(environ, start_response):
     '''Serve Related-Work.net to Apache mod-WSGI'''
     sys.stdout = environ['wsgi.errors']
@@ -55,7 +57,7 @@ def init_globals():
     global ROOT, PAPER, AUTHOR
     global author_idx, source_idx, label_idx, search_idx
 
-    db = GraphDatabase('db_folder')
+    db = GraphDatabase(neo4j_db_folder)
     
     label_idx  = db.node.indexes.get('label_idx')
     source_idx = db.node.indexes.get('source_idx')

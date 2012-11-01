@@ -4,7 +4,31 @@
 # by Heinrich Hartmann, related-work.net, 2012
 #
 
-import os, pickle
+import os, pickle, json
+
+def get_json_from_dir(json_dir, limit = -1):
+    counter = 0
+    for file_name in os.listdir(json_dir):
+        if not file_name.endswith('.json'): continue
+
+        print "Processing", file_name
+
+        try:
+            fh = open(json_dir + file_name)
+            objects = json.load(fh)
+            fh.close()
+        except (IOError, ValueError) as Err:
+            print "Error loading json file", json_dir + file_name
+            print Err
+            continue
+
+        for obj in objects:
+            yield obj
+
+            counter += 1
+            if counter == limit:
+                raise StopIteration
+
 
 def get_meta_from_pkl(pkl_dir, limit = -1):
     """
