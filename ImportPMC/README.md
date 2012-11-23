@@ -21,10 +21,12 @@ Process
 
    It is recommended that you do this with some sort of for loop. 
  
-   This script relies on the Apache XML Project (now Xerces). Download
-   the file
+   This script relies on the Apache XML Project (now Xerces) and the Saxon Java Library. 
+   Download the files
    [xml-commons-resolover-1.2](http://www.mirrorservice.org/sites/ftp.apache.org//xerces/xml-commons/xml-commons-resolver-1.2.tar.gz)
-   and extract it to this directory.
+   [saxon](http://sourceforge.net/projects/saxon/files/latest/download)
+   extract them in your favorite directory, and alter the path in transform.sh accordingly.
+
 
 3. BibJSON conversion
    Next, cd into pubmed and do run::
