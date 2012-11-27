@@ -44,7 +44,8 @@ def get_json_files(tar):
 
 def write_dataset(tar, tar_info, json):
     data = StringIO.StringIO()
-    data.write(simplejson.dumps(json, indent='  '))
+#    data.write(simplejson.dumps(json, indent='  '))
+    data.write(simplejson.dumps(json, indent=2))
     data.seek(0)
     tar_info.size = data.len
     tar.addfile(tar_info, data)

@@ -1,3 +1,11 @@
+#
+# This scripts takes XML files from the ../out directory 
+# and produces BibJSON documents stored in a tar.gz file
+# '../parsed/articles-raw.bibjson.tar.gz 
+#
+# (C) by Alex Dutton
+#
+
 import datetime
 import simplejson
 import tarfile
@@ -11,6 +19,8 @@ import urlparse
 from lxml import etree
 
 from utils import get_graphs
+
+from ipdb import set_trace as BREAK
 
 class Data(dict):
     def __init__(self, xml):
@@ -48,6 +58,10 @@ JOURNAL_MAP = {
     'issn': 'issn',
     'eissn': 'eissn',
 }
+
+#
+# XML --> JSON templates for various document types
+# 
 
 def article_record(xml, node, data):
     record = {
@@ -144,6 +158,11 @@ def organisation_record(xml, node, data):
             record[a] = data[b]
     return record
 
+
+#
+# Generate a dictionary that maps
+# PMC_ID  ------> ftp url for download
+#
 def get_source_url_mapping():
     cached_filename = os.path.join(os.path.expanduser('~'), '.pubmed', 'file_list.csv')
     if not os.path.exists(os.path.dirname(cached_filename)):
@@ -171,10 +190,16 @@ def get_source_url_mapping():
         reader = csv.reader(f)
         reader.next() # Skip the first line
         for row in reader:
+            # HERE IS THE MEAT
             path, pmc_id = row[0], row[2][3:]
             url_mapping[pmc_id] = urlparse.urljoin('ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/', path)
 
     return url_mapping
+
+
+#
+# Tools for filtering 
+#
 
 def seen_before(seen):
     def seen_filter(directory, filename):
@@ -185,6 +210,10 @@ def reis(directory, filename):
     return filename == 'PLoS_Negl_Trop_Dis-2-4-2292260.nxml.xml'
 
 def subset(directory, filename):
+    """
+    Used as filter for running on a test dataset.
+    This needs to be adjusted to the vailable data.
+    """
     return directory in SUBSET_DIRECTORIES
 SUBSET_DIRECTORIES = set([
     'BMC_Med_Res_Methodol', 'PLoS_Comput_Biol', 'PLoS_Med', 'PLoS_Negl_Trop_Dis',
@@ -192,10 +221,23 @@ SUBSET_DIRECTORIES = set([
     'BMC_Infect_Dis', 'Nucleic_Acids_Res',
 ])
 
-print SUBSET_DIRECTORIES - set(os.listdir('../data'))
+# filtering enabled
+#print "Running on directories: ", set(os.listdir('../data')).intersection(SUBSET_DIRECTORIES)
+
+# filtering disabled
+print "Running on directories: ", set(os.listdir('../data'))
+
+
+#
+# Main program
+#
 
 def run(input_directory, articles_filename):
+    #
+    # restore old progress: 
+    #
     seen = set()
+
     parse_lock_filename = os.path.join(os.path.expanduser('~'), '.pubmed', 'parse.lock')
     if os.path.exists(articles_filename) and os.path.exists(parse_lock_filename):
         os.rename(articles_filename, articles_filename+'.old')
@@ -218,13 +260,26 @@ def run(input_directory, articles_filename):
             os.unlink(articles_filename+'.old')
             print "Done loading previous progress, found %d articles" % len(seen)
 
+
+
     # Touch the lock file to say we've started.
     with open(parse_lock_filename, 'w') as f: pass
 
+
+    # for status reporting
     last_journal, i, j, started = None, 0, 0, time.time()
+
+    # URL map is used for PMC_ID restoring
     url_mapping = get_source_url_mapping()
 
-    for journal, filename, xml in get_graphs(input_directory, filter=subset): #seen_before(seen)):
+    # we disable directory filtering
+    # for journal, filename, xml in get_graphs(input_directory, filter=subset): #seen_before(seen)):
+    for journal, filename, xml in get_graphs(input_directory): #seen_before(seen)):
+        #
+        # We are looping through articles in input_dir parsed into etree objects: xml
+        # 
+
+        # status report
         if last_journal != journal:
             last_journal, i, duration = journal, i + 1, time.time() - started
             if last_journal:
@@ -232,11 +287,16 @@ def run(input_directory, articles_filename):
             j, started = 0, time.time()
         j += 1
 
+
         record_list = []
         dataset = {
             'recordList' : record_list,
         }
 
+
+        #
+        # Get PMC ID for current article
+        # 
         pmc = xml.xpath("/article-data/node[1]/data[@key='pmc']")
         source_url = None
         if not len(pmc):
@@ -245,6 +305,9 @@ def run(input_directory, articles_filename):
             source_url = url_mapping[pmc[0].text]
         else:
             print "Couldn't find source URL for PMC%s (%s)" % (pmc[0].text, filename)
+
+
+
 
         for node in xml.xpath("/article-data/node"):
             data = Data(node)
@@ -272,7 +335,11 @@ def run(input_directory, articles_filename):
 
         tar_info = tarfile.TarInfo('pmc_open_access/%s/%s' % (journal, filename.replace('.nxml', '.json')))
         data = StringIO.StringIO()
-        simplejson.dump(dataset, data, indent='  ')
+        
+        # There were errors using indent = '  '. 
+        # It seems to work with an integer now.
+        #simplejson.dump(dataset, data, indent='  ')
+        simplejson.dump(dataset, data, indent = 2)
         tar_info.size = data.len
         data.seek(0)
         tar.addfile(tar_info, data)
@@ -282,5 +349,3 @@ def run(input_directory, articles_filename):
 
 if __name__ == '__main__':
     run('../out', '../parsed/articles-raw.bibjson.tar.gz')
-
-

@@ -30,7 +30,8 @@ def run(input_filename, output_filename):
                     k += 1
                 j += 1
             data = StringIO.StringIO()
-            simplejson.dump(dataset, data, indent='  ')
+            # simplejson.dump(dataset, data, indent='  ')
+            simplejson.dump(dataset, data, indent=2)
             tar_info.size = data.tell()
             data.seek(0)
         tar_out.addfile(tar_info, data)

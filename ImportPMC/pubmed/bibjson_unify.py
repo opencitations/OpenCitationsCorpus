@@ -142,7 +142,8 @@ def run(input_filename, output_filename):
 
             tar_info = tarfile.TarInfo("%s/%s.json" % (ptype, filename))
             data = StringIO.StringIO()
-            data.write(simplejson.dumps(dataset, indent='  '))
+#            data.write(simplejson.dumps(dataset, indent='  '))
+            data.write(simplejson.dumps(dataset, indent=2))
             tar_info.size = data.len
             data.seek(0)
             tar.addfile(tar_info, data)
