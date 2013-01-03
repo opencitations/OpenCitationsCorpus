@@ -1,12 +1,12 @@
-Citation Corpus Datastore
-=========================
+Open Citations Corpus Datastore
+===============================
 
-This is repository contains code for the CitationCorpusDatastore (CCD).
+This is repository contains code for the OpenCitationsCorpusDatastore (OCCD).
 
 It consists of several parts:
 * PMC import scripts
 * Arxiv import scripts
-* CCD server (tbd)
+* OCCD server (tbd)
   
 
 Status
