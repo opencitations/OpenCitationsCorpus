@@ -1,7 +1,7 @@
 Open Citations Corpus Datastore
 ===============================
 
-This is repository contains code for the OpenCitationsCorpusDatastore (OCCD).
+This repository contains code for the Open Citations Corpus Datastore (OCCD). 
 
 It consists of several parts:
 * PMC import scripts
