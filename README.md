@@ -19,3 +19,17 @@ done we can
 * adapt the import scripts to the new format
 * work with relyable data in the front end
 * strat implementing the CCD.
+
+
+Pipeline
+--------
+
+Mark has added a pipeline folder with a first python file
+
+
+BibServer
+---------
+
+Mark has added bibserver as a submodule. After cloning this repo, do 
+git submodule update --init --recursive
+to have a working repo.
