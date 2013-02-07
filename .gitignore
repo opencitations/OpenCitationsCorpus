@@ -25,3 +25,8 @@ local.properties
 # PDT-specific
 .buildpath
 
+.DS_Store
+
+ImportArxiv/MetaImport.CL/MetaHarvester.py
+
+ImportArxiv/BucketControl/extraction_queue.txt
