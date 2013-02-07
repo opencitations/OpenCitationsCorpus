@@ -1,0 +1,3 @@
+[submodule "bibserver"]
+	path = bibserver
+	url = https://github.com/okfn/bibserver.git
