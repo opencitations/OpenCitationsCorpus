@@ -1,0 +1,1586 @@
+The following object is closer to bibjson than the original acta example.
+
+There are comments at the top here, and also within the JSON, so this doc is not valid JSON, but is an example.
+
+The whole lot was taken out of the wrapping JSON object and the containing "recordList" - a bibjson object can stand alone
+and only needs to be wrapped in a "records" list if it is being provided as part of a wrapping collection object
+
+The pmc ID had to be moved into a new identifer list.
+
+The pmid had to be moved into the identifier list.
+
+The title had the newlines stripped from it
+
+The ID was removed it is not particularly needed in itself, although it can be set if desired.
+
+The x-... ones at the top appear to be internally specified, are not previously part of bibjson.
+However would it be worth considering specifying a "source" key in bibjson where data about the source of the record is stored?
+
+{
+  "x-fabio-type": "Expression",     # these x- types are not used in bibjson but can be kept without causing issue
+  "x-in-text-reference-pointer-count": "28",
+  "x-reference-count": "22",
+  "x-source-type": "pmc_oa",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+ 
+ # We need a wee bit of metadata to keep bibserver happy
+ "_id": "...", # this can either be provided at upload or it will be created for you (as described, you can call the make_id function from bibserver code if necessary
+ "_collection": ["opencitations"],
+ "_created_by": <someusername>,
+ "_created": datetime.now().strftime("%Y-%m-%d %H%M")
+ 
+  
+  This group here are standard bibjson now
+  "type": "Article",
+  "title": "Range of motion exercise of temporo-mandibular joint with hot pack increases occlusal force in patients with Duchenne muscular dystrophy",
+  "identifier": [
+    {
+        "type": "pmc",
+        "id": "3146337"
+    },
+    {
+        "type": "pmid",
+        "id": "21574523"
+    }
+  ],
+  "abstract": "The purpose of this study is to evaluate whether the range of motion exercise of the temporo-mandibular joint (jaw ROM exercise) with a hot pack and massage of the masseter muscle improve biting disorder in Duchenne muscular dystrophy (DMD). The subjects were 18 DMD patients (21.3 \u00b1 4.1 years old). The jaw ROM exercise consisted of therapist-assisted training (2 times a week) and self-training (before each meal every day). The therapist-assisted training consisted of the application of a hot pack on the cheek of the masseter muscle region (15 minutes), the massage of the masseter (10 minutes), and jaw ROM exercise (5 minutes). The self-training involved jaw ROM exercise by opening the mouth to the maximum degree, ten times. These trainings continued for six months. Outcomes were evaluated by measuring the greatest occlusal force and the distance at the maximum degree of mouth opening between an incisor of the top and that of the bottom. Six months later, the greatest occlusal force had increased significantly compared with that at the start of jaw ROM exercise (intermediate values: from 73.8N to 97.3N) (p = 0.005) as determined by the Friedman test and Scheff\u00e9's nonparametric test. The patients' satisfaction with meals increased. However, the maximum degree of mouth opening did not change after six months of jaw ROM exercise. Jaw ROM exercise in DMD is effective for increasing the greatest occlusal force.",
+  "volume": "29",
+  "year": "2010",
+  "month": "12",
+  "pages": "392--397",
+
+  "pageStart": "392",   # these are not common in bibjson, usually just pages string is used. But these do not need to be removed
+  "pageEnd": "397",
+
+  whilst bibjson does state you can use the rules of JSON-LD to reference other objects, there is little value for doing that within 
+  our index. So the journal object should be contained within the record object as below, rather than a ref item
+  NOTE ALSO the journal should have a "name", and this one does not appear to have one. If there is no known name, perhaps the 
+  x-nlm-ta should be used as the name too.
+  "journal": {
+      "publisher": {
+        "id": "pmid:21574523:publisher",
+        "name": "Pacini Editore SpA"
+      },
+      "identifier":[
+        {
+            "type": "issn",
+            "id": "1128-2460"
+        },
+        {
+            "eissn": "1128-2460"
+      ],
+      "x-nlm-ta": "Acta Myol",
+  },
+
+
+  Similarly, these author objects should just be internal to the record object unless we do decide to go with separated author entities.
+  I have not written them all in below, but essentially each of these author objects that contains a "ref" should actually just contain 
+  the author data directly. Look at the author list below to see an example of the content of an author object
+  "author": [
+    {
+      "ref": "@pmid:21574523:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:contributor:3"
+    },
+    {
+      "ref": "@pmid:21574523:contributor:4"
+    },
+    {
+      "ref": "@pmid:21574523:contributor:5"
+    },
+    {
+      "ref": "@pmid:21574523:contributor:6"
+    },
+    {
+      "ref": "@pmid:21574523:contributor:7"
+    }
+  ],
+
+
+  The "cites" object has been changed in name to "citation" to better fit modern bibjson approach
+  Now, because citation objects are full record objects, and because we care about citations in this project, 
+  there is value in the citations being full record objects.
+  So, when a record is supplied to our index from the pipeline, it should contain a citation list that is just a list of 
+  objects with "ref" but "ref" must point to the _id of that record object in our index. If it does not yet exist in our 
+  index, then create the record object then add its _id to the citation list.
+  Here we can also consider nesting on the index if necessary, although it is not an immediate requirement.
+  "citation": [
+    {
+      "ref": "@pmid:21574523:reference:R01"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R02"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R03"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R04"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R05"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R06"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R07"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R08"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R09"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R10"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R11"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R12"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R13"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R14"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R15"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R16"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R17"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R18"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R19"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R20"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R21"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R22"
+    }
+  ]
+}
+
+
+# the useful parts of the journal item here were pulled into the bibjson object above
+{
+  "publisher": {
+    "ref": "@pmid:21574523:publisher"
+  },
+  "issn": "1128-2460",
+  "x-nlm-ta": "Acta Myol",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "eissn": "1128-2460",
+  "type": "Journal",
+  "id": "pmid:21574523:journal"
+},
+# and this publisher object was pulled into the above journal object
+{
+  "type": "Organization",
+  "id": "pmid:21574523:publisher",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "name": "Pacini Editore SpA"
+},
+
+
+
+# these author objects should be internal to the record object. The first author object is altered here to fit bibjson
+
+# this is the altered first author
+# x-surname changed to lastname
+# x-source-url, x-given-names, x-name-style removed. Could be left in if desired, but not obviously useful
+# id removed
+# type removed - it is inherent
+# the affiliation data has been wrapped into this author object too - name was stripped from address, if possible. 
+Otherwise just make the name the same as the address
+Also remove the ; from the end of the address string
+{
+  "name": "Nozaki, S.",
+  "lastname": "Nozaki",
+  "affiliation": {
+    "name": "Hyogo University of Health Science",
+    "address": " Hyogo University of Health Science, School of Rehabilitation, Japan"
+  }
+}
+
+
+
+# here is the original author list
+{
+  "x-surname": "Nozaki",
+  "name": "Nozaki, S.",
+  "x-given-names": "S.",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "affiliated": {
+    "ref": "@pmid:21574523:affiliation:A1"
+  },
+  "type": "Person",
+  "id": "pmid:21574523:contributor:1"
+},
+{
+  "x-surname": "Kawai",
+  "name": "Kawai, M.",
+  "x-given-names": "M.",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "affiliated": {
+    "ref": "@pmid:21574523:affiliation:A2"
+  },
+  "type": "Person",
+  "id": "pmid:21574523:contributor:2"
+},
+{
+  "x-surname": "Shimoyama",
+  "name": "Shimoyama, R.",
+  "x-given-names": "R.",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "affiliated": {
+    "ref": "@pmid:21574523:affiliation:A3"
+  },
+  "type": "Person",
+  "id": "pmid:21574523:contributor:3"
+},
+{
+  "x-surname": "Futamura",
+  "name": "Futamura, N.",
+  "x-given-names": "N.",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "affiliated": {
+    "ref": "@pmid:21574523:affiliation:A4"
+  },
+  "type": "Person",
+  "id": "pmid:21574523:contributor:4"
+},
+{
+  "x-surname": "Matsumura",
+  "name": "Matsumura, T.",
+  "x-given-names": "T.",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "affiliated": {
+    "ref": "@pmid:21574523:affiliation:A5"
+  },
+  "type": "Person",
+  "id": "pmid:21574523:contributor:5"
+},
+{
+  "x-surname": "Adachi",
+  "name": "Adachi, K.",
+  "x-given-names": "K.",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "affiliated": {
+    "ref": "@pmid:21574523:affiliation:A6"
+  },
+  "type": "Person",
+  "id": "pmid:21574523:contributor:6"
+},
+{
+  "x-surname": "Kikuchi",
+  "name": "Kikuchi, Y.",
+  "x-given-names": "Y.",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "affiliated": {
+    "ref": "@pmid:21574523:affiliation:A7"
+  },
+  "type": "Person",
+  "id": "pmid:21574523:contributor:7"
+},
+
+
+# here are the organisations
+{
+  "type": "Organization",
+  "id": "pmid:21574523:affiliation:A1",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "address": " Hyogo University of Health Science, School of Rehabilitation, Japan;"
+},
+{
+  "type": "Organization",
+  "id": "pmid:21574523:affiliation:A2",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "address": " Higashisaitama National Hospital, Department of Neurology, Japan;"
+},
+{
+  "type": "Organization",
+  "id": "pmid:21574523:affiliation:A3",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "address": " Matsue Medical Center, Department of Neurology, Japan;"
+},
+{
+  "type": "Organization",
+  "id": "pmid:21574523:affiliation:A4",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "address": " Hyogochuo National Hospital, Department of Neurology, Japan;"
+},
+{
+  "type": "Organization",
+  "id": "pmid:21574523:affiliation:A5",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "address": " Toneyama National Hospital, Department of Neurology, Japan;"
+},
+{
+  "type": "Organization",
+  "id": "pmid:21574523:affiliation:A6",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "address": " Tokushima National Hospital, Department of Neurology, Japan;"
+},
+{
+  "type": "Organization",
+  "id": "pmid:21574523:affiliation:A7",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "address": " Nagasaki University Graduate School of Biomedical Science, Japan"
+},
+
+
+# here are the citations and then their authors and so on
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Botteron S Verdebout CM Jeannet PY Orofacial dysfunction in Duchenne muscular dystrophy Arch Oral Biol 2009 54 26 31 18805518",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R01:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R01:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R01:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R01:journal"
+  },
+  "title": "Orofacial dysfunction\nin Duchenne muscular dystrophy",
+  "pageStart": "26",
+  "volume": "54",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "26--31",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2009",
+  "pmid": "18805518",
+  "pageEnd": "31",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R01"
+},
+{
+  "x-nlm-ta": "Arch Oral Biol",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R01:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Botteron",
+  "name": "Botteron, S",
+  "x-given-names": "S",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R01:contributor:1"
+},
+{
+  "x-surname": "Verdebout",
+  "name": "Verdebout, CM",
+  "x-given-names": "CM",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R01:contributor:2"
+},
+{
+  "x-surname": "Jeannet",
+  "name": "Jeannet, PY",
+  "x-given-names": "PY",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R01:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Nozaki S Umaki Y Sugishita S Videofluorographic assessment of swallowing function in patients with Duchenne muscular dystrophy Rinsho Shinkeigaku 2007 47 407 412 17710883",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R02:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R02:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R02:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R02:journal"
+  },
+  "title": "Videofluorographic assessment\nof swallowing function in patients with Duchenne muscular\ndystrophy",
+  "pageStart": "407",
+  "volume": "47",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "407--412",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2007",
+  "pmid": "17710883",
+  "pageEnd": "412",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R02"
+},
+{
+  "x-nlm-ta": "Rinsho Shinkeigaku",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R02:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Nozaki",
+  "name": "Nozaki, S",
+  "x-given-names": "S",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R02:contributor:1"
+},
+{
+  "x-surname": "Umaki",
+  "name": "Umaki, Y",
+  "x-given-names": "Y",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R02:contributor:2"
+},
+{
+  "x-surname": "Sugishita",
+  "name": "Sugishita, S",
+  "x-given-names": "S",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R02:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Hanayama K Liu M Higuchi Y Dysphagia in patients with Duchenne muscular dystrophy evaluated with a questionnaire and videofluorography Disabil Rehabil 2008 30 517 522 17852269",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R03:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R03:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R03:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R03:journal"
+  },
+  "title": "Dysphagia in patients with\nDuchenne muscular dystrophy evaluated with a questionnaire and\nvideofluorography",
+  "pageStart": "517",
+  "volume": "30",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "517--522",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2008",
+  "pmid": "17852269",
+  "pageEnd": "522",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R03"
+},
+{
+  "x-nlm-ta": "Disabil Rehabil",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R03:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Hanayama",
+  "name": "Hanayama, K",
+  "x-given-names": "K",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R03:contributor:1"
+},
+{
+  "x-surname": "Liu",
+  "name": "Liu, M",
+  "x-given-names": "M",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R03:contributor:2"
+},
+{
+  "x-surname": "Higuchi",
+  "name": "Higuchi, Y",
+  "x-given-names": "Y",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R03:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Leopold NA Kagel MC Swallowing, ingestion and dysphagia Arch Phys Med Rehabil 1983 64 371 373 6882177",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R04:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R04:contributor:2"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R04:journal"
+  },
+  "title": "Swallowing, ingestion and dysphagia",
+  "pageStart": "371",
+  "volume": "64",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "371--373",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1983",
+  "pmid": "6882177",
+  "pageEnd": "373",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R04"
+},
+{
+  "x-nlm-ta": "Arch Phys Med Rehabil",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R04:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Leopold",
+  "name": "Leopold, NA",
+  "x-given-names": "NA",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R04:contributor:1"
+},
+{
+  "x-surname": "Kagel",
+  "name": "Kagel, MC",
+  "x-given-names": "MC",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R04:contributor:2"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Ueki K Nakagawa K Yamamoto E Bite force and maxillofacial morphology in patients with Duchenne-type muscular dystrophy J Oral Maxillofac Surg 2007 65 34 39 17174761",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R05:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R05:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R05:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R05:journal"
+  },
+  "title": "Bite force and maxillofacial\nmorphology in patients with Duchenne-type muscular dystrophy",
+  "pageStart": "34",
+  "volume": "65",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "34--39",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2007",
+  "pmid": "17174761",
+  "pageEnd": "39",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R05"
+},
+{
+  "x-nlm-ta": "J\nOral Maxillofac Surg",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R05:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Ueki",
+  "name": "Ueki, K",
+  "x-given-names": "K",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R05:contributor:1"
+},
+{
+  "x-surname": "Nakagawa",
+  "name": "Nakagawa, K",
+  "x-given-names": "K",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R05:contributor:2"
+},
+{
+  "x-surname": "Yamamoto",
+  "name": "Yamamoto, E",
+  "x-given-names": "E",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R05:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Matsuyuki T Kitahara T Nakashima A Developmental changes in craniofacial morphology in subjects with Duchenne muscular dystrophy Eur J Orthod 2006 28 42 50 16278226",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R06:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R06:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R06:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R06:journal"
+  },
+  "title": "Developmental changes in\ncraniofacial morphology in subjects with Duchenne muscular dystrophy",
+  "pageStart": "42",
+  "volume": "28",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "42--50",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2006",
+  "pmid": "16278226",
+  "pageEnd": "50",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R06"
+},
+{
+  "x-nlm-ta": "Eur J Orthod",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R06:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Matsuyuki",
+  "name": "Matsuyuki, T",
+  "x-given-names": "T",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R06:contributor:1"
+},
+{
+  "x-surname": "Kitahara",
+  "name": "Kitahara, T",
+  "x-given-names": "T",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R06:contributor:2"
+},
+{
+  "x-surname": "Nakashima",
+  "name": "Nakashima, A",
+  "x-given-names": "A",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R06:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Matsumoto S Morinushi T Ogura Ogura Time dependent changes of variables associated with malocclusion in patients with Duchenne muscular dystrophy J Clin Pediatr Dent 2002 27 53 61 12413173",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R07:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R07:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R07:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R07:journal"
+  },
+  "title": "Time dependent changes of\nvariables associated with malocclusion in patients with Duchenne\nmuscular dystrophy",
+  "pageStart": "53",
+  "volume": "27",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "53--61",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2002",
+  "pmid": "12413173",
+  "pageEnd": "61",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R07"
+},
+{
+  "x-nlm-ta": "J Clin Pediatr Dent",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R07:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Matsumoto",
+  "name": "Matsumoto, S",
+  "x-given-names": "S",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R07:contributor:1"
+},
+{
+  "x-surname": "Morinushi",
+  "name": "Morinushi, T",
+  "x-given-names": "T",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R07:contributor:2"
+},
+{
+  "x-surname": "Ogura",
+  "name": "Ogura, Ogura",
+  "x-given-names": "Ogura",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R07:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Friedman M The use of ranks to avoid the assumption of normality implicit in the analysis of variance J Amer Statist Assoc 1937 32 675 701",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R08:contributor:1"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R08:journal"
+  },
+  "title": "The use of ranks to avoid the assumption of normality\nimplicit in the analysis of variance",
+  "pageEnd": "701",
+  "volume": "32",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "675--701",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1937",
+  "pageStart": "675",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R08"
+},
+{
+  "x-nlm-ta": "J Amer Statist Assoc",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R08:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Friedman",
+  "name": "Friedman, M",
+  "x-given-names": "M",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R08:contributor:1"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Scheff\u00e9 H A method for judging all contrasts in the analysis of covariance Biometrika 1953 40 87 104",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R09:contributor:1"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R09:journal"
+  },
+  "title": "A method for judging all contrasts in the analysis of\ncovariance",
+  "pageEnd": "104",
+  "volume": "40",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "87--104",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1953",
+  "pageStart": "87",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R09"
+},
+{
+  "x-nlm-ta": "Biometrika",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R09:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Scheff\u00e9",
+  "name": "Scheff\u00e9, H",
+  "x-given-names": "H",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R09:contributor:1"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Kiliaridis S Katsaros C The effects of myotonic dystrophy and Duchenne muscular dystrophy on the orofacial muscles and dentofacial morphology Acta Odontol Scand 1998 56 369 374 10066119",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R10:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R10:contributor:2"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R10:journal"
+  },
+  "title": "The effects of myotonic dystrophy and\nDuchenne muscular dystrophy on the orofacial muscles and dentofacial\nmorphology",
+  "pageStart": "369",
+  "volume": "56",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "369--374",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1998",
+  "pmid": "10066119",
+  "pageEnd": "374",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R10"
+},
+{
+  "x-nlm-ta": "Acta Odontol Scand",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R10:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Kiliaridis",
+  "name": "Kiliaridis, S",
+  "x-given-names": "S",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R10:contributor:1"
+},
+{
+  "x-surname": "Katsaros",
+  "name": "Katsaros, C",
+  "x-given-names": "C",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R10:contributor:2"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Morel-Verdebout C Botteron S Kiliaridis S Dentofacial characteristics of growing patients with Duchenne muscular dystrophy: a morphological study Eur J Orthod 2007 29 500 507 17974540",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R11:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R11:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R11:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R11:journal"
+  },
+  "title": "Dentofacial characteristics\nof growing patients with Duchenne muscular dystrophy: a\nmorphological study",
+  "pageStart": "500",
+  "volume": "29",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "500--507",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2007",
+  "pmid": "17974540",
+  "pageEnd": "507",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R11"
+},
+{
+  "x-nlm-ta": "Eur J Orthod",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R11:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Morel-Verdebout",
+  "name": "Morel-Verdebout, C",
+  "x-given-names": "C",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R11:contributor:1"
+},
+{
+  "x-surname": "Botteron",
+  "name": "Botteron, S",
+  "x-given-names": "S",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R11:contributor:2"
+},
+{
+  "x-surname": "Kiliaridis",
+  "name": "Kiliaridis, S",
+  "x-given-names": "S",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R11:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Symons AL Townsend GC Hughes TE Dental characteristics of patients with Duchenne muscular dystrophy ASDC J Dent Child 2002 69 277 283 12613312",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R12:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R12:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R12:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R12:journal"
+  },
+  "title": "Dental characteristics of\npatients with Duchenne muscular dystrophy",
+  "pageStart": "277",
+  "volume": "69",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "277--283",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2002",
+  "pmid": "12613312",
+  "pageEnd": "283",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R12"
+},
+{
+  "x-nlm-ta": "ASDC J Dent Child",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R12:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Symons",
+  "name": "Symons, AL",
+  "x-given-names": "AL",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R12:contributor:1"
+},
+{
+  "x-surname": "Townsend",
+  "name": "Townsend, GC",
+  "x-given-names": "GC",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R12:contributor:2"
+},
+{
+  "x-surname": "Hughes",
+  "name": "Hughes, TE",
+  "x-given-names": "TE",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R12:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Warren CG Lehmann JF Koblanski JN Elongation of rat tail tendon: effect of load and temperature Arch Phys Med Rehabil 1971 52 465 474 5116032",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R13:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R13:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R13:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R13:journal"
+  },
+  "title": "Elongation of rat tail\ntendon: effect of load and temperature",
+  "pageStart": "465",
+  "volume": "52",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "465--474",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1971",
+  "pmid": "5116032",
+  "pageEnd": "474",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R13"
+},
+{
+  "x-nlm-ta": "Arch Phys Med Rehabil",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R13:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Warren",
+  "name": "Warren, CG",
+  "x-given-names": "CG",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R13:contributor:1"
+},
+{
+  "x-surname": "Lehmann",
+  "name": "Lehmann, JF",
+  "x-given-names": "JF",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R13:contributor:2"
+},
+{
+  "x-surname": "Koblanski",
+  "name": "Koblanski, JN",
+  "x-given-names": "JN",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R13:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Petrofsky JS Laymon M Heat transfer to deep tissue: the effect of body fat and heating modality J Med Eng Technol 2009 33 337 348 19440919",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R14:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R14:contributor:2"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R14:journal"
+  },
+  "title": "Heat transfer to deep tissue: the effect\nof body fat and heating modality",
+  "pageStart": "337",
+  "volume": "33",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "337--348",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2009",
+  "pmid": "19440919",
+  "pageEnd": "348",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R14"
+},
+{
+  "x-nlm-ta": "J Med Eng Technol",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R14:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Petrofsky",
+  "name": "Petrofsky, JS",
+  "x-given-names": "JS",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R14:contributor:1"
+},
+{
+  "x-surname": "Laymon",
+  "name": "Laymon, M",
+  "x-given-names": "M",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R14:contributor:2"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Lehmann J Masock A Warren C Effect of therapeutic temperatures on tendon extensibility Arch Phys Med Rehabil 1970 51 481 487 5448112",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R15:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R15:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R15:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R15:journal"
+  },
+  "title": "Effect of therapeutic temperatures\non tendon extensibility",
+  "pageStart": "481",
+  "volume": "51",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "481--487",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1970",
+  "pmid": "5448112",
+  "pageEnd": "487",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R15"
+},
+{
+  "x-nlm-ta": "Arch Phys Med Rehabil",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R15:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Lehmann",
+  "name": "Lehmann, J",
+  "x-given-names": "J",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R15:contributor:1"
+},
+{
+  "x-surname": "Masock",
+  "name": "Masock, A",
+  "x-given-names": "A",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R15:contributor:2"
+},
+{
+  "x-surname": "Warren",
+  "name": "Warren, C",
+  "x-given-names": "C",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R15:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Lee GP Ng GY Effects of stretching and heat treatment on hamstring extensibility in children with severe mental retardation and hypertonia Clin Rehabil 2008 22 771 779 18728130",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R16:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R16:contributor:2"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R16:journal"
+  },
+  "title": "Effects of stretching and heat treatment on hamstring\nextensibility in children with severe mental retardation and\nhypertonia",
+  "pageStart": "771",
+  "volume": "22",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "771--779",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2008",
+  "pmid": "18728130",
+  "pageEnd": "779",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R16"
+},
+{
+  "x-nlm-ta": "Clin Rehabil",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R16:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Lee",
+  "name": "Lee, GP",
+  "x-given-names": "GP",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R16:contributor:1"
+},
+{
+  "x-surname": "Ng",
+  "name": "Ng, GY",
+  "x-given-names": "GY",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R16:contributor:2"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Fountain FP Gersten JW Sengir O Decrease in muscle spasm produced by ultrasound, hot packs, and infrared radiation Arch Phys Med Rehabil 1960 41 293 298 13824160",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R17:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R17:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R17:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R17:journal"
+  },
+  "title": "Decrease in muscle spasm produced\nby ultrasound, hot packs, and infrared radiation",
+  "pageStart": "293",
+  "volume": "41",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "293--298",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1960",
+  "pmid": "13824160",
+  "pageEnd": "298",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R17"
+},
+{
+  "x-nlm-ta": "Arch Phys\nMed Rehabil",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R17:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Fountain",
+  "name": "Fountain, FP",
+  "x-given-names": "FP",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R17:contributor:1"
+},
+{
+  "x-surname": "Gersten",
+  "name": "Gersten, JW",
+  "x-given-names": "JW",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R17:contributor:2"
+},
+{
+  "x-surname": "Sengir",
+  "name": "Sengir, O",
+  "x-given-names": "O",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R17:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Fischer M Sch\u00e4fer SS Temperature effects on the discharge frequency of primary and secondary endings of isolated cat muscle spindles recorded under a ramp-and-hold stretch Brain Res 1999 840 1 15 10517947",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R18:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R18:contributor:2"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R18:journal"
+  },
+  "title": "Temperature effects on the discharge frequency\nof primary and secondary endings of isolated cat muscle\nspindles recorded under a ramp-and-hold stretch",
+  "pageStart": "1",
+  "volume": "840",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "1--15",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1999",
+  "pmid": "10517947",
+  "pageEnd": "15",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R18"
+},
+{
+  "x-nlm-ta": "Brain Res",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R18:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Fischer",
+  "name": "Fischer, M",
+  "x-given-names": "M",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R18:contributor:1"
+},
+{
+  "x-surname": "Sch\u00e4fer",
+  "name": "Sch\u00e4fer, SS",
+  "x-given-names": "SS",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R18:contributor:2"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Sakaguchi A Ookawara T Shimada T Inhibitory effect of a combination of thermotherapy with exercise therapy on progression of muscle atrophy J Physical Therapy Science 2010 22 17 22",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R19:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R19:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R19:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R19:journal"
+  },
+  "title": "Inhibitory effect of a combination\nof thermotherapy with exercise therapy on progression of\nmuscle atrophy",
+  "pageEnd": "22",
+  "volume": "22",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "17--22",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2010",
+  "pageStart": "17",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R19"
+},
+{
+  "x-nlm-ta": "J Physical Therapy Science",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R19:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Sakaguchi",
+  "name": "Sakaguchi, A",
+  "x-given-names": "A",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R19:contributor:1"
+},
+{
+  "x-surname": "Ookawara",
+  "name": "Ookawara, T",
+  "x-given-names": "T",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R19:contributor:2"
+},
+{
+  "x-surname": "Shimada",
+  "name": "Shimada, T",
+  "x-given-names": "T",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R19:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Horowitz M Robinson SD Heat shock proteins and the heat shock response during hyperthermia and its modulation by altered physiological conditions Prog Brain Res 2007 162 433 446 17645931",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R20:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R20:contributor:2"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R20:journal"
+  },
+  "title": "Heat shock proteins and the heat shock\nresponse during hyperthermia and its modulation by altered physiological\nconditions",
+  "pageStart": "433",
+  "volume": "162",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "433--446",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2007",
+  "pmid": "17645931",
+  "pageEnd": "446",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R20"
+},
+{
+  "x-nlm-ta": "Prog Brain Res",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R20:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Horowitz",
+  "name": "Horowitz, M",
+  "x-given-names": "M",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R20:contributor:1"
+},
+{
+  "x-surname": "Robinson",
+  "name": "Robinson, SD",
+  "x-given-names": "SD",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R20:contributor:2"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Maglara AA Vasilaki A Jackson MJ Damage to developing mouse skeletal muscle myotubes in culture: protective effect of heat shock proteins J Physiol 2003 548 837 846 12598587",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R21:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R21:contributor:2"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R21:contributor:3"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R21:journal"
+  },
+  "title": "Damage to developing\nmouse skeletal muscle myotubes in culture: protective effect of heat\nshock proteins",
+  "pageStart": "837",
+  "volume": "548",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "837--846",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "2003",
+  "pmid": "12598587",
+  "pageEnd": "846",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R21"
+},
+{
+  "x-nlm-ta": "J Physiol",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R21:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Maglara",
+  "name": "Maglara, AA",
+  "x-given-names": "AA",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R21:contributor:1"
+},
+{
+  "x-surname": "Vasilaki",
+  "name": "Vasilaki, A",
+  "x-given-names": "A",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R21:contributor:2"
+},
+{
+  "x-surname": "Jackson",
+  "name": "Jackson, MJ",
+  "x-given-names": "MJ",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R21:contributor:3"
+},
+{
+  "x-fabio-type": "JournalArticle",
+  "citation": "Eckardt L Harzer W Facial structure and functional findings in patients with progressive muscular dystrophy (Duchenne) Am J Orthod Dentofacial Orthop 1996 110 185 190 8760845",
+  "author": [
+    {
+      "ref": "@pmid:21574523:reference:R22:contributor:1"
+    },
+    {
+      "ref": "@pmid:21574523:reference:R22:contributor:2"
+    }
+  ],
+  "journal": {
+    "ref": "@pmid:21574523:reference:R22:journal"
+  },
+  "title": "Facial structure and functional findings in\npatients with progressive muscular dystrophy (Duchenne)",
+  "pageStart": "185",
+  "volume": "110",
+  "x-source-type": "pmc_oa_reference",
+  "pages": "185--190",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "year": "1996",
+  "pmid": "8760845",
+  "pageEnd": "190",
+  "type": "Article",
+  "id": "pmid:21574523:reference:R22"
+},
+{
+  "x-nlm-ta": "Am J\nOrthod Dentofacial Orthop",
+  "type": "Journal",
+  "id": "pmid:21574523:reference:R22:journal",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz"
+},
+{
+  "x-surname": "Eckardt",
+  "name": "Eckardt, L",
+  "x-given-names": "L",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R22:contributor:1"
+},
+{
+  "x-surname": "Harzer",
+  "name": "Harzer, W",
+  "x-given-names": "W",
+  "x-name-style": "western",
+  "x-source-url": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/96/f2/Acta_Myol_2010_Dec_29(3)_392-397.tar.gz",
+  "type": "Person",
+  "id": "pmid:21574523:reference:R22:contributor:2"
+}
