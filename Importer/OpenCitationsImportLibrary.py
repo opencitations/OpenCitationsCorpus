@@ -13,7 +13,7 @@ import os
 import time
 from datetime import date, datetime, timedelta
 from oaipmh.client import Client
-from oaipmh.metadata import MetadataRegistry, oai_dc_reader
+from oaipmh.metadata import MetadataRegistry, MetadataReader#, oai_dc_reader
 
 
 class OAIImporter:
@@ -22,6 +22,43 @@ class OAIImporter:
     METADATA_PREFIX_PMC_FM = 'pmc_fm'
     METADATA_PREFIX_PMC = 'pmc'
 
+    METADATA_READER_OAI_DC = MetadataReader(
+        fields={
+        'title':       ('textList', 'oai_dc:dc/dc:title/text()'),
+        'creator':     ('textList', 'oai_dc:dc/dc:creator/text()'),
+        'subject':     ('textList', 'oai_dc:dc/dc:subject/text()'),
+        'description': ('textList', 'oai_dc:dc/dc:description/text()'),
+        'publisher':   ('textList', 'oai_dc:dc/dc:publisher/text()'),
+        'contributor': ('textList', 'oai_dc:dc/dc:contributor/text()'),
+        'date':        ('textList', 'oai_dc:dc/dc:date/text()'),
+        'type':        ('textList', 'oai_dc:dc/dc:type/text()'),
+        'format':      ('textList', 'oai_dc:dc/dc:format/text()'),
+        'identifier':  ('textList', 'oai_dc:dc/dc:identifier/text()'),
+        'source':      ('textList', 'oai_dc:dc/dc:source/text()'),
+        'language':    ('textList', 'oai_dc:dc/dc:language/text()'),
+        'relation':    ('textList', 'oai_dc:dc/dc:relation/text()'),
+        'coverage':    ('textList', 'oai_dc:dc/dc:coverage/text()'),
+        'rights':      ('textList', 'oai_dc:dc/dc:rights/text()')
+        },
+        namespaces={
+        'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+        'dc' : 'http://purl.org/dc/elements/1.1/'}
+        )
+
+    METADATA_READER_PMC_FM = MetadataReader(
+        fields={
+        'title':       ('text', 'pmc:article/pmc:front/pmc:article-meta/pmc:title-group/pmc:article-title/text()'),
+        'contrib' :    ('textList', 'pmc:article/pmc:front/pmc:article-meta/pmc:contrib-group/pmc:contrib/pmc:name/pmc:surname/text()'),
+
+        'doi':       ('text', 'pmc:article/pmc:front/pmc:article-meta/pmc:article-id[@pub-id-type="doi"]/text()')
+        },
+        namespaces={
+        'pmc': 'http://dtd.nlm.nih.gov/2.0/xsd/archivearticle',
+        'xlink': 'http://www.w3.org/1999/xlink',
+        'mml' : 'http://www.w3.org/1998/Math/MathML',
+        'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+        )
+
     def run(self):
         print "Importing from: %s" % self.uri
         print "From date: %s" % self.from_date
@@ -29,7 +66,8 @@ class OAIImporter:
         print "Delta months: %s" % self.delta_months
 
         registry = MetadataRegistry()
-        registry.registerReader(self.metadata_prefix, oai_dc_reader) #CHANGE DEPENDING ON PREFIX
+        registry.registerReader(self.metadata_prefix, self.metadata_reader)
+
         client = Client(self.uri, registry)
         identity = client.identify()
 
@@ -47,21 +85,23 @@ class OAIImporter:
         #client.getMetadataRegistry().registerReader('oai_dc', oai_dc_reader)
 
         start = time.time()
-        for (current_date, next_date) in self.loop_months():
-            print "current_date: %s, next_date: %s" % (current_date, next_date)
+        #for (current_date, next_date) in self.loop_months():
+            #print "current_date: %s, next_date: %s" % (current_date, next_date)
 
             # get identifiers
-            identifiers = list(self.get_identifiers(client, current_date, next_date))
-            self.print_identifiers(identifiers)
+            #identifiers = list(self.get_identifiers(client, current_date, next_date))
+            #self.print_identifiers(identifiers)
             
             # get records
-            try:
-                records = list(self.get_records(client, current_date, next_date))
-            except:
-                print "failed receiving records!"
-                continue
-            self.print_records(records, max_recs = 2)
-            
+            #try:
+            #    records = list(self.get_records(client, current_date, next_date))
+            #except:
+            #    print "failed receiving records!"
+            #    continue
+            #self.print_records(records, max_recs = 2)
+
+        record = self.get_record(client)
+        self.print_record(record)
 
         print 'Total Time spent: %d seconds' % (time.time() - start)
 
@@ -130,6 +170,24 @@ class OAIImporter:
 
         return records
 
+
+
+    def get_record(self, client):
+        print '****** Getting 1 record ******'
+
+        chunk_time = time.time()
+        record = list(client.getRecord(
+                identifier = 'oai:pubmedcentral.nih.gov:29057',
+                metadataPrefix = self.metadata_prefix
+                ))
+
+        d_time = time.time() - chunk_time
+        print 'recieved in %d seconds' % (d_time )
+        chunk_time = time.time()
+
+        return record
+
+
     def print_records(self, records, max_recs = 2):
         print '****** Printing data ******'
         # for large collections this breaks
@@ -150,6 +208,20 @@ class OAIImporter:
             if count > max_recs: break
             count += 1
 
+
+    def print_record(self, record):
+        header, metadata, about = record
+        map = metadata.getMap()
+        print 'Header identifier: %s' % header.identifier()
+        print 'Header datestamp: %s' % header.datestamp()
+        print 'Header setSpec: %s' % header.setSpec()
+        print 'Header isDeleted: %s' % header.isDeleted()
+        print "KEYS+VALUES"
+        for key, value in map.items():
+            print '  ', key, ':', value
+        print ""
+
+
     def print_identifiers(self, identifiers, max_recs = 20):
         print '****** Printing identifiers ******'
         # for large collections this breaks
@@ -168,4 +240,5 @@ class OAIImporter:
         self.until_date = datetime.strptime(until_date,"%Y-%m-%d")
         self.delta_months = delta_months
         self.metadata_prefix = metadata_prefix
+        self.metadata_reader = self.METADATA_READER_PMC_FM
 
