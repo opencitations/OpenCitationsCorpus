@@ -12,6 +12,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+*.pyc
 
 # External tool builders
 .externalToolBuilders/
@@ -24,6 +25,7 @@ local.properties
 
 # PDT-specific
 .buildpath
+data/*
 
 .DS_Store
 
