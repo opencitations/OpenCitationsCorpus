@@ -25,3 +25,7 @@ local.properties
 # PDT-specific
 .buildpath
 
+# marks local test data, just in case I try to push 50gb to the repo...
+pipeline/pmcoa/*
+pipeline/medline/*
+pipeline/workdir/*
