@@ -12,6 +12,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+*.pyc
 
 # External tool builders
 .externalToolBuilders/
@@ -24,8 +25,15 @@ local.properties
 
 # PDT-specific
 .buildpath
+data/*
 
 # marks local test data, just in case I try to push 50gb to the repo...
 pipeline/pmcoa/*
 pipeline/medline/*
 pipeline/workdir/*
+
+.DS_Store
+
+ImportArxiv/MetaImport.CL/MetaHarvester.py
+
+ImportArxiv/BucketControl/extraction_queue.txt
