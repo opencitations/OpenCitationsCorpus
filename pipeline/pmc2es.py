@@ -12,7 +12,7 @@
 # parser = pmc2es.PMC2ES()
 # parser.do()
 
-import requests, json, os
+import requests, json, os, sys
 import threading, Queue
 from process import Process
 import config
@@ -60,19 +60,30 @@ class PMC2ES(object):
 
     # prep the index to receive files
     def _prep_index(self):
+        # check ES is reachable
+        test = 'http://' + str( config.es_url ).lstrip('http://').rstrip('/')
+        try:
+            hi = requests.get(test)
+            if hi.status_code != 200:
+                print "there is no elasticsearch index available at " + test + ". aborting."
+                sys.exit()
+        except:
+            print "there is no elasticsearch index available at " + test + ". aborting."
+            sys.exit()
+
         print "prepping the index"
         # delete the index if requested - leaves the database intact
         if config.es_delete_indextype:
             print "deleting the index type " + config.es_indextype
-            r = requests.delete(config.es_target)
-            print r.status_code
+            d = requests.delete(config.es_target)
+            print d.status_code
 
         # check to see if index exists - in which case it will have a mapping even if it is empty, create if not
         dbaddr = 'http://' + str( config.es_url ).lstrip('http://').rstrip('/') + '/' + config.es_index
         if requests.get(dbaddr + '/_mapping').status_code == 404:
             print "creating the index"
-            r = requests.post(dbaddr)
-            print r.status_code
+            c = requests.post(dbaddr)
+            print c.status_code
 
         # check for mapping and create one if provided and does not already exist
         # this will automatically create the necessary index type if it is not already there
@@ -80,8 +91,8 @@ class PMC2ES(object):
             t = config.es_target + '_mapping' 
             if requests.get(t).status_code == 404:
                 print "putting the index type mapping"
-                r = requests.put(t, data=json.dumps(config.es_mapping) )
-                print r.status_code
+                p = requests.put(t, data=json.dumps(config.es_mapping) )
+                print p.status_code
 
 
 if __name__ == "__main__":
