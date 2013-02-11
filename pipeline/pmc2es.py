@@ -96,6 +96,11 @@ class PMC2ES(object):
 
 
 if __name__ == "__main__":
+    from datetime import datetime
+    started = datetime.now()
+    print started
     parser = PMC2ES()
     parser.do()
-
+    ended = datetime.now()
+    print ended
+    print ended - started
