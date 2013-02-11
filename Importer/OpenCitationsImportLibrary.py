@@ -14,6 +14,44 @@ import time
 from datetime import date, datetime, timedelta
 from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry, MetadataReader#, oai_dc_reader
+from lxml import etree
+from lxml.etree import SubElement
+from oaipmh import common
+
+class MetadataReaderPMCFM(object):
+    """A metadata reader for PubMedCentral Front Matter data.
+    """
+    def __init__(self, fields, namespaces=None):
+        self._fields = fields
+        self._namespaces = namespaces or {}
+
+    def __call__(self, element):
+        map = {}
+
+        # create XPathEvaluator for this element
+        xpath_evaluator = etree.XPathEvaluator(element, 
+                                               namespaces=self._namespaces)
+        
+        e = xpath_evaluator.evaluate
+        # now extra field info according to xpath expr
+        for field_name, (field_type, expr) in self._fields.items():
+            if field_type == 'bytes':
+                value = str(e(expr))
+            elif field_type == 'bytesList':
+                value = [str(item) for item in e(expr)]
+            elif field_type == 'text':
+                # make sure we get back unicode strings instead
+                # of lxml.etree._ElementUnicodeResult objects.
+                value = unicode(e(expr))
+            elif field_type == 'textList':
+                # make sure we get back unicode strings instead
+                # of lxml.etree._ElementUnicodeResult objects.
+                value = [unicode(v) for v in e(expr)]
+            else:
+                raise Error, "Unknown field type: %s" % field_type
+            map[field_name] = value
+        return common.Metadata(map)
+
 
 
 class OAIImporter:
@@ -45,7 +83,7 @@ class OAIImporter:
         'dc' : 'http://purl.org/dc/elements/1.1/'}
         )
 
-    METADATA_READER_PMC_FM = MetadataReader(
+    METADATA_READER_PMC_FM = MetadataReaderPMCFM(
         fields={
         'title':       ('text', 'pmc:article/pmc:front/pmc:article-meta/pmc:title-group/pmc:article-title/text()'),
         'contrib' :    ('textList', 'pmc:article/pmc:front/pmc:article-meta/pmc:contrib-group/pmc:contrib/pmc:name/pmc:surname/text()'),
