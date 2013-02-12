@@ -37,3 +37,5 @@ pipeline/workdir/*
 ImportArxiv/MetaImport.CL/MetaHarvester.py
 
 ImportArxiv/BucketControl/extraction_queue.txt
+
+Importer/Parse.py
