@@ -60,6 +60,9 @@ class MetadataReaderPMCFM(object):
         # front
         front = metadata_element.find("nlmaa:article/nlmaa:front", self._namespaces)
 
+        # back
+        back = metadata_element.find("nlmaa:article/nlmaa:back", self._namespaces)
+
         # journal meta
         journal_meta = front.find("nlmaa:journal-meta", self._namespaces)
         
@@ -161,6 +164,44 @@ class MetadataReaderPMCFM(object):
                         map["author"].append(entity)
                     if contrib.get("contrib-type") == "editor":
                         map["editor"].append(entity)
+
+        if back is not None:
+            acknowledgements = back.findall("nlmaa:ack/nlmaa:sec/nlmaa:p", self._namespaces)
+            if acknowledgements:
+                map["acknowledgement"] = []
+                for acknowledgement in acknowledgements:
+                    map["acknowledgement"].append(acknowledgement.text)
+            
+            conflicts = back.findall("nlmaa:fn-group/nlmaa:fn/nlmaa:p", self._namespaces)
+            if conflicts:
+                map["conflict"] = []
+                for conflict in conflicts:
+                    map["conflict"].append(conflict.text)
+                    
+            refs = back.findall("nlmaa:ref-list/nlmaa:ref", self._namespaces)
+            if refs:
+                map["citation"] = []
+                for ref in refs:
+                    entity = {}
+                    self.set_map_with_element_text(entity, "label", ref, "nlmaa:label")
+                    
+                    #Three different ways to cite articles. Check with Mark.
+                    citation = ref.find("nlmaa:mixed-citation", self._namespaces)
+                    if citation is None:
+                        citation = ref.find("nlmaa:element-citation", self._namespaces)
+                    if citation is None:
+                        citation = ref.find("nlmaa:citation", self._namespaces)
+                    
+                    if citation is not None:
+                        self.set_map_with_element_text(entity, "title", citation, "nlmaa:article-title")
+                        pub_ids = citation.findall("nlmaa:pub-id", self._namespaces)
+                        if pub_ids:
+                            entity["identifier"] = []
+                            for pub_id in pub_ids:
+                                entity["identifier"].append({"type": pub_id.get('pub-id-type'), "id": pub_id.text})
+                    map["citation"].append(entity)
+
+
 
 
         return common.Metadata(map)
@@ -319,7 +360,7 @@ class OAIImporter:
 
         chunk_time = time.time()
         record = list(client.getRecord(
-                identifier = 'oai:pubmedcentral.nih.gov:29057',
+                identifier = 'oai:pubmedcentral.nih.gov:3081214',
                 metadataPrefix = self.metadata_prefix
                 ))
 
