@@ -19,7 +19,7 @@ def main():
 	#arxiv.run()
 	
 	pmc_oa = OpenCitationsImportLibrary.OAIImporter("http://www.pubmedcentral.nih.gov/oai/oai.cgi", 
-		"2012-01-02", "2012-01-03", 1, OpenCitationsImportLibrary.OAIImporter.METADATA_PREFIX_PMC_FM)
+		"2012-01-02", "2012-01-03", 1, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_PMC)
 	pmc_oa.run()
 
 	pass
