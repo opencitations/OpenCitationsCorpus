@@ -21,9 +21,13 @@ batchsize = 5000 # size of batches to bundle and send to the index. If zero they
 es_url = "localhost:9200" # where is the ES index?
 es_index = "test" # what is the name of the elasticsearch database to use?
 es_indextype = "record" # what is the name of the index object type to save into?
+es_synchroniser_config_type = 'synchroniser_config'
 
 es_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
 es_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_indextype.lstrip('/').rstrip('/') + '/'
+
+es_synchroniser_config_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
+es_synchroniser_config_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_synchroniser_config_type.lstrip('/').rstrip('/') + '/'
 
 es_prep = True # prep the index by making sure it exists and sending it a mapping before doing any uploads
 es_delete_indextype = True # wipe the specified index before starting. This only happens if prep is also true

@@ -11,12 +11,15 @@ Based on arXiv MetaHarvester by Dr Heinrich Hartmann, related-work.net,  2012
 
 import sys, os, time
 from datetime import date, datetime, timedelta
+import dateutil.parser
+from oaipmh.error import NoRecordsMatchError
 from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry, oai_dc_reader
 import MetadataReaders
 import Batch
 import Config
 import hashlib, md5
+import requests, json
 
 class OAIImporter:
 
@@ -25,18 +28,16 @@ class OAIImporter:
     METADATA_FORMAT_PMC = {"prefix": 'pmc', "reader": MetadataReaders.MetadataReaderPMC()}
 
     #default to OAI Dublin Core metadata format if note specified
-    def __init__(self, uri, from_date, until_date, delta_months = 1, metadata = METADATA_FORMAT_OAI_DC):
+    def __init__(self, uri, delta_days = 0, metadata = METADATA_FORMAT_OAI_DC):
         self.uri = uri
-        self.from_date = datetime.strptime(from_date,"%Y-%m-%d")
-        self.until_date = datetime.strptime(until_date,"%Y-%m-%d")
-        self.delta_months = delta_months
+        #self.from_date = datetime.strptime(from_date,"%Y-%m-%d")
+        #self.until_date = datetime.strptime(until_date,"%Y-%m-%d")
+        self.delta_days = delta_days
         self.metadata = metadata
+        self.es_synchroniser_config = Config.es_synchroniser_config_target + hashlib.md5(uri).hexdigest()
 
     def run(self):
         print "Importing from: %s" % self.uri
-        print "From date: %s" % self.from_date
-        print "Until date: %s" % self.until_date
-        print "Delta months: %s" % self.delta_months
 
         registry = MetadataRegistry()
         registry.registerReader(self.metadata["prefix"], self.metadata["reader"])
@@ -53,33 +54,74 @@ class OAIImporter:
 
         #ElasticSearch batcher
         batcher = Batch.Batch()
-    
 
+        synchronisation_config = self.get_synchronisation_config()
+        if False and synchronisation_config is not None and "last_synchronised" in synchronisation_config:
+            last_synchronised = dateutil.parser.parse(synchronisation_config["last_synchronised"])
+        else:
+            last_synchronised = dateutil.parser.parse("2013-01-31")
+
+        total_records = 0
+
+        print "Last synchronised to: %s" % last_synchronised.date()
+        if not (last_synchronised.date() < (date.today() - timedelta(days=1))):
+            print "Nothing to synchronise today."
+        
         start = time.time()
-        for (current_date, next_date) in self.loop_months():
-            print "current_date: %s, next_date: %s" % (current_date, next_date)
-
-            # get identifiers
-            identifiers = list(self.get_identifiers(client, current_date, next_date))
-            self.print_identifiers(identifiers)
-            
-            # get records
-            #try:
-            records = list(self.get_records(client, current_date, next_date))
-            for record in records:
-                batcher.add(self.bibify_record(record))
-            #except:
-            #    print "failed receiving records!"
-            #    continue
-            #self.print_records(records, max_recs = 2)
-
-        #record = self.get_record(client, 'oai:pubmedcentral.nih.gov:3081214')
-
+        while last_synchronised.date() < (date.today() - timedelta(days=1)):
+            start_date = last_synchronised + timedelta(days=1)
+            end_date = start_date + timedelta(days=self.delta_days)
+            number_of_records = self.synchronise_period(client, batcher, start_date, end_date)
+            last_synchronised = end_date
+            self.put_synchronisation_config(last_synchronised, number_of_records)
+            total_records += number_of_records
         
         batcher.clear()
+        time_spent = time.time() - start
+        print 'Total time spent: %d seconds' % (time_spent)
+
+        if time_spent > 0.001: # careful as its not an integer
+            print 'Total records synchronised: %i records (%d records/second)' % (total_records, (total_records/time_spent))
+        else:
+            print 'Total records synchronised: %i records' % (total_records)
+        return total_records
+    
 
 
-        print 'Total Time spent: %d seconds' % (time.time() - start)
+
+    def synchronise_period(self, client, batcher, start_date, end_date):
+        #last_synchronised = dateutil.parser.parse(synchronisation_config["last_synchronised"])
+        #start_date = last_synchronised + timedelta(days=1)
+        #end_date = start_date + timedelta(days=0) # one day at a time
+        print "Synchronising period: %s - %s" % (start_date, end_date)
+        records = list(self.get_records(client, start_date, end_date))
+        for record in records:
+            batcher.add(self.bibify_record(record))
+
+        #ids = self.get_identifiers(client, start_date, end_date)
+        #print "Found %i ids" % len(ids)
+        #self.print_identifiers(ids)
+        #self.put_synchronisation_config(end_date, len(ids))
+        return len(records)
+
+
+
+
+    def get_synchronisation_config(self):
+        print "Getting synchronisation_config for %s" % (self.uri)
+        r = requests.get(self.es_synchroniser_config)
+        if r.status_code == 404 or not r.json()["exists"]:
+            print "No synchronisation_config found"
+            return None
+        else:
+            return r.json()["_source"]
+
+
+    def put_synchronisation_config(self, last_synchronised, number_of_records):
+        print "Putting synchronisation_config for %s to %s" % (self.uri, self.es_synchroniser_config)
+        data = {'uri': self.uri, 'last_synchronised': last_synchronised.isoformat(), 'number_of_records': number_of_records}
+        r = requests.put(self.es_synchroniser_config, data=json.dumps(data))
+
 
 
 
@@ -105,6 +147,7 @@ class OAIImporter:
 
             current_date = next_date
 
+
     def get_identifiers(self, client, start_date, end_date):
         print '****** Getting identifiers ******'
         print 'from   : %s' % start_date.strftime('%Y-%m-%d')
@@ -113,11 +156,14 @@ class OAIImporter:
         chunk_time = time.time()
 
         print 'client.listIdentifiers(from_=',start_date,'until=',end_date,'metadataPrefix=',self.metadata["prefix"],'))'
-        identifiers = list(client.listIdentifiers(
+        try:
+            identifiers = list(client.listIdentifiers(
                 from_          = start_date,  # yes, it is from_ not from
                 until          = end_date,
                 metadataPrefix = self.metadata["prefix"]
                 ))
+        except NoRecordsMatchError:
+            identifiers = []
 
         d_time = time.time() - chunk_time
         print 'received %d identifiers in %d seconds' % (len(identifiers), d_time )
@@ -134,14 +180,17 @@ class OAIImporter:
         chunk_time = time.time()
 
         print 'client.listRecords(from_=',start_date,'until=',end_date,'metadataPrefix=',self.metadata["prefix"],'))'
-        records = list(client.listRecords(
+        try:
+            records = list(client.listRecords(
                 from_          = start_date,  # yes, it is from_ not from
                 until          = end_date,
                 metadataPrefix = self.metadata["prefix"]
                 ))
+        except NoRecordsMatchError:
+            records = []
 
         d_time = time.time() - chunk_time
-        print 'recieved %d records in %d seconds' % (len(records), d_time )
+        print 'received %d records in %d seconds' % (len(records), d_time )
         chunk_time = time.time()
 
         return records
@@ -221,10 +270,10 @@ class OAIImporter:
         count = 1
 
         for header in identifiers:
-            print 'Header identifier: %s' % header.identifier()
-            print 'Header datestamp: %s' % header.datestamp()
-            print 'Header setSpec: %s' % header.setSpec()
-            print 'Header isDeleted: %s' % header.isDeleted()
+            print 'Header identifier: %s - %s' % (header.identifier(), header.datestamp())
+            #print 'Header datestamp: %s' % header.datestamp()
+            #print 'Header setSpec: %s' % header.setSpec()
+            #print 'Header isDeleted: %s' % header.isDeleted()
 
 
 

@@ -18,7 +18,7 @@ class Batch(object):
 
     def _es_bulk_load(self):
         print "sending batch of " + str(len(self.temp))
-        # http://www.elasticsearch.org/guide/reference/api/bulk.html        
+        # http://www.elasticsearch.org/guide/reference/api/bulk.html
         data = ''
         for r in self.temp:
             data += json.dumps( {'index':{'_id': r['_id']}} ) + '\n'

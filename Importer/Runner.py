@@ -13,18 +13,19 @@ import OpenCitationsImportLibrary
 
 
 def main():
-	os.system('clear')
-	print "OPEN CITATIONS IMPORTER"
-	#arxiv = OpenCitationsImportLibrary.OAIImporter("http://export.arxiv.org/oai2", "2012-01-02", "2012-01-03")
-	#arxiv.run()
-	
-	pmc_oa = OpenCitationsImportLibrary.OAIImporter("http://www.pubmedcentral.nih.gov/oai/oai.cgi", 
-		"2012-01-02", "2012-01-03", 1, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_PMC)
-	pmc_oa.run()
+    os.system('clear')
+    print "OPEN CITATIONS IMPORTER"
+    #arxiv = OpenCitationsImportLibrary.OAIImporter("http://export.arxiv.org/oai2", "2012-01-02", "2012-01-03")
+    #arxiv.run()
+    
+    pmc_oa = OpenCitationsImportLibrary.OAIImporter("http://www.pubmedcentral.nih.gov/oai/oai.cgi", 
+        5, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_PMC)
+    pmc_oa.run()
 
-	pass
+    print "Finished."
+    pass
 
 
 if __name__ == '__main__':
-	main()
+    main()
 
