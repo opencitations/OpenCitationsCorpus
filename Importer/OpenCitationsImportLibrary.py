@@ -5,7 +5,7 @@ OpenCitationsImportLibrary.py
 
 Created by Martyn Whitwell on 2013-02-08.
 Based on arXiv MetaHarvester by Dr Heinrich Hartmann, related-work.net,  2012
-Based on PubMedCentral Parser by Mark MacGillivray
+
 
 """
 
@@ -14,6 +14,9 @@ from datetime import date, datetime, timedelta
 from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry, oai_dc_reader
 import MetadataReaders
+import Batch
+import Config
+import hashlib, md5
 
 class OAIImporter:
 
@@ -47,26 +50,34 @@ class OAIImporter:
         # got to update granularity or we barf with: 
         # oaipmh.error.BadArgumentError: Max granularity is YYYY-MM-DD:2003-04-10T00:00:00Z
         client.updateGranularity()
+
+        #ElasticSearch batcher
+        batcher = Batch.Batch()
     
 
         start = time.time()
-        #for (current_date, next_date) in self.loop_months():
-            #print "current_date: %s, next_date: %s" % (current_date, next_date)
+        for (current_date, next_date) in self.loop_months():
+            print "current_date: %s, next_date: %s" % (current_date, next_date)
 
             # get identifiers
-            #identifiers = list(self.get_identifiers(client, current_date, next_date))
-            #self.print_identifiers(identifiers)
+            identifiers = list(self.get_identifiers(client, current_date, next_date))
+            self.print_identifiers(identifiers)
             
             # get records
             #try:
-            #    records = list(self.get_records(client, current_date, next_date))
+            records = list(self.get_records(client, current_date, next_date))
+            for record in records:
+                batcher.add(self.bibify_record(record))
             #except:
             #    print "failed receiving records!"
             #    continue
             #self.print_records(records, max_recs = 2)
 
-        record = self.get_record(client)
-        self.print_record(record)
+        #record = self.get_record(client, 'oai:pubmedcentral.nih.gov:3081214')
+
+        
+        batcher.clear()
+
 
         print 'Total Time spent: %d seconds' % (time.time() - start)
 
@@ -137,20 +148,37 @@ class OAIImporter:
 
 
 
-    def get_record(self, client):
-        print '****** Getting 1 record ******'
+    def get_record(self, client, oaipmh_identifier):
+        return list(client.getRecord(
+            identifier = oaipmh_identifier,
+            metadataPrefix = self.metadata["prefix"]))
 
-        chunk_time = time.time()
-        record = list(client.getRecord(
-                identifier = 'oai:pubmedcentral.nih.gov:3081214',
-                metadataPrefix = self.metadata["prefix"]
-                ))
 
-        d_time = time.time() - chunk_time
-        print 'recieved in %d seconds' % (d_time )
-        chunk_time = time.time()
+    def bibify_record(self, record):
+        header, metadata, about = record
+        bibjson = metadata.getMap()
+        bibjson["oaipmh.identifier"] = header.identifier()
+        bibjson["oaipmh.datestamp"] = header.datestamp().isoformat()
+        bibjson["oaipmh.setSpec"] = header.setSpec()
+        bibjson["oaipmh.isDeleted"] = header.isDeleted()
 
-        return record
+        bibjson['_id'] = hashlib.md5(header.identifier()).hexdigest() #Not sure about sense of MD5 hash
+        bibjson["url"] = Config.bibjson_url + bibjson["_id"]
+        bibjson['_collection'] = [Config.bibjson_creator + '_____' + Config.bibjson_collname]
+        bibjson['_created'] = datetime.now().strftime("%Y-%m-%d %H%M"),
+        bibjson['_created_by'] = Config.bibjson_creator
+        if "identifier" not in bibjson:
+            bibjson["identifier"] = []
+        bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"],"url":bibjson["url"]})
+
+        return bibjson
+        
+
+
+
+
+
+
 
 
     def print_records(self, records, max_recs = 2):

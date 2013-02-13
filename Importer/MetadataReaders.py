@@ -4,7 +4,6 @@
 OpenCitationsImportLibrary.py
 
 Created by Martyn Whitwell on 2013-02-08.
-Based on arXiv MetaHarvester by Dr Heinrich Hartmann, related-work.net,  2012
 Based on PubMedCentral Parser by Mark MacGillivray
 
 """
@@ -47,6 +46,7 @@ class MetadataReaderPMC(object):
 
     def __call__(self, metadata_element):
         map = {}
+        #map = self._prepdoc()
 
         # front
         front = metadata_element.find("nlmaa:article/nlmaa:front", self._namespaces)
@@ -131,7 +131,7 @@ class MetadataReaderPMC(object):
                         entity["corresponding"] = 'yes'
                     self.set_map_with_element_text(entity, "lastname", contrib, "nlmaa:name/nlmaa:surname")
                     self.set_map_with_element_text(entity, "firstname", contrib, "nlmaa:name/nlmaa:given-names")
-                    if "lastname" in entity and "firstname" in entity:
+                    if "lastname" in entity and entity["lastname"] is not None and "firstname" in entity and entity["firstname"] is not None:
                         entity["name"] = entity["lastname"] + " " + entity["firstname"]
                     email = contrib.find("nlmaa:address/nlmaa:email", self._namespaces)
                     if email is None:
@@ -191,7 +191,6 @@ class MetadataReaderPMC(object):
                             for pub_id in pub_ids:
                                 entity["identifier"].append({"type": pub_id.get('pub-id-type'), "id": pub_id.text})
                     map["citation"].append(entity)
-
 
 
 

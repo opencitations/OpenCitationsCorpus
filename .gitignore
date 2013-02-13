@@ -39,3 +39,7 @@ ImportArxiv/MetaImport.CL/MetaHarvester.py
 ImportArxiv/BucketControl/extraction_queue.txt
 
 Importer/Parse.py
+
+Importer/_Parse.py
+
+Importer/_OldMetaData.py
