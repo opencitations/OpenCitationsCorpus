@@ -437,10 +437,32 @@ class Parse(object):
 
     # complete a bibjson record
     def _completedoc(self,doc):
+        # set an ID
         doc['_id'] = self._makeid(doc)
+        # set a bibserver identifier object
         if "identifier" not in doc: doc["identifier"] = []
         doc["url"] = config.bibjson_url + doc["_id"]
         doc["identifier"].append({"type":"bibsoup","id":doc["_id"],"url":doc["url"]})
+        # set a date string
+        y = doc.get('year',doc.get('journal',{}).get('year',False))
+        if y:
+            m = doc.get('month',doc.get('journal',{}).get('month','1'))
+            if m.lower().startswith('jan'): m = '01'
+            if m.lower().startswith('feb'): m = '02'
+            if m.lower().startswith('mar'): m = '03'
+            if m.lower().startswith('apr'): m = '04'
+            if m.lower().startswith('may'): m = '05'
+            if m.lower().startswith('jun'): m = '06'
+            if m.lower().startswith('jul'): m = '07'
+            if m.lower().startswith('aug'): m = '08'
+            if m.lower().startswith('sep'): m = '09'
+            if m.lower().startswith('oct'): m = '10'
+            if m.lower().startswith('nov'): m = '11'
+            if m.lower().startswith('dec'): m = '12'
+            if len(m) == 1: m = '0' + m
+            d = doc.get('day',doc.get('journal',{}).get('day','1'))
+            if len(d) == 1: d = '0' + d
+            doc['date'] = d + '/' + m + '/' + y
         return doc
 
 
