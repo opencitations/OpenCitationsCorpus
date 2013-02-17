@@ -1,6 +1,6 @@
 
 from elementtree import ElementTree as ET
-import hashlib, md5, re, json
+import hashlib, md5, re, json, uuid
 from unicodedata import normalize
 from datetime import datetime
 
@@ -398,18 +398,21 @@ class Parse(object):
     #--------------------------------------------------------------------------------#
 
 
-    # This is a copy of the bibserver DAO record ID maker, found on line 172 of that file
-    # you could also just import it instead of having it specified explicitly here
     def _makeid(self, data):
-        id_data = {
-            'author': [i.get('name','') for i in data.get('author',[])],
-            'title': data.get('title',''),
-            'identifier': [i.get('id','') for i in data.get('identifier',[]) if i.get('type','').lower() != "bibsoup"]
-        }
-        if id_data['author'] is not None: id_data['author'].sort() # these must be done after the comprehensions above or they give null
-        if id_data['identifier'] is not None: id_data['identifier'].sort()
-        buf = self._slugify(json.dumps(id_data, sort_keys=True).replace('author:','').replace('title:','').replace('identifier:','').replace('null','').decode('unicode-escape'),delim=u'')
-        new_id = hashlib.md5(buf).hexdigest()
+        if config.idtype == 'bibserver':        
+            # This is a copy of the bibserver DAO record ID maker, found on line 172 of that file
+            # you could also just import it instead of having it specified explicitly here
+            id_data = {
+                'author': [i.get('name','') for i in data.get('author',[])],
+                'title': data.get('title',''),
+                'identifier': [i.get('id','') for i in data.get('identifier',[]) if i.get('type','').lower() != "bibsoup"]
+            }
+            if id_data['author'] is not None: id_data['author'].sort() # these must be done after the comprehensions above or they give null
+            if id_data['identifier'] is not None: id_data['identifier'].sort()
+            buf = self._slugify(json.dumps(id_data, sort_keys=True).replace('author:','').replace('title:','').replace('identifier:','').replace('null','').decode('unicode-escape'),delim=u'')
+            new_id = hashlib.md5(buf).hexdigest()
+        elif config.idtype == 'uuid':
+            new_id = uuid.uuid4().hex
         return new_id
 
     # also copied from bibserver code, from the UTIL, for use in the make ID function

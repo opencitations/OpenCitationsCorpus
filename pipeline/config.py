@@ -2,6 +2,9 @@
 # set whether to parse pmcoa subset tar.gz files or nlm medline xml.gz files
 sourcetype = "pmcoa" # this should be pmcoa or nlm
 
+# set this to bibserver if you want to use the bibserver hashing algorithm for IDs, otherwise set to uuid
+idtype = "uuid"
+
 # set threads to a number of threads to run. Note you need enough disk and RAM to support them all
 # and there is little point if you don't have enough processors to run them
 # leave as zero if you don't want threading
