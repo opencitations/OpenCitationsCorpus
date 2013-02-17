@@ -8,7 +8,7 @@ idtype = "uuid"
 # set threads to a number of threads to run. Note you need enough disk and RAM to support them all
 # and there is little point if you don't have enough processors to run them
 # leave as zero if you don't want threading
-threads = 4
+threads = 0
 
 # set the bibserver params you want, and other starting values for each bibJSON object
 # a bibjson url and identifier object will also be written in, so set params for them too
