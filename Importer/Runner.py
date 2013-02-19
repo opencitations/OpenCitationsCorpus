@@ -15,12 +15,12 @@ import OpenCitationsImportLibrary
 def main():
     os.system('clear')
     print "OPEN CITATIONS IMPORTER"
-    #arxiv = OpenCitationsImportLibrary.OAIImporter("http://export.arxiv.org/oai2", "2012-01-02", "2012-01-03")
-    #arxiv.run()
+
+    arxiv = OpenCitationsImportLibrary.OAIImporter("http://export.arxiv.org/oai2", 0, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_OAI_DC)
+    arxiv.run()
     
-    pmc_oa = OpenCitationsImportLibrary.OAIImporter("http://www.pubmedcentral.nih.gov/oai/oai.cgi", 
-        5, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_PMC)
-    pmc_oa.run()
+    #pmc_oa = OpenCitationsImportLibrary.OAIImporter("http://www.pubmedcentral.nih.gov/oai/oai.cgi", 0, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_PMC)
+    #pmc_oa.run()
 
     print "Finished."
     pass

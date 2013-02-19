@@ -30,8 +30,6 @@ class OAIImporter:
     #default to OAI Dublin Core metadata format if note specified
     def __init__(self, uri, delta_days = 0, metadata = METADATA_FORMAT_OAI_DC):
         self.uri = uri
-        #self.from_date = datetime.strptime(from_date,"%Y-%m-%d")
-        #self.until_date = datetime.strptime(until_date,"%Y-%m-%d")
         self.delta_days = delta_days
         self.metadata = metadata
         self.es_synchroniser_config = Config.es_synchroniser_config_target + hashlib.md5(uri).hexdigest()
@@ -56,12 +54,19 @@ class OAIImporter:
         batcher = Batch.Batch()
 
         synchronisation_config = self.get_synchronisation_config()
-        if False and synchronisation_config is not None and "last_synchronised" in synchronisation_config:
-            last_synchronised = dateutil.parser.parse(synchronisation_config["last_synchronised"])
+        if False and synchronisation_config is not None and "to_date" in synchronisation_config:
+            last_synchronised = dateutil.parser.parse(synchronisation_config["to_date"])
         else:
-            last_synchronised = dateutil.parser.parse("2013-01-31")
+            last_synchronised = dateutil.parser.parse("2013-02-08")
 
-        total_records = 0
+        #total_records = 0
+
+        #total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:0804.2273")
+        
+        #return 1
+
+
+
 
         print "Last synchronised to: %s" % last_synchronised.date()
         if not (last_synchronised.date() < (date.today() - timedelta(days=1))):
@@ -71,9 +76,9 @@ class OAIImporter:
         while last_synchronised.date() < (date.today() - timedelta(days=1)):
             start_date = last_synchronised + timedelta(days=1)
             end_date = start_date + timedelta(days=self.delta_days)
-            number_of_records = self.synchronise_period(client, batcher, start_date, end_date)
+            number_of_records = self.synchronise_by_block(client, batcher, start_date, end_date)
+            self.put_synchronisation_config(start_date, end_date, number_of_records)
             last_synchronised = end_date
-            self.put_synchronisation_config(last_synchronised, number_of_records)
             total_records += number_of_records
         
         batcher.clear()
@@ -89,22 +94,31 @@ class OAIImporter:
 
 
 
-    def synchronise_period(self, client, batcher, start_date, end_date):
-        #last_synchronised = dateutil.parser.parse(synchronisation_config["last_synchronised"])
-        #start_date = last_synchronised + timedelta(days=1)
-        #end_date = start_date + timedelta(days=0) # one day at a time
+    def synchronise_by_block(self, client, batcher, start_date, end_date):
         print "Synchronising period: %s - %s" % (start_date, end_date)
         records = list(self.get_records(client, start_date, end_date))
         for record in records:
             batcher.add(self.bibify_record(record))
-
-        #ids = self.get_identifiers(client, start_date, end_date)
-        #print "Found %i ids" % len(ids)
-        #self.print_identifiers(ids)
-        #self.put_synchronisation_config(end_date, len(ids))
         return len(records)
 
 
+    def synchronise_by_records(self, client, batcher, start_date, end_date):
+        print "Synchronising records in period: %s - %s" % (start_date, end_date)
+        identifiers = list(self.get_identifiers(client, start_date, end_date))
+        counter = 0
+        for identifier in identifiers:
+            print "Synchronising %s - %s" % (identifier.identifier(), identifier.datestamp())
+            record = self.get_record(client, identifier.identifier())
+            batcher.add(self.bibify_record(record))
+            counter += 1
+        return counter
+
+
+    def synchronise_record(self, client, batcher, oaipmh_identifier):
+        print "Synchronising record: %s" % (oaipmh_identifier)
+        record = self.get_record(client, oaipmh_identifier)
+        batcher.add(self.bibify_record(record))
+        return 1
 
 
     def get_synchronisation_config(self):
@@ -117,9 +131,9 @@ class OAIImporter:
             return r.json()["_source"]
 
 
-    def put_synchronisation_config(self, last_synchronised, number_of_records):
+    def put_synchronisation_config(self, from_date, to_date, number_of_records):
         print "Putting synchronisation_config for %s to %s" % (self.uri, self.es_synchroniser_config)
-        data = {'uri': self.uri, 'last_synchronised': last_synchronised.isoformat(), 'number_of_records': number_of_records}
+        data = {'uri': self.uri, 'from_date': from_date.isoformat(), 'to_date': to_date.isoformat(), 'number_of_records': number_of_records}
         r = requests.put(self.es_synchroniser_config, data=json.dumps(data))
 
 
@@ -218,7 +232,7 @@ class OAIImporter:
         bibjson['_created_by'] = Config.bibjson_creator
         if "identifier" not in bibjson:
             bibjson["identifier"] = []
-        bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"],"url":bibjson["url"]})
+        #bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"],"url":bibjson["url"]})
 
         return bibjson
         

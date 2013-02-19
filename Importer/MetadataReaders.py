@@ -29,7 +29,7 @@ class MetadataReaderPMC(object):
     def set_map_with_element_text(self, map, key, element, xpath):
         if element is not None:
             sought_element = element.find(xpath, self._namespaces)
-            if sought_element is not None and hasattr(sought_element,'text'):
+            if sought_element is not None and hasattr(sought_element,'text') and sought_element.text is not None:
                 map[key] = sought_element.text
                 return True
         return False
