@@ -54,12 +54,12 @@ class OAIImporter:
         batcher = Batch.Batch()
 
         synchronisation_config = self.get_synchronisation_config()
-        if False and synchronisation_config is not None and "to_date" in synchronisation_config:
+        if synchronisation_config is not None and "to_date" in synchronisation_config:
             last_synchronised = dateutil.parser.parse(synchronisation_config["to_date"])
         else:
             last_synchronised = dateutil.parser.parse("2013-02-08")
 
-        #total_records = 0
+        total_records = 0
 
         #total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:0804.2273")
         
@@ -226,6 +226,7 @@ class OAIImporter:
         bibjson["oaipmh.isDeleted"] = header.isDeleted()
 
         bibjson['_id'] = hashlib.md5(header.identifier()).hexdigest() #Not sure about sense of MD5 hash
+        #bibjson['_id'] = uuid.uuid4().hex
         bibjson["url"] = Config.bibjson_url + bibjson["_id"]
         bibjson['_collection'] = [Config.bibjson_creator + '_____' + Config.bibjson_collname]
         bibjson['_created'] = datetime.now().strftime("%Y-%m-%d %H%M"),

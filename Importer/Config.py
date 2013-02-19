@@ -34,7 +34,6 @@ es_delete_indextype = True # wipe the specified index before starting. This only
 
 es_mapping = { # the mapping to use for the ES index - this one here is the default record mapping for bibserver
     "record" : {
-        "date_detection" : False,
         "dynamic_templates" : [
             {
                 "default" : {
@@ -49,7 +48,14 @@ es_mapping = { # the mapping to use for the ES index - this one here is the defa
                     }
                 }
             }
-        ]
+        ],
+        "properties":{
+            "date":{
+                "type": "date",
+                "index": "not_analyzed",
+                "format": "dd/MM/yyyy"
+            }
+        }
     }
 }
 
