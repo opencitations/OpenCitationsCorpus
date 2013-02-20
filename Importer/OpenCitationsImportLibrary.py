@@ -20,6 +20,7 @@ import Batch
 import Config
 import hashlib, md5
 import requests, json
+import uuid
 
 class OAIImporter:
 
@@ -35,6 +36,13 @@ class OAIImporter:
         self.es_synchroniser_config = Config.es_synchroniser_config_target + hashlib.md5(uri).hexdigest()
 
     def run(self):
+        #self._prep_index()
+
+        #js = self.get_bibserver_id("oai:arXiv.org:0804.2273")
+        #print js
+        #return 1
+
+
         print "Importing from: %s" % self.uri
 
         registry = MetadataRegistry()
@@ -119,6 +127,24 @@ class OAIImporter:
         record = self.get_record(client, oaipmh_identifier)
         batcher.add(self.bibify_record(record))
         return 1
+
+
+
+    def get_bibserver_id(self, oaipmh_identifier):
+        q = {"query":{"term":{"_oaipmh_identifier": oaipmh_identifier}}}
+        r = requests.get(Config.es_target + "_search", data=json.dumps(q))
+        data = r.json()
+        if data["hits"]["total"] == 1:
+            #return existing id as specified in BibServer
+            bibserver_id = data["hits"]["hits"][0]["_id"]
+            print "Found existing ID for %s: %s" % (oaipmh_identifier, bibserver_id)
+        else:
+            #Create new id using UUID
+            bibserver_id = uuid.uuid4().hex
+            print "Creating a new ID for %s: %s" % (oaipmh_identifier, bibserver_id)
+        return bibserver_id
+        
+        
 
 
     def get_synchronisation_config(self):
@@ -220,13 +246,12 @@ class OAIImporter:
     def bibify_record(self, record):
         header, metadata, about = record
         bibjson = metadata.getMap()
-        bibjson["oaipmh.identifier"] = header.identifier()
-        bibjson["oaipmh.datestamp"] = header.datestamp().isoformat()
-        bibjson["oaipmh.setSpec"] = header.setSpec()
-        bibjson["oaipmh.isDeleted"] = header.isDeleted()
+        bibjson["_oaipmh_identifier"] = header.identifier()
+        bibjson["_oaipmh_datestamp"] = header.datestamp().isoformat()
+        bibjson["_oaipmh_setSpec"] = header.setSpec()
+        bibjson["_oaipmh_isDeleted"] = header.isDeleted()
 
-        bibjson['_id'] = hashlib.md5(header.identifier()).hexdigest() #Not sure about sense of MD5 hash
-        #bibjson['_id'] = uuid.uuid4().hex
+        bibjson['_id'] = self.get_bibserver_id(header.identifier())
         bibjson["url"] = Config.bibjson_url + bibjson["_id"]
         bibjson['_collection'] = [Config.bibjson_creator + '_____' + Config.bibjson_collname]
         bibjson['_created'] = datetime.now().strftime("%Y-%m-%d %H%M"),
@@ -239,7 +264,40 @@ class OAIImporter:
         
 
 
+    def _prep_index(self):
+        # check ES is reachable
+        test = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/')
+        try:
+            hi = requests.get(test)
+            if hi.status_code != 200:
+                print "there is no elasticsearch index available at " + test + ". aborting."
+                sys.exit()
+        except:
+            print "there is no elasticsearch index available at " + test + ". aborting."
+            sys.exit()
 
+        print "prepping the index"
+        # delete the index if requested - leaves the database intact
+        if Config.es_delete_indextype:
+            print "deleting the index type " + Config.es_indextype
+            d = requests.delete(Config.es_target)
+            print d.status_code
+
+        # check to see if index exists - in which case it will have a mapping even if it is empty, create if not
+        dbaddr = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/') + '/' + Config.es_index
+        if requests.get(dbaddr + '/_mapping').status_code == 404:
+            print "creating the index"
+            c = requests.post(dbaddr)
+            print c.status_code
+
+        # check for mapping and create one if provided and does not already exist
+        # this will automatically create the necessary index type if it is not already there
+        if Config.es_mapping:
+            t = Config.es_target + '_mapping' 
+            if requests.get(t).status_code == 404:
+                print "putting the index type mapping"
+                p = requests.put(t, data=json.dumps(Config.es_mapping) )
+                print p.status_code
 
 
 
