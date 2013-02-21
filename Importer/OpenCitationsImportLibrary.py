@@ -6,6 +6,9 @@ OpenCitationsImportLibrary.py
 Created by Martyn Whitwell on 2013-02-08.
 Based on arXiv MetaHarvester by Dr Heinrich Hartmann, related-work.net,  2012
 
+to run, you will need the following Python libraries
+pip install python-dateutil
+pip install pyoai
 
 """
 
@@ -69,7 +72,7 @@ class OAIImporter:
 
         total_records = 0
 
-        #total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:0804.2273")
+        total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:0804.2273")
         
         #return 1
 
@@ -258,6 +261,8 @@ class OAIImporter:
         bibjson['_created_by'] = Config.bibjson_creator
         if "identifier" not in bibjson:
             bibjson["identifier"] = []
+        #this line crashes Elastic Search? Check with Mark
+        #CHANGE THE PARSER TO USE A LIST OF OBJECTS
         #bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"],"url":bibjson["url"]})
 
         return bibjson
