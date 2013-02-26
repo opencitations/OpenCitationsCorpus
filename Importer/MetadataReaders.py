@@ -40,7 +40,7 @@ class MetadataReaderAbstract(object):
     def _find_element_xml(self, current_element, xpath):
         sought_element = self._find_element(current_element, xpath)
         if sought_element is not None:
-            return tree.tostring(sought_element)
+            return etree.tostring(sought_element)
         else:
             return None
 

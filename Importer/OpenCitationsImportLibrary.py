@@ -42,10 +42,6 @@ class OAIImporter:
     def run(self):
         #self._prep_index()
 
-        #js = self.get_bibserver_id("oai:arXiv.org:0804.2273")
-        #print js
-        #return 1
-
 
         print "Importing from: %s" % self.uri
 
@@ -56,7 +52,7 @@ class OAIImporter:
         identity = client.identify()
 
         print "Repository: %s" % identity.repositoryName()
-        print "Metadata formats: %s" % client.listMetadataFormats()
+        #print "Metadata formats: %s" % client.listMetadataFormats()
 
         # got to update granularity or we barf with: 
         # oaipmh.error.BadArgumentError: Max granularity is YYYY-MM-DD:2003-04-10T00:00:00Z
@@ -69,13 +65,13 @@ class OAIImporter:
         if synchronisation_config is not None and "to_date" in synchronisation_config:
             last_synchronised = dateutil.parser.parse(synchronisation_config["to_date"])
         else:
-            last_synchronised = dateutil.parser.parse("2013-02-08")
+            last_synchronised = dateutil.parser.parse("2013-02-23")
 
         total_records = 0
 
-        total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:1104.2274") #0804.2273
+        #total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:1104.2274") #0804.2273
         
-        return 1
+
 
 
 
@@ -264,7 +260,7 @@ class OAIImporter:
             bibjson["identifier"] = []
         #this line crashes Elastic Search? Check with Mark
         #CHANGE THE PARSER TO USE A LIST OF OBJECTS
-        #bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"],"url":bibjson["url"]})
+        bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"],"url":bibjson["url"]})
 
         return bibjson
         
