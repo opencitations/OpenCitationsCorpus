@@ -85,6 +85,7 @@ class OAIImporter:
             start_date = last_synchronised + timedelta(days=1)
             end_date = start_date + timedelta(days=self.delta_days)
             number_of_records = self.synchronise_by_block(client, batcher, start_date, end_date)
+            batcher.clear() #Store the records in elasticsearch
             self.put_synchronisation_config(start_date, end_date, number_of_records)
             last_synchronised = end_date
             total_records += number_of_records
