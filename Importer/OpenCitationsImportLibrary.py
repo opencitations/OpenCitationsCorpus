@@ -28,6 +28,7 @@ import uuid
 class OAIImporter:
 
     METADATA_FORMAT_OAI_DC = {"prefix": 'oai_dc', "reader": oai_dc_reader}
+    METADATA_FORMAT_ARXIV = {"prefix": 'arXiv', "reader": MetadataReaders.MetadataReaderArXiv()}
     METADATA_FORMAT_PMC_FM = {"prefix": 'pmc_fm', "reader": MetadataReaders.MetadataReaderPMC()}
     METADATA_FORMAT_PMC = {"prefix": 'pmc', "reader": MetadataReaders.MetadataReaderPMC()}
 
@@ -72,9 +73,9 @@ class OAIImporter:
 
         total_records = 0
 
-        total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:0804.2273")
+        total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:1104.2274") #0804.2273
         
-        #return 1
+        return 1
 
 
 
