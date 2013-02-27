@@ -5,6 +5,8 @@ import os
 from subprocess import call
 import sys
 sys.path.append('../ImportArxiv/tools')  #TODO: Tidy this up
+sys.path.append('../ImportArxiv/RefExtract')  #TODO: Tidy this up
+from RefExtract import *
 import file_queue as fq
 from nb_input import nbRawInput
 
@@ -20,9 +22,8 @@ class DownloadArXiv(object):
         self.s3_cmd_ex     = self.cur_dir + "/../ImportArxiv/tools/s3cmd/s3cmd" #TODO: Tidy this up
         self.dl_dir        = self.cur_dir + '/DATA/arXiv/downloads/'
         self.extract_dir =  self.cur_dir + '/DATA/arXiv/sources/'
+        self.citations_dir =  self.cur_dir + '/DATA/arXiv/citations/'
         self.tmp_dir = self.cur_dir + '/DATA/arXiv/tmp/'
-
-        #self.bucket_dir = '../DATA/BUCKETS/'
 
 
     def download(self):
@@ -89,3 +90,35 @@ class DownloadArXiv(object):
                 print "Extraction suspended. Restart script to resume."
                 break
 
+
+    def bibify_with_matcher(self):
+        if not os.path.exists(self.citations_dir):
+            os.mkdir(self.citations_dir)
+
+        for file_name in os.listdir(self.extract_dir):
+            if not file_name.endswith('gz'): continue
+            print "Processing", file_name
+            ref_text = RefExtract(self.extract_dir + file_name)
+            print "ref text = " + ref_text
+            ref_file_name = file_name[:-3] + '.ref.txt'
+            wh = open(self.citations_dir + ref_file_name,'w')
+            wh.write(ref_text)
+            wh.close()
+            #os.remove(gz_dir + file_name)
+
+
+    def bibify_with_tex2bib(self):
+        if not os.path.exists(self.citations_dir):
+            os.mkdir(self.citations_dir)
+
+        for file_name in os.listdir(self.extract_dir):
+            if not file_name.endswith('gz'): continue
+            print "Processing", file_name
+
+            ref_text = RefExtract(self.extract_dir + file_name)
+            print "ref text = " + ref_text
+            ref_file_name = file_name[:-3] + '.ref.txt'
+            wh = open(self.citations_dir + ref_file_name,'w')
+            wh.write(ref_text)
+            wh.close()
+            #os.remove(gz_dir + file_name)
