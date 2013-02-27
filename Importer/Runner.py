@@ -24,7 +24,7 @@ def main():
 
 
     d = Downloader.DownloadArXiv()
-    d.download()
+    d.extract()
 
 
     print "Finished."
