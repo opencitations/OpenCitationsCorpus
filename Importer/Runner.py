@@ -24,7 +24,7 @@ def main():
 
 
     d = Downloader.DownloadArXiv()
-    d.bibify()
+    d.bibify_with_tex2bib()
 
 
     print "Finished."
