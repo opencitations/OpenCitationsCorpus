@@ -4,6 +4,7 @@
 import os
 from subprocess import call
 import sys
+import tarfile
 sys.path.append('../ImportArxiv/tools')  #TODO: Tidy this up
 sys.path.append('../ImportArxiv/RefExtract')  #TODO: Tidy this up
 from RefExtract import *
@@ -22,8 +23,10 @@ class DownloadArXiv(object):
         self.s3_cmd_ex     = self.cur_dir + "/../ImportArxiv/tools/s3cmd/s3cmd" #TODO: Tidy this up
         self.dl_dir        = self.cur_dir + '/DATA/arXiv/downloads/'
         self.extract_dir =  self.cur_dir + '/DATA/arXiv/sources/'
+        self.uncompressed_dir = self.cur_dir + '/DATA/arXiv/sources/uncompressed/'
         self.citations_dir =  self.cur_dir + '/DATA/arXiv/citations/'
         self.tmp_dir = self.cur_dir + '/DATA/arXiv/tmp/'
+        self.tex2bibjson = self.cur_dir + '/tex2bib/tex2bibjson'
 
 
     def download(self):
@@ -114,11 +117,30 @@ class DownloadArXiv(object):
         for file_name in os.listdir(self.extract_dir):
             if not file_name.endswith('gz'): continue
             print "Processing", file_name
+            uncompressed_dir = self.uncompressed_dir + os.path.splitext(file_name)[0]
+            if not os.path.exists(uncompressed_dir):
+                os.mkdir(uncompressed_dir)
+            returncode = call(["tar", "xzf", self.extract_dir + file_name, "-C", uncompressed_dir])
+            if (returncode == 1): #there was an error, so perhaps its not a Tar file. Instead try a plain gunzip
+                print "trying to gunzip instead for " + file_name
+                os.system("gunzip -c %s > %s" % (self.extract_dir + file_name, uncompressed_dir + "/file.tex"))
 
-            ref_text = RefExtract(self.extract_dir + file_name)
-            print "ref text = " + ref_text
-            ref_file_name = file_name[:-3] + '.ref.txt'
-            wh = open(self.citations_dir + ref_file_name,'w')
-            wh.write(ref_text)
-            wh.close()
+            #Now process .tex files
+            for tex_file_name in os.listdir(uncompressed_dir):
+                if not tex_file_name.endswith('.tex'): continue
+                call([self.tex2bibjson, "-i", uncompressed_dir + "/" + tex_file_name, "-o", self.citations_dir + os.path.splitext(file_name)[0] + "_" +  os.path.splitext(tex_file_name)[0] + ".json"])
+
+                
+
+
+            #print "returncode = %s" % returncode
+
+            #break
+
+            #ref_text = RefExtract(self.extract_dir + file_name)
+            #print "ref text = " + ref_text
+            #ref_file_name = file_name[:-3] + '.ref.txt'
+            #wh = open(self.citations_dir + ref_file_name,'w')
+            #wh.write(ref_text)
+            #wh.close()
             #os.remove(gz_dir + file_name)
