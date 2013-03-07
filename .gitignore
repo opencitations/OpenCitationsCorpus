@@ -45,3 +45,5 @@ Importer/_Parse.py
 Importer/_OldMetaData.py
 
 Importer/DATA/
+
+Importer/importer.log

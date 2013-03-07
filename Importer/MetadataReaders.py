@@ -13,6 +13,14 @@ Parses PubMed Central Front Matter (PMC-FM) and arXiv metadata
 from oaipmh import common
 from lxml import etree
 
+import logging
+logger = logging.getLogger('importer')
+hdlr = logging.FileHandler('importer.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.DEBUG)
+
 
 class MetadataReaderAbstract(object):
     """Metadata reader abstract class containing methods for use in derived classes.
@@ -142,7 +150,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
 
         # front
         front = self._find_element(metadata_element,"nlmaa:article/nlmaa:front")
-
+        
         # back
         back = self._find_element(metadata_element,"nlmaa:article/nlmaa:back")
 
@@ -153,100 +161,136 @@ class MetadataReaderPMC(MetadataReaderAbstract):
         article_meta = self._find_element(front,"nlmaa:article-meta")
         
         if journal_meta is not None:
-            
-            map["journal"] = {}
+            try:
+                map["journal"] = {}
 
-            (self._set_map_with_element_text(map["journal"], "name", journal_meta, "nlmaa:journal-title-group/nlmaa:journal-title") or
-                self._set_map_with_element_text(map["journal"], "name", journal_meta, "nlmaa:journal-title"))
-            
-            issns = journal_meta.findall('nlmaa:issn', self._namespaces)
-            if issns:
-                map["journal"]["identifier"] = []
-                for issn in issns:
-                    map["journal"]["identifier"].append({"type": issn.get('pub-type'), "id": issn.text})
-            
-            self._set_map_with_element_text(map["journal"], "publisher", journal_meta, "nlmaa:publisher/nlmaa:publisher-name")
+                (self._set_map_with_element_text(map["journal"], "name", journal_meta, "nlmaa:journal-title-group/nlmaa:journal-title") or
+                    self._set_map_with_element_text(map["journal"], "name", journal_meta, "nlmaa:journal-title"))
+                
+                issns = journal_meta.findall('nlmaa:issn', self._namespaces)
+                if issns:
+                    map["journal"]["identifier"] = []
+                    for issn in issns:
+                        map["journal"]["identifier"].append({"type": issn.get('pub-type'), "id": issn.text})
+                
+                self._set_map_with_element_text(map["journal"], "publisher", journal_meta, "nlmaa:publisher/nlmaa:publisher-name")
+            except:
+                logging.error("Could not extract journal metadata")
+        else:
+            logging.info("No journal metadata found for ")
+        
         
         if article_meta is not None:
-    
-            #identifiers
-            article_ids = article_meta.findall("nlmaa:article-id", self._namespaces)
-            if article_ids:
-                map["identifier"] = []
-                for article_id in article_ids:
-                    map["identifier"].append({"type": article_id.get('pub-id-type'), "id": article_id.text})
+            try:
+                #identifiers
+                article_ids = article_meta.findall("nlmaa:article-id", self._namespaces)
+                if article_ids:
+                    map["identifier"] = []
+                    for article_id in article_ids:
+                        map["identifier"].append({"type": article_id.get('pub-id-type'), "id": article_id.text})
+            except:
+                logging.error("Could not extract identifiers from article metadata")
             
-            #title
-            self._set_map_with_element_text(map, "title", article_meta, "nlmaa:title-group/nlmaa:article-title")
+            try:
+                #title
+                self._set_map_with_element_text(map, "title", article_meta, "nlmaa:title-group/nlmaa:article-title")
+            except:
+                logging.error("Could not extract title from article metadata")
             
-            #pagination
-            self._set_map_with_element_text(map, "volume", article_meta, "nlmaa:volume")
-            self._set_map_with_element_text(map, "issue", article_meta, "nlmaa:issue")
-            self._set_map_with_element_text(map, "firstpage", article_meta, "nlmaa:fpage")
-            self._set_map_with_element_text(map, "lastpage", article_meta, "nlmaa:lpage")
-            if "firstpage" in map:
-                if "lastpage" in map and (map["firstpage"] != map["lastpage"]):
-                    map["pages"] = map["firstpage"] + "-" + map["lastpage"]
-                else:
-                    map["pages"] = map["firstpage"]
+            try:
+                #pagination
+                self._set_map_with_element_text(map, "volume", article_meta, "nlmaa:volume")
+                self._set_map_with_element_text(map, "issue", article_meta, "nlmaa:issue")
+                self._set_map_with_element_text(map, "firstpage", article_meta, "nlmaa:fpage")
+                self._set_map_with_element_text(map, "lastpage", article_meta, "nlmaa:lpage")
+                if "firstpage" in map:
+                    if "lastpage" in map and (map["firstpage"] != map["lastpage"]):
+                        map["pages"] = map["firstpage"] + "-" + map["lastpage"]
+                    else:
+                        map["pages"] = map["firstpage"]
+            except:
+                logging.error("Could not extract pagination from article metadata")
 
-            #publication date
-            # why only use the pmc-release date? need to check with Mark
-            pub_date = article_meta.find("nlmaa:pub-date[@pub-type='pmc-release']", self._namespaces)
-            if pub_date is not None:
-                self._set_map_with_element_text(map, "year", pub_date, "nlmaa:year")
-                self._set_map_with_element_text(map, "month", pub_date, "nlmaa:month")
-                self._set_map_with_element_text(map, "day", pub_date, "nlmaa:day")
+            try:
+                #publication date
+                # why only use the pmc-release date? need to check with Mark
+                pub_date = article_meta.find("nlmaa:pub-date[@pub-type='pmc-release']", self._namespaces)
+                if pub_date is not None:
+                    self._set_map_with_element_text(map, "year", pub_date, "nlmaa:year")
+                    self._set_map_with_element_text(map, "month", pub_date, "nlmaa:month")
+                    self._set_map_with_element_text(map, "day", pub_date, "nlmaa:day")
+                else:
+                    logging.info("No publication data for ")
+            except:
+                logging.error("Could not extract publication date from article metadata")
             
-            #copyright
-            self._set_map_with_element_text(map, "copyright", article_meta, "nlmaa:permissions/nlmaa:copyright-statement")
+            try:
+                #copyright
+                self._set_map_with_element_text(map, "copyright", article_meta, "nlmaa:permissions/nlmaa:copyright-statement")
+            except:
+                logging.error("Could not extract copyright info from article metadata")
             
-            #abstract
-            self._set_map_with_element_xml(map, "abstract", article_meta, "nlmaa:abstract")
+            try:
+                #abstract
+                self._set_map_with_element_xml(map, "abstract", article_meta, "nlmaa:abstract")
+            except:
+                logging.error("Could not extract abstract from article metadata")
             
-            #keywords
-            keywords = article_meta.findall("nlmaa:kwd_group/nlmaa:kwd", self._namespaces)
-            if keywords:
-                map["keyword"] = []
-                for keyword in keywords:
-                    map["keyword"].append(keyword.text)
+            try:
+                #keywords
+                keywords = article_meta.findall("nlmaa:kwd_group/nlmaa:kwd", self._namespaces)
+                if keywords:
+                    map["keyword"] = []
+                    for keyword in keywords:
+                        map["keyword"].append(keyword.text)
+                else:
+                    logging.info("No keywords for ")
+            except:
+                logging.error("Could not extract keywords from article metadata")
             
-            #contributors
-            contribs = article_meta.findall("nlmaa:contrib-group/nlmaa:contrib", self._namespaces)
-            
-            if contribs:
-                map["author"] = []
-                map["editor"] = []
-                for contrib in contribs:
-                    entity = {}
-                    if contrib.get('corresp') == 'yes':
-                        entity["corresponding"] = 'yes'
-                    self._set_map_with_element_text(entity, "lastname", contrib, "nlmaa:name/nlmaa:surname")
-                    self._set_map_with_element_text(entity, "forenames", contrib, "nlmaa:name/nlmaa:given-names") #MW: Changed firstname to forenames. Discuss with Mark.
-                    if "lastname" in entity and entity["lastname"] is not None and "forenames" in entity and entity["forenames"] is not None:
-                        entity["name"] = entity["lastname"] + ", " + entity["forenames"]
-                    email = contrib.find("nlmaa:address/nlmaa:email", self._namespaces)
-                    if email is None:
-                        email = contrib.find("nlmaa:email", self._namespaces)
-                    if email is not None:
-                        entity["identifier"] = {"type": "email", "id": email.text}
-                    
-                    xrefs = contrib.findall("nlmaa:xref", self._namespaces)
-                    affs = article_meta.findall("nlmaa:aff", self._namespaces) #NOT ContribGroup - check with Mark
-                    for xref in xrefs:
-                        if xref.get('ref-type') == "aff":
-                            rid = xref.get("rid")
-                            for aff in affs:
-                                if aff.get("id") == rid:
-                                    if "affiliation" not in entity:
-                                        entity["affiliation"] = []
-                                    for text in aff.itertext():
-                                        entity["affiliation"].append(text)
-                                    
-                    if contrib.get("contrib-type") == "author":
-                        map["author"].append(entity)
-                    if contrib.get("contrib-type") == "editor":
-                        map["editor"].append(entity)
+            try:
+                #contributors
+                contribs = article_meta.findall("nlmaa:contrib-group/nlmaa:contrib", self._namespaces)
+                if contribs:
+                    map["author"] = []
+                    map["editor"] = []
+                    for contrib in contribs:
+                        entity = {}
+                        if contrib.get('corresp') == 'yes':
+                            entity["corresponding"] = 'yes'
+                        self._set_map_with_element_text(entity, "lastname", contrib, "nlmaa:name/nlmaa:surname")
+                        self._set_map_with_element_text(entity, "forenames", contrib, "nlmaa:name/nlmaa:given-names") #MW: Changed firstname to forenames. Discuss with Mark.
+                        if "lastname" in entity and entity["lastname"] is not None and "forenames" in entity and entity["forenames"] is not None:
+                            entity["name"] = entity["lastname"] + ", " + entity["forenames"]
+                        email = contrib.find("nlmaa:address/nlmaa:email", self._namespaces)
+                        if email is None:
+                            email = contrib.find("nlmaa:email", self._namespaces)
+                        if email is not None:
+                            entity["identifier"] = {"type": "email", "id": email.text}
+                        
+                        xrefs = contrib.findall("nlmaa:xref", self._namespaces)
+                        affs = article_meta.findall("nlmaa:aff", self._namespaces) #NOT ContribGroup - check with Mark
+                        for xref in xrefs:
+                            if xref.get('ref-type') == "aff":
+                                rid = xref.get("rid")
+                                for aff in affs:
+                                    if aff.get("id") == rid:
+                                        if "affiliation" not in entity:
+                                            entity["affiliation"] = []
+                                        for text in aff.itertext():
+                                            entity["affiliation"].append(text)
+                                        
+                        if contrib.get("contrib-type") == "author":
+                            map["author"].append(entity)
+                        if contrib.get("contrib-type") == "editor":
+                            map["editor"].append(entity)
+                else:
+                    logging.info("No contributors found for ")
+            except:
+                logging.error("Could not extract contributors from article metadata")
+        else:
+            logging.info("No article metadata found for ")
+
 
         if back is not None:
             acknowledgements = back.findall("nlmaa:ack/nlmaa:sec/nlmaa:p", self._namespaces)
@@ -254,12 +298,16 @@ class MetadataReaderPMC(MetadataReaderAbstract):
                 map["acknowledgement"] = []
                 for acknowledgement in acknowledgements:
                     map["acknowledgement"].append(acknowledgement.text)
+            else:
+                logging.info("No acknowledgements found for ")
             
             conflicts = back.findall("nlmaa:fn-group/nlmaa:fn/nlmaa:p", self._namespaces)
             if conflicts:
                 map["conflict"] = []
                 for conflict in conflicts:
                     map["conflict"].append(conflict.text)
+            else:
+                logging.info("No conflicts found for ")
                     
             refs = back.findall("nlmaa:ref-list/nlmaa:ref", self._namespaces)
             if refs:
@@ -282,8 +330,13 @@ class MetadataReaderPMC(MetadataReaderAbstract):
                             entity["identifier"] = []
                             for pub_id in pub_ids:
                                 entity["identifier"].append({"type": pub_id.get('pub-id-type'), "id": pub_id.text})
+                    # TODO: should this append happen even if the entity is empty? or bring into the above IF
                     map["citation"].append(entity)
-
+                    # add code here to create a record for this citation if it does not already exist
+            else:
+                logging.info("No refs found for ")
+        else:
+            logging.info("No back metadata for ")
 
 
         return common.Metadata(map)
