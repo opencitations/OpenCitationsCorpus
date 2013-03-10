@@ -13,13 +13,18 @@ Parses PubMed Central Front Matter (PMC-FM) and arXiv metadata
 from oaipmh import common
 from lxml import etree
 
+
+
+
 import logging
-logger = logging.getLogger('importer')
-hdlr = logging.FileHandler('importer.log')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr) 
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(filename='importer.log',level=logging.DEBUG)
+
+#logger = logging.getLogger('importer')
+#hdlr = logging.FileHandler('importer.log')
+#formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+#hdlr.setFormatter(formatter)
+#logger.addHandler(hdlr) 
+#logger.setLevel(logging.DEBUG)
 
 
 class MetadataReaderAbstract(object):
@@ -146,35 +151,43 @@ class MetadataReaderPMC(MetadataReaderAbstract):
     """A metadata reader for PubMedCentral Front Matter data.
     """
 
-    def __call__(self, metadata_element):
+    def __call__(self, metadata_element, nsprefix="nlmaa:"):
         map = {}
 
+        #logging.info("Parsing " + etree.tostring(metadata_element))
+
+        article = self._find_element(metadata_element,"{0}article".format(nsprefix))
+
+        #In the case of the bulk importer, the root element is Article
+        if article is None:
+            article = metadata_element
+
         # front
-        front = self._find_element(metadata_element,"nlmaa:article/nlmaa:front")
+        front = self._find_element(article,"{0}front".format(nsprefix))
         
         # back
-        back = self._find_element(metadata_element,"nlmaa:article/nlmaa:back")
+        back = self._find_element(article,"{0}back".format(nsprefix))
 
         # journal meta
-        journal_meta = self._find_element(front,"nlmaa:journal-meta")
+        journal_meta = self._find_element(front,"{0}journal-meta".format(nsprefix))
         
         # article metadata
-        article_meta = self._find_element(front,"nlmaa:article-meta")
+        article_meta = self._find_element(front,"{0}article-meta".format(nsprefix))
         
         if journal_meta is not None:
             try:
                 map["journal"] = {}
 
-                (self._set_map_with_element_text(map["journal"], "name", journal_meta, "nlmaa:journal-title-group/nlmaa:journal-title") or
-                    self._set_map_with_element_text(map["journal"], "name", journal_meta, "nlmaa:journal-title"))
+                (self._set_map_with_element_text(map["journal"], "name", journal_meta, "{0}journal-title-group/{0}journal-title".format(nsprefix)) or
+                    self._set_map_with_element_text(map["journal"], "name", journal_meta, "{0}journal-title".format(nsprefix)))
                 
-                issns = journal_meta.findall('nlmaa:issn', self._namespaces)
+                issns = journal_meta.findall("{0}issn".format(nsprefix), self._namespaces)
                 if issns:
                     map["journal"]["identifier"] = []
                     for issn in issns:
                         map["journal"]["identifier"].append({"type": issn.get('pub-type'), "id": issn.text, "canonical":issn.get('pub-type') + ':' + issn.text})
                 
-                self._set_map_with_element_text(map["journal"], "publisher", journal_meta, "nlmaa:publisher/nlmaa:publisher-name")
+                self._set_map_with_element_text(map["journal"], "publisher", journal_meta, "{0}publisher/{0}publisher-name".format(nsprefix))
             except:
                 logging.error("Could not extract journal metadata")
         else:
@@ -184,26 +197,32 @@ class MetadataReaderPMC(MetadataReaderAbstract):
         if article_meta is not None:
             try:
                 #identifiers
-                article_ids = article_meta.findall("nlmaa:article-id", self._namespaces)
+                article_ids = article_meta.findall("{0}article-id".format(nsprefix), self._namespaces)
                 if article_ids:
                     map["identifier"] = []
                     for article_id in article_ids:
                         map["identifier"].append({"type": article_id.get('pub-id-type'), "id": article_id.text, "canonical": article_id.get('pub-id-type') + ':' + article_id.text })
+
+                        if article_id.get('pub-id-type') == 'pmid' and article_id.text == '17242517':
+                            print "FOUND THE record with missing citations"
+                            logging.critical("FOUND THE record with missing citations")
+                            logging.critical(etree.tostring(metadata_element))
+                            
             except:
                 logging.error("Could not extract identifiers from article metadata")
             
             try:
                 #title
-                self._set_map_with_element_text(map, "title", article_meta, "nlmaa:title-group/nlmaa:article-title")
+                self._set_map_with_element_text(map, "title", article_meta, "{0}title-group/{0}article-title".format(nsprefix))
             except:
                 logging.error("Could not extract title from article metadata")
             
             try:
                 #pagination
-                self._set_map_with_element_text(map, "volume", article_meta, "nlmaa:volume")
-                self._set_map_with_element_text(map, "issue", article_meta, "nlmaa:issue")
-                self._set_map_with_element_text(map, "firstpage", article_meta, "nlmaa:fpage")
-                self._set_map_with_element_text(map, "lastpage", article_meta, "nlmaa:lpage")
+                self._set_map_with_element_text(map, "volume", article_meta, "{0}volume".format(nsprefix))
+                self._set_map_with_element_text(map, "issue", article_meta, "{0}issue".format(nsprefix))
+                self._set_map_with_element_text(map, "firstpage", article_meta, "{0}fpage".format(nsprefix))
+                self._set_map_with_element_text(map, "lastpage", article_meta, "{0}lpage".format(nsprefix))
                 if "firstpage" in map:
                     if "lastpage" in map and (map["firstpage"] != map["lastpage"]):
                         map["pages"] = map["firstpage"] + "-" + map["lastpage"]
@@ -215,11 +234,11 @@ class MetadataReaderPMC(MetadataReaderAbstract):
             try:
                 #publication date
                 # why only use the pmc-release date? need to check with Mark
-                pub_date = article_meta.find("nlmaa:pub-date[@pub-type='pmc-release']", self._namespaces)
+                pub_date = article_meta.find("{0}pub-date[@pub-type='pmc-release']".format(nsprefix), self._namespaces)
                 if pub_date is not None:
-                    self._set_map_with_element_text(map, "year", pub_date, "nlmaa:year")
-                    self._set_map_with_element_text(map, "month", pub_date, "nlmaa:month")
-                    self._set_map_with_element_text(map, "day", pub_date, "nlmaa:day")
+                    self._set_map_with_element_text(map, "year", pub_date, "{0}year".format(nsprefix))
+                    self._set_map_with_element_text(map, "month", pub_date, "{0}month".format(nsprefix))
+                    self._set_map_with_element_text(map, "day", pub_date, "{0}day".format(nsprefix))
                 else:
                     logging.info("No publication data for ")
             except:
@@ -227,19 +246,19 @@ class MetadataReaderPMC(MetadataReaderAbstract):
             
             try:
                 #copyright
-                self._set_map_with_element_text(map, "copyright", article_meta, "nlmaa:permissions/nlmaa:copyright-statement")
+                self._set_map_with_element_text(map, "copyright", article_meta, "{0}permissions/{0}copyright-statement".format(nsprefix))
             except:
                 logging.error("Could not extract copyright info from article metadata")
             
             try:
                 #abstract
-                self._set_map_with_element_xml(map, "abstract", article_meta, "nlmaa:abstract")
+                self._set_map_with_element_xml(map, "abstract", article_meta, "{0}abstract".format(nsprefix))
             except:
                 logging.error("Could not extract abstract from article metadata")
             
             try:
                 #keywords
-                keywords = article_meta.findall("nlmaa:kwd_group/nlmaa:kwd", self._namespaces)
+                keywords = article_meta.findall("{0}kwd_group/{0}kwd".format(nsprefix), self._namespaces)
                 if keywords:
                     map["keyword"] = []
                     for keyword in keywords:
@@ -251,7 +270,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
             
             try:
                 #contributors
-                contribs = article_meta.findall("nlmaa:contrib-group/nlmaa:contrib", self._namespaces)
+                contribs = article_meta.findall("{0}contrib-group/{0}contrib".format(nsprefix), self._namespaces)
                 if contribs:
                     map["author"] = []
                     map["editor"] = []
@@ -259,18 +278,18 @@ class MetadataReaderPMC(MetadataReaderAbstract):
                         entity = {}
                         if contrib.get('corresp') == 'yes':
                             entity["corresponding"] = 'yes'
-                        self._set_map_with_element_text(entity, "lastname", contrib, "nlmaa:name/nlmaa:surname")
-                        self._set_map_with_element_text(entity, "forenames", contrib, "nlmaa:name/nlmaa:given-names") #MW: Changed firstname to forenames. Discuss with Mark.
+                        self._set_map_with_element_text(entity, "lastname", contrib, "{0}name/{0}surname".format(nsprefix))
+                        self._set_map_with_element_text(entity, "forenames", contrib, "{0}name/{0}given-names".format(nsprefix)) #MW: Changed firstname to forenames. Discuss with Mark.
                         if "lastname" in entity and entity["lastname"] is not None and "forenames" in entity and entity["forenames"] is not None:
                             entity["name"] = entity["lastname"] + ", " + entity["forenames"]
-                        email = contrib.find("nlmaa:address/nlmaa:email", self._namespaces)
+                        email = contrib.find("{0}address/{0}email".format(nsprefix), self._namespaces)
                         if email is None:
-                            email = contrib.find("nlmaa:email", self._namespaces)
+                            email = contrib.find("{0}email".format(nsprefix), self._namespaces)
                         if email is not None:
                             entity["identifier"] = {"type": "email", "id": email.text}
                         
-                        xrefs = contrib.findall("nlmaa:xref", self._namespaces)
-                        affs = article_meta.findall("nlmaa:aff", self._namespaces) #NOT ContribGroup - check with Mark
+                        xrefs = contrib.findall("{0}xref".format(nsprefix), self._namespaces)
+                        affs = article_meta.findall("{0}aff".format(nsprefix), self._namespaces) #NOT ContribGroup - check with Mark
                         for xref in xrefs:
                             if xref.get('ref-type') == "aff":
                                 rid = xref.get("rid")
@@ -294,7 +313,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
 
 
         if back is not None:
-            acknowledgements = back.findall("nlmaa:ack/nlmaa:sec/nlmaa:p", self._namespaces)
+            acknowledgements = back.findall("{0}ack/{0}sec/{0}p".format(nsprefix), self._namespaces)
             if acknowledgements:
                 map["acknowledgement"] = []
                 for acknowledgement in acknowledgements:
@@ -302,7 +321,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
             else:
                 logging.info("No acknowledgements found for ")
             
-            conflicts = back.findall("nlmaa:fn-group/nlmaa:fn/nlmaa:p", self._namespaces)
+            conflicts = back.findall("{0}fn-group/{0}fn/{0}p".format(nsprefix), self._namespaces)
             if conflicts:
                 map["conflict"] = []
                 for conflict in conflicts:
@@ -310,23 +329,23 @@ class MetadataReaderPMC(MetadataReaderAbstract):
             else:
                 logging.info("No conflicts found for ")
                     
-            refs = back.findall("nlmaa:ref-list/nlmaa:ref", self._namespaces)
+            refs = back.findall("{0}ref-list/{0}ref".format(nsprefix), self._namespaces)
             if refs:
                 map["citation"] = []
                 for ref in refs:
                     entity = {}
-                    self._set_map_with_element_text(entity, "label", ref, "nlmaa:label")
+                    self._set_map_with_element_text(entity, "label", ref, "{0}label".format(nsprefix))
                     
                     #Three different ways to cite articles. Check with Mark.
-                    citation = ref.find("nlmaa:mixed-citation", self._namespaces)
+                    citation = ref.find("{0}mixed-citation".format(nsprefix), self._namespaces)
                     if citation is None:
-                        citation = ref.find("nlmaa:element-citation", self._namespaces)
+                        citation = ref.find("{0}element-citation".format(nsprefix), self._namespaces)
                     if citation is None:
-                        citation = ref.find("nlmaa:citation", self._namespaces)
+                        citation = ref.find("{0}citation".format(nsprefix), self._namespaces)
                     
                     if citation is not None:
-                        self._set_map_with_element_text(entity, "title", citation, "nlmaa:article-title")
-                        pub_ids = citation.findall("nlmaa:pub-id", self._namespaces)
+                        self._set_map_with_element_text(entity, "title", citation, "{0}article-title".format(nsprefix))
+                        pub_ids = citation.findall("{0}pub-id".format(nsprefix), self._namespaces)
                         if pub_ids:
                             entity["identifier"] = []
                             for pub_id in pub_ids:
@@ -338,6 +357,8 @@ class MetadataReaderPMC(MetadataReaderAbstract):
                 logging.info("No refs found for ")
         else:
             logging.info("No back metadata for ")
+
+
 
 
         return common.Metadata(map)

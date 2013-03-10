@@ -1,0 +1,1579 @@
+<?xml version="1.0"?>
+<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" article-type="research-article" xml:lang="EN">
+	<?properties no_embargo?>
+	<?properties open_access?>
+	<front>
+		<journal-meta>
+			<journal-id journal-id-type="nlm-ta">Acta
+Crystallogr D Biol Crystallogr</journal-id>
+			<journal-id journal-id-type="publisher-id">Acta Cryst. D</journal-id>
+			<journal-title>Acta
+Crystallographica Section D: Biological Crystallography</journal-title>
+			<issn pub-type="ppub">0907-4449</issn>
+			<issn pub-type="epub">1399-0047</issn>
+			<publisher>
+				<publisher-name>International Union of
+Crystallography</publisher-name>
+			</publisher>
+		</journal-meta>
+		<article-meta>
+			<article-id pub-id-type="pmc">2483498</article-id>
+			<article-id pub-id-type="publisher-id">hv5074</article-id>
+			<article-id pub-id-type="doi">10.1107/S090744490604947X</article-id>
+			<article-id pub-id-type="coden">ABCRE6</article-id>
+			<article-id pub-id-type="pii">S090744490604947X</article-id>
+			<article-id pub-id-type="pmid">17242517</article-id>
+			<article-categories>
+				<subj-group subj-group-type="heading">
+					<subject>Research
+Papers</subject>
+				</subj-group>
+			</article-categories>
+			<title-group>
+				<article-title>Ceruloplasmin revisited: structural and functional roles
+of various metal cation-binding sites</article-title>
+				<alt-title>Ceruloplasmin</alt-title>
+			</title-group>
+			<contrib-group>
+				<contrib contrib-type="author">
+					<name>
+						<surname>Bento</surname>
+						<given-names>Isabel</given-names>
+					</name>
+					<xref ref-type="aff" rid="a">a</xref>
+				</contrib>
+				<contrib contrib-type="author">
+					<name>
+						<surname>Peixoto</surname>
+						<given-names>Cristina</given-names>
+					</name>
+					<xref ref-type="aff" rid="b">b</xref>
+				</contrib>
+				<contrib contrib-type="author">
+					<name>
+						<surname>Zaitsev</surname>
+						<given-names>Vjacheslav
+N.</given-names>
+					</name>
+					<xref ref-type="aff" rid="c">c</xref>
+				</contrib>
+				<contrib contrib-type="author">
+					<name>
+						<surname>Lindley</surname>
+						<given-names>Peter F.</given-names>
+					</name>
+					<xref ref-type="aff" rid="a">a</xref>
+					<xref ref-type="aff" rid="d">d</xref>
+					<xref ref-type="corresp" rid="cor">*</xref>
+				</contrib>
+				<aff id="a"><label>a</label>Instituto de Tecnologia Qu&#xED;mica e Biol&#xF3;gica, Universidade Nova de Lisboa, Apartado 127, 2781-901
+Oeiras, <country>Portugal</country></aff>
+				<aff id="b"><label>b</label>Laboratory of Animal Cell Technology, Instituto de Biologia
+Experimental e Tecnol&#xF3;gica, Apartado 12, 2781-901 Oeiras, <country>Portugal</country></aff>
+				<aff id="c"><label>c</label>Centre for
+Biomolecular Sciences, University of St Andrews, North Haugh, St Andrews KY16 9ST, <country>Scotland</country></aff>
+				<aff id="d"><label>d</label>Department of Crystallography, Birkbeck College, University of London, Malet Street, London WC1E 7HX,
+<country>England</country></aff>
+			</contrib-group>
+			<author-notes>
+				<corresp id="cor">Correspondence e-mail:
+<email>lindley.p@googlemail.com</email></corresp>
+			</author-notes>
+			<pub-date pub-type="ppub">
+				<day>01</day>
+				<month>2</month>
+				<year>2007</year>
+			</pub-date>
+			<pub-date pub-type="epub">
+				<day>16</day>
+				<month>1</month>
+				<year>2007</year>
+			</pub-date>
+			<pub-date pub-type="pmc-release">
+				<day>16</day>
+				<month>1</month>
+				<year>2007</year>
+			</pub-date>
+			<volume>63</volume>
+			<issue>Pt 2</issue>
+			<issue-id pub-id-type="publisher-id">d070200</issue-id>
+			<fpage>240</fpage>
+			<lpage>248</lpage>
+			<history>
+				<date date-type="received">
+					<day>11</day>
+					<month>10</month>
+					<year>2006</year>
+				</date>
+				<date date-type="accepted">
+					<day>18</day>
+					<month>11</month>
+					<year>2006</year>
+				</date>
+			</history>
+			<permissions>
+				<copyright-statement>&#xA9;
+International Union of Crystallography 2007</copyright-statement>
+				<copyright-year>2007</copyright-year>
+				<license license-type="open-access" xlink:href="http://journals.iucr.org/services/termsofuse.html">
+					<p>This is an open-access article
+distributed under the terms described at http://journals.iucr.org/services/termsofuse.html.</p>
+				</license>
+			</permissions>
+			<self-uri xlink:type="simple" xlink:href="http://dx.doi.org/10.1107/S090744490604947X">A full version of this article is available from
+Crystallography Journals Online.</self-uri>
+			<abstract abstract-type="toc">
+				<p>The three-dimensional molecular structure of human serum
+ceruloplasmin has been reinvestigated using X-ray synchrotron data collected at 100&#x2005;K from a crystal frozen to liquid-nitrogen
+temperature.</p>
+			</abstract>
+			<abstract>
+				<p>The three-dimensional molecular structure of human serum ceruloplasmin has been reinvestigated
+using X-ray synchrotron data collected at 100&#x2005;K from a crystal frozen to liquid-nitrogen temperature. The resulting model, with
+an increase in resolution from 3.1 to 2.8&#x2005;&#xC5;, gives an overall improvement of the molecular structure, in particular the
+side chains. In addition, it enables the clear definition of previously unidentified Ca<sup>2+</sup>-binding and
+Na<sup>+</sup>-binding sites. The Ca<sup>2+</sup> cation is located in domain 1 in a configuration very similar to that found in the
+activated bovine factor Va. The Na<sup>+</sup> sites appear to play a structural role in providing rigidity to the three protuberances
+on the top surface of the molecule. These features probably help to steer substrates towards the mononuclear copper sites prior to
+their oxidation and to restrict the size of the approaching substrate. The trinuclear copper centre appears to differ from the
+room-temperature structure in that a dioxygen moiety is bound in a similar way to that found in the endospore coat protein CotA from
+<italic>Bacillus subtilis</italic>.</p>
+			</abstract>
+			<kwd-group>
+				<kwd>ceruloplasmin</kwd>
+				<kwd>copper oxidases</kwd>
+				<kwd>metal-binding
+sites</kwd>
+			</kwd-group>
+		</article-meta>
+	</front>
+	<body>
+		<sec sec-type="introduction" id="sec1">
+			<label>1.</label>
+			<title>Introduction</title>
+			<p>Human ceruloplasmin, hCP, is a member of the multi-copper oxidase family of
+enzymes that includes ascorbate oxidase and the laccases. It was first isolated in 1944 (Holmberg, 1944<xref ref-type="bibr" rid="bb13"> &#x25B6;</xref>) and has a molecular weight of some 132&#x2005;kDa, being comprised of a single polypeptide chain of 1046
+amino-acid residues with a carbohydrate content of between 7% and 8% (Takahashi <italic>et al.</italic>, 1984<xref ref-type="bibr" rid="bb37"> &#x25B6;</xref>). The first X-ray structural study of human ceruloplasmin was reported in 1996 (Zaitseva <italic>et
+al.</italic>, 1996<xref ref-type="bibr" rid="bb42"> &#x25B6;</xref>) and confirmed that the molecule is comprised of six
+cupredoxin-type domains arranged in a triangular array. It also showed that there are six integral copper ions, three of which form a
+trinuclear cluster at the interface of domains 1 and 6, whilst the remainder are arranged in three mononuclear sites, one each in
+domains 2, 4 and 6. Each of the mononuclear copper ions is coordinated to a cysteine and two histidine residues and those in domains 4
+and 6 also coordinate weakly to a methionine residue; in domain 2, the methionine is replaced by a leucine residue at a van der Waals
+contact distance from the cation. The arrangements of the trinuclear centre and the mononuclear copper ion in domain 6 are essentially
+the same as that found in ascorbate oxidase (Messerschmidt <italic>et al.</italic>, 1992<xref ref-type="bibr" rid="bb24">
+&#x25B6;</xref>) and other members of the laccase family (Lindley, 2001<xref ref-type="bibr" rid="bb18"> &#x25B6;</xref>; Nakamura &amp;
+Go, 2005<xref ref-type="bibr" rid="bb29"> &#x25B6;</xref>), strongly suggesting an oxidase role for ceruloplasmin in the plasma. The
+multi-functional nature of ceruloplasmin has been the subject of several reviews (see for example, Laurie &amp; Mohammed, 1980<xref ref-type="bibr" rid="bb16"> &#x25B6;</xref>; Ryden, 1984<xref ref-type="bibr" rid="bb34"> &#x25B6;</xref>; Lindley <italic>et
+al.</italic>, 1999<xref ref-type="bibr" rid="bb19"> &#x25B6;</xref>; Bielli &amp; Calabrese, 2002<xref ref-type="bibr" rid="bb5">
+&#x25B6;</xref>), but despite this structural information it was still not possible to define the precise function(s) of
+hCP.</p>
+			<p>Further structural studies involving the binding of the cations Co<sup>2+</sup>, Fe<sup>2+</sup> and Fe<sup>3+</sup>
+(Lindley <italic>et al.</italic>, 1997<xref ref-type="bibr" rid="bb20"> &#x25B6;</xref>) added substantial weight to the argument that
+ceruloplasmin has an oxidase role and indicated a putative mechanism for oxidase activity. They also provided a structural explanation
+regarding how mutations in the ceruloplasmin gene leading to the expression of a truncated form of the protein could lead to systemic
+haemosiderosis (Yoshida <italic>et al.</italic>, 1995<xref ref-type="bibr" rid="bb40"> &#x25B6;</xref>). A ferroxidase role of the
+enzyme in plasma therefore appears to have been substantiated and in this context ceruloplasmin may serve to assist the release of
+iron from cells prior to uptake of the metal by the transferrin (Frieden &amp; Hsieh, 1976<xref ref-type="bibr" rid="bb11">
+&#x25B6;</xref>; Lindley <italic>et al.</italic>, 1999<xref ref-type="bibr" rid="bb19"> &#x25B6;</xref>). Another series of structural
+studies (Zaitsev <italic>et al.</italic>, 1999<xref ref-type="bibr" rid="bb41"> &#x25B6;</xref>) located the binding sites for an
+inhibitor, azide, and various amine substrates. Surprisingly, it was found that there are two distinct sites for amine substrates.
+Aromatic diamines appear to bind near the bottom of domain 4, close to an arrangement of tryptophan, methionine and histidine residues
+that is unique to this domain and remote from the mononuclear copper centre within it. Biogenic amines, such as nor&#xAD;epinephrine,
+epinephrine, serotonin and dopa, bind at a site in domain 6 that is very close to the site used for cation oxidation. On the other
+hand, (+)-lysergic acid diethylamine (LSD) appears to bind close to the glycan moiety at Asn119 in domain 1.</p>
+			<p>However, all these
+structural studies have been severely hampered by the limited resolution of the X-ray data, which is of 3.0&#x2005;&#xC5; or worse. The
+protein is large in size, with some 8500 non-H atoms, and therefore tends to show weak diffraction of X-rays. In addition, the
+trigonal crystals used for the X-ray data collection have a high solvent content, approaching 70%, and are very sensitive at ambient
+temperatures to radiation damage, particularly when using the high-brilliance synchrotron X-&#xAD;ray sources that are necessary to
+obtain even medium-resolution data. Many attempts have been made to cryo-freeze hCP crystals to temperatures approaching that of
+liquid nitrogen, but the high solvent content and sensitivity of the protein to chemical denaturation present real problems. However,
+recently a set of conditions has been found, as described in &#xA7;<xref ref-type="sec" rid="sec2"/>2, that has enabled the growth of
+crystals that can be cryo-frozen. The size of these crystals still needs to be improved, but is has been possible to collect X-ray
+data to 2.8&#x2005;&#xC5; using the European Synchrotron Radiation Facility at Grenoble, France. This modest increase in resolution,
+together with the cryotemperature, which minimizes the thermal motion of the atoms in the crystal, has enabled further X-ray studies
+resulting in new structural information on the hCP molecule, including the identification of Ca<sup>2+</sup>-binding and
+Na<sup>+</sup>-binding sites; these findings are reported here.</p>
+		</sec>
+		<sec sec-type="methods" id="sec2">
+			<label>2.</label>
+			<title>Experimental</title>
+			<sec id="sec2.1">
+				<label>2.1.</label>
+				<title>Chromatographic purification,
+crystallization and data collection</title>
+				<p>Samples of hCP were obtained as described previously (Moshkov <italic>et al.</italic>,
+1979<xref ref-type="bibr" rid="bb25"> &#x25B6;</xref>). However, prior to crystallization a final purification stage was undertaken
+using size-exclusion chromatography. The protein, at a concentration of approximately 100&#x2005;mg&#x2005;ml<sup>&#x2212;1</sup>, was
+loaded onto a HiPrep 16/30 Sephacryl S-300 column (GE Healthcare, USA) with a flow rate of 0.7&#x2005;ml&#x2005;min<sup>&#x2212;1</sup>
+after the column had been equilibrated with five column volumes of 0.1&#x2005;<italic>M</italic> sodium acetate buffer with
+100&#x2005;m<italic>M</italic> NaCl. Elution was monitored online at 280 and 610&#x2005;nm and the peaks were recovered and analyzed by
+SDS&#x2013;PAGE. All chromatographic procedures were performed using an &#xC4;KTA explorer 10S system (GE Healthcare) at 277&#x2005;K.
+The samples recovered after this &#x2018;polishing&#x2019; stage were loaded onto NuPage (Invitrogen, UK) precast gradient 4&#x2013;12%
+acrylamide gels and analyzed using the Simply Blue Safe Stain (Invitrogen, UK). The total protein content was determined by the
+bicinchoninic acid (BCA) assay using a commercial kit (Pierce, USA) with bovine serum albumin as a standard.</p>
+				<p>hCP was
+crystallized by the hanging-drop vapour-diffusion technique using a 4&#x2005;&#xB5;l total drop volume with 50% protein at a
+concentration of 50&#x2005;mg&#x2005;ml<sup>&#x2212;1</sup> and a precipitant solution containing 8% PEG 20K, 8% PEG MME 550,
+0.1&#x2005;<italic>M</italic> sodium acetate, 0.2&#x2005;<italic>M</italic> sodium formate pH 5.6. Small crystals of 0.15 &#xD7; 0.02
+&#xD7; 0.08&#x2005;mm in size were obtained at 277&#x2005;K within a few days and the addition of 23% glycerol enabled these to be
+frozen to liquid-nitrogen temperature.</p>
+				<p>Diffraction data were collected to 2.8&#x2005;&#xC5; resolution under cryogenic conditions
+(100&#x2005;K) at ESRF beamline ID14-4 with a wavelength of 0.9393&#x2005;&#xC5;. All data were processed with <italic>MOSFLM</italic>
+(Leslie, 1992<xref ref-type="bibr" rid="bb17"> &#x25B6;</xref>) and merged with the <italic>SCALA</italic> package from the
+<italic>CCP</italic>4 program suite (Collaborative Computational Project, Number 4, 1994<xref ref-type="bibr" rid="bb6">
+&#x25B6;</xref>). Crystallographic data and data-collection statistics are summarized in Table 1<xref ref-type="table" rid="table1">
+&#x25B6;</xref>.</p>
+			</sec>
+			<sec id="sec2.2">
+				<label>2.2.</label>
+				<title>Structure determination and refinement</title>
+				<p>The crystal
+structure was elucidated by the molecular-replacement technique using the program <italic>MOLREP</italic> (Vagin &amp; Teplyakov,
+1997<xref ref-type="bibr" rid="bb38"> &#x25B6;</xref>) from the <italic>CCP</italic>4 program suite. The room-temperature structure of
+hCP (PDB code <ext-link ext-link-type="uri" xlink:href="http://www.rcsb.org/pdb/explore.do?structureId=1kcw">1kcw</ext-link>; Zaitseva
+<italic>et al.</italic>, 1996<xref ref-type="bibr" rid="bb42"> &#x25B6;</xref>) was used as the search model with all the copper ions
+and sugar residues removed. Only one solution was evident, with a signal-to-noise ratio of 16.8 compared with 7.3 for the next highest
+solution and with an <italic>R</italic> factor of 0. 40 and a correlation coefficient of 0.58. Refinement was performed using
+<italic>REFMAC</italic> (Murshudov <italic>et al.</italic>, 1999<xref ref-type="bibr" rid="bb26"> &#x25B6;</xref>) interspersed with
+manual correction of the model and stereochemical parameters using a combination of the <italic>O</italic> (Jones <italic>et
+al.</italic>, 1991<xref ref-type="bibr" rid="bb14"> &#x25B6;</xref>) and <italic>Coot</italic> (Emsley &amp; Cowtan, 2004<xref ref-type="bibr" rid="bb9"> &#x25B6;</xref>) computer-graphics packages and difference electron-density maps with (<italic>F</italic>
+<sub>o</sub>&#xA0;&#x2212;&#xA0;<italic>F</italic> <sub>c</sub>) and (2<italic>F</italic> <sub>o</sub>&#xA0;&#x2212; <italic>F</italic>
+<sub>c</sub>) coefficients weighted according to the scheme devised by Read (1986<xref ref-type="bibr" rid="bb33"> &#x25B6;</xref>).
+Metal cations were identified on the basis of chemical probability and the behaviour of their thermal isotropic parameters during
+refinement. For the various types of metal ions, restraints were used according to the standard CCP4 libraries. In the case of the
+dioxygen molecule between the two type 3 copper ions, OMIT maps (omitting one or both O atoms) clearly showed that the O&#x2014;O
+separation was that of a dioxygen molecule and the separation was restrained to be within 0.02&#x2005;&#xC5; of the theoretical value.
+Solvent molecules were added in the final stages if they were clearly shown in (<italic>F</italic> <sub>o</sub> &#x2212;
+<italic>F</italic> <sub>c</sub>) syntheses at a level &#x2265;3.5&#x2005;r.m.s., were located in chemically sensible positions and
+refined to give thermal isotropic coefficients &lt;70&#x2005;&#xC5;<sup>2</sup>. The final model refined to an <italic>R</italic> and
+<italic>R</italic> <sub>free</sub> of 0.178 and 0.228, respectively, in the resolution range 68.5&#x2013;2.8&#x2005;&#xC5; and was
+validated using the program <italic>PROCHECK</italic> (Laskowski <italic>et al.</italic>, 1993<xref ref-type="bibr" rid="bb15">
+&#x25B6;</xref>) as indicated in Table 2<xref ref-type="table" rid="table2"> &#x25B6;</xref>.</p>
+			</sec>
+		</sec>
+		<sec sec-type="discussion|interpretation" id="sec3">
+			<label>3.</label>
+			<title>Results and discussion</title>
+			<sec id="sec3.1">
+				<label>3.1.</label>
+				<title>Overall organization of the molecule</title>
+				<p>Fig. 1<xref ref-type="fig" rid="fig1">
+&#x25B6;</xref> shows the overall organization of the human ceruloplasmin (hCP) molecule and the locations of the various metal
+cations: Cu<sup>2+</sup>, Ca<sup>2+</sup> and Na<sup>+</sup>. The molecule is comprised of six cupredoxin-type domains (Zaitseva
+<italic>et al.</italic>, 1996<xref ref-type="bibr" rid="bb42"> &#x25B6;</xref>) coloured red through to purple. Domains 1, 3 and 5
+comprise some 190 amino-acid residues, whereas the even domains are smaller, with around 150 residues. Domains 2, 4 and 6 possess a
+binding site for a mononuclear type 1 copper centre; a trinuclear copper centre comprising a type 2 copper ion and two type 3 copper
+ions is located between domains 1 and 6. Domain 1 has a Ca<sup>2+</sup>-binding site towards its outer surface. The lower surface of
+the molecule is relatively planar, with the exception of the loops connecting the domains, but the top surface has three large
+protuberances formed by loops from pairs of odd and even domains. Thus, the loop between &#x3B2;-strands 1 and 2 of an odd domain packs
+against the loop between &#x3B2;-strands 1 and 2 of an even domain and this association is assisted by a Na<sup>+</sup> cation (see
+below).</p>
+				<p>The quality of the model is high for a 2.8&#x2005;&#xC5; resolution structure (Table 2<xref ref-type="table" rid="table2"> &#x25B6;</xref>), but some loops and inter-domain connecting strands are still either poorly defined or completely
+lacking electron density. Thus, there is a break in the main chain between residues 476 and 482 in domain 3 corresponding to the
+formation of the 67 and 50&#x2005;kDa fragments (Takahashi <italic>et al.</italic>, 1983<xref ref-type="bibr" rid="bb36">
+&#x25B6;</xref>) and the interconnecting region between domains 5 and 6, residues 885&#x2013;888, and the last few residues at the
+C-terminus, 1041&#x2013;1046, are not defined. Three further regions, 18&#x2013;32 in domain 1 and the regions connecting domains 2 and
+3 (residues 340&#x2013;350) and 4 and 5 (residues 703&#x2013;709), are poorly defined, but are included in the model on a &#x2018;best
+efforts&#x2019; basis. For the remainder of the structure, 86.7% of the residues (749) lie in the most favoured regions of a
+Ramachandran plot (Ramakrishnan &amp; Ramachandran, 1965<xref ref-type="bibr" rid="bb32"> &#x25B6;</xref>), 12.6% (109) lie in
+additionally allowed regions, 0.6% (5) lie in generously allowed regions and 0.1% (1) lie in disallowed regions. The last category
+involves residue Arg883, which is close to the missing region between domains 5 and 6.</p>
+				<p>hCP is known to show heterogeneity with
+respect to its glycan moieties, but usually possesses at least three glycan chains terminating in sialic acid residues (Yamashita
+<italic>et al.</italic>, 1981<xref ref-type="bibr" rid="bb39"> &#x25B6;</xref>; Endo <italic>et al.</italic>, 1982<xref ref-type="bibr" rid="bb10"> &#x25B6;</xref>). In the predominant heteromer, two biantennary and one triantennary chain are N-linked to asparagine
+residues located within the 67&#x2005;kDa fragment of the molecule at Asn119, Asn339 and Asn378. A fourth chain that is also
+triantennary can be attached to Asn743. In the current X-ray model, only the first units of the glycan chains at Asn119 and Asn378 are
+clearly visible.</p>
+			</sec>
+			<sec id="sec3.2">
+				<label>3.2.</label>
+				<title>The mononuclear T1 copper-binding sites</title>
+				<p>hCP contains
+three mononuclear T1-type (Malmstr&#xF6;m, 1982<xref ref-type="bibr" rid="bb23"> &#x25B6;</xref>) copper-binding sites located in the
+even domains 2, 4 and 6. The T1 sites in domains 4 and 6 are typical blue-copper sites with two histidines and a cysteine ligand at
+around 2.0&#x2005;&#xC5; and a fourth weaker ligand, a methionine, at distance of around 3.0&#x2005;&#xC5; (Table 3<xref ref-type="table" rid="table3"> &#x25B6;</xref>). The mononuclear site in domain 2 is similar to that found in several fungal laccases
+(Ducros <italic>et al.</italic>, 2001<xref ref-type="bibr" rid="bb8"> &#x25B6;</xref>; Piontek <italic>et al.</italic>, 2002<xref ref-type="bibr" rid="bb31"> &#x25B6;</xref>; Garavaglia <italic>et al.</italic>, 2004<xref ref-type="bibr" rid="bb12"> &#x25B6;</xref>)
+in that it lacks the weak methionine ligand, which is replaced by an aliphatic leucine residue at a closest distance of around
+3.5&#x2005;&#xC5;. These three sites are not significantly different from those described in detail for the room-temperature
+structure.</p>
+				<p>Ceruloplasmin is unique among the other multi-copper oxidases in that it contains three type 1 &#x2018;integral&#x2019;
+copper ions in the even-numbered domains, whereas only the T1 copper in domain 6 at a distance of some 12&#x2013;13&#x2005;&#xC5; from
+the trinuclear cluster is absolutely necessary for ceruloplasmin to perform catalytic action according to the schemes suggested for
+ascorbate oxidase and laccase (Messerschmidt <italic>et al.</italic>, 1992<xref ref-type="bibr" rid="bb24"> &#x25B6;</xref>; Bento
+<italic>et al.</italic>, 2005<xref ref-type="bibr" rid="bb3"> &#x25B6;</xref>). The distances between the copper ions in the even
+domains of around 18&#x2005;&#xC5; is well within the range of effective electron transfer (Lindley <italic>et al.</italic>, 1997<xref ref-type="bibr" rid="bb20"> &#x25B6;</xref>; Machonkin &amp; Solomon, 2000<xref ref-type="bibr" rid="bb21"> &#x25B6;</xref>) and it has
+been suggested that the copper ions in domains 2 and 4 could provide a slower route of electron transfer, thus permitting the
+oxidation of more than one substrate molecule at a time. This could in turn accomplish a more effective transfer of four electrons to
+the dioxygen molecule from the reducing substrate. The role of the copper ion in domain 2, however, remains intriguing. Firstly, none
+of the metal-soaking or organic substrate-soaking experiments gave any indication that reducing substrates bind in domain 2. Secondly,
+the replacement of the axial ligand of the T1 copper in domain 2, Leu329, with Met by site-directed mutagenesis resulted in a silent
+mutation in that it failed to modify either the spectroscopic or catalytic properties of the mutated protein (Bielli <italic>et
+al.</italic>, 2001<xref ref-type="bibr" rid="bb4"> &#x25B6;</xref>). Whether the T1 site in domain 2 is an &#x2018;evolutionary
+relic&#x2019; and therefore functionally silent or whether this copper ion is destined for other functions still remains
+unclear.</p>
+			</sec>
+			<sec id="sec3.3">
+				<label>3.3.</label>
+				<title>The trinuclear copper centre</title>
+				<p>The trinuclear copper centre
+comprising two type 3 copper cations and a type 2 cation may well contain a mixture of states, but the dominant species is that with a
+diatomic species bound to the trinuclear centre as shown in Fig. 2<xref ref-type="fig" rid="fig2"> &#x25B6;</xref>. The separation of
+the two type 3 copper cations, Cu2&#x2014;Cu3 = 4.97&#x2005;&#xC5;, readily accommodates this species and it has been modelled as a
+dioxygen molecule in a similar manner to that found in the <italic>Bacillus subtiltis</italic> endospore coat protein (Bento
+<italic>et al.</italic>, 2005<xref ref-type="bibr" rid="bb3"> &#x25B6;</xref>). Details of the molecular geometry are given in
+Table&#xA0;4<xref ref-type="table" rid="table4"> &#x25B6;</xref>. A network of solvent molecules is found in the entrance channel to
+the trinuclear site, but some of these are weakly defined and may not have full occupancies. Thus, W199 is 2.59 and 2.43&#x2005;&#xC5;
+from Cu2 and O2 of the dioxygen moiety, respectively, and also is hydrogen bonded to W1 and W2 at 3.12 and 2.19&#x2005;&#xC5;,
+respectively. W1 is 3.07&#x2005;&#xC5; from W195, which in turn is hydrogen bonded to the O<sup>&#x220A;1</sup> atom of Glu1032
+(W195&#x2014;O<sup>&#x220A;1</sup> = 2.74&#x2005;&#xC5;) and W123 at 3.03&#x2005;&#xC5;; W123 is 3.10&#x2005;&#xC5; from the
+O<sup>&#x220A;1</sup> atom of Gln740. Glu1032 may be the acidic residue necessary for the initial protonation of the dioxygen molecule
+<italic>via</italic> the water network. In CotA the equivalent of Glu1032 is Glu498, although the latter residue is on the opposite
+side of the entrance channel (equivalent to Ile1027 in hCP) and closer to the trinuclear centre.</p>
+				<p>The type 2 copper ion, Cu4,
+appears to have two configurations at around the 50% level, the first with an oxygen moiety O35, presumably hydroxide, at a distance
+of around 2.05&#x2005;&#xC5; and the second with a water molecule, W148, at a distance of 2.98&#x2005;&#xC5;. In either case, a hydrogen
+bond is formed with the hydroxyl group of Tyr107 (W148&#x2014;OH = 2.33&#x2005;&#xC5;). W148 is also hydrogen-bonded to the main-chain
+carboxyl group of Ser102 (W148&#x2014;O = 3.23&#x2005;&#xC5;) and W106 (W148&#x2014;W106 = 2.62&#x2005;&#xC5;), which in turn forms
+hydrogen bonds to the O<sup>&#x3B4;2</sup> atom of Asp995 (Wat106&#x2014;O<sup>&#x3B4;2</sup> = 2.57&#x2005;&#xC5;) and the main-chain
+carboxyl moiety of Phe979 (Wat106&#x2014;O = 3.19&#x2005;&#xC5;). According to the reaction scheme proposed by Bento <italic>et
+al.</italic> (Bento <italic>et al.</italic>, 2005<xref ref-type="bibr" rid="bb3"> &#x25B6;</xref>), both the hydroxyl group and the
+water molecule probably arise from reduction of a dioxygen at the trinuclear cluster.</p>
+			</sec>
+			<sec id="sec3.4">
+				<label>3.4.</label>
+				<title>The additional metal-binding sites for Cu, Fe and Co</title>
+				<p>In previous studies (Lindley
+<italic>et al.</italic>, 1997<xref ref-type="bibr" rid="bb20"> &#x25B6;</xref>), additional metal sites were identified in domains 4
+and 6, roughly 9.0&#x2013;10.0&#x2005;&#xC5; distant from the respective mononuclear copper centres and therefore well within
+electron-transfer range. The sites involve a histidine residue and negatively charged aspartate and glutamate residues and in the
+native crystal structure appear to be partially occupied by copper ions with occupancies of around 50%. Interestingly, an additional
+site was not found in domain 2, where the mononuclear copper ion may be in the fully reduced state (Machonkin <italic>et al.</italic>,
+1998<xref ref-type="bibr" rid="bb22"> &#x25B6;</xref>) and the histidine is replaced by a tyrosine residue. Soaking experiments with
+CoCl<sub>2</sub>, FeSO<sub>4</sub>, FeCl<sub>3</sub> and CuSO<sub>4</sub> gave credence to the idea that these additional sites were
+sites of metal oxidation. The existence of the iron-binding sites in domains 4 and 6 of the hCP structure appears to be consistent
+with the earlier biochemical data (Frieden &amp; Hsieh, 1976<xref ref-type="bibr" rid="bb11"> &#x25B6;</xref>) suggesting two
+iron-binding sites in the enzyme. The access to these sites is limited to relatively small substrates by three large protuberances at
+the top of the hCP molecule (see &#xA7;<xref ref-type="sec" rid="sec3.6"/>3.6). In the case of soaking with CoCl<sub>2</sub>, the
+metal appeared to replace any copper that was bound and to fill the additional sites in domains 4 and 6. The sites are rich in oxygen
+donors and therefore amenable to the presence of Co<sup>2+</sup>, but the metal could also become oxidized to the kinetically inert
+Co<sup>3+</sup> through the transfer of an electron to the respective mononuclear copper centres. For both Fe<sup>2+</sup> and
+Fe<sup>3+</sup>, the metals appeared to bind to &#x2018;holding&#x2019; sites near the outside of the protein and in the case of the
+Fe<sup>2+</sup> this could be explained by the metal occupying the additional site, releasing an electron to the nearest mononuclear
+copper and then translocating to the holding site with Glu597 and Glu935 in domains 4 and 6, respectively, playing key roles in the
+translocation process. At the holding site the ferric iron would be available for collection, for example, by serum
+transferrin.</p>
+				<p>In the present study, there is no clear indication of an additional copper site in domain 4, but rather a solvent
+molecule, W201, that forms hydrogen bonds with His602 (W201&#x2014;N<sup>&#x220A;2</sup> = 2.28&#x2005;&#xC5;), Glu971
+(W201&#x2014;O<sup>&#x220A;2</sup> = 2.35&#x2005;&#xC5;) and a second solvent molecule W321 at 2.44&#x2005;&#xC5;. In turn, W321 forms a
+hydrogen bond with Glu597 (W321&#x2014;O<sup>&#x220A;2</sup> = 2.37&#x2005;&#xC5;). In domain 6, the additional copper site does appear
+to contain a metal cation but at a low occupancy of only around 50% and its nature is difficult to define precisely. As indicated in
+Table&#xA0;3<xref ref-type="table" rid="table3"> &#x25B6;</xref>, there could be up to five ligands, three of which are water
+molecules, arranged in a distorted trigonal bipyramid. Asp1025 clearly shows two alternative configurations, one oriented towards the
+metal site and the second pointing away so that the O<sup>&#x3B4;1</sup> atom forms a 1&#x2014;6 inter-domain hydrogen bond with
+Asn271&#x2005;N<sup>&#x3B4;2</sup> at a distance of 2.90&#x2005;&#xC5;. Although the additional site in domain 6 is not fully defined,
+the observations appear to be consistent with it acting as a site of metal-cation oxidation and with Glu935 playing a role in
+translocating the oxidized metal ion to a holding site closer to the molecular surface (Lindley <italic>et al.</italic>, 1997<xref ref-type="bibr" rid="bb20"> &#x25B6;</xref>).</p>
+			</sec>
+			<sec id="sec3.5">
+				<label>3.5.</label>
+				<title>The calcium-binding
+site</title>
+				<p>The room-temperature structure determination of human ceruloplasmin at 3.1&#x2005;&#xC5; resolution indicated a binding
+site unique to domain 1 (residues 1&#x2013;192 inclusive), although it was not possible at this resolution to determine the precise
+nature of the moiety that was bound. The cryo-data at 2.8&#x2005;&#xC5; resolution show refinement parameters consistent with a
+Ca<sup>2+</sup> cation in an environment comprising two bidentate aspartate ligands, Asp127 and Asp128, the carboxyl main-chain oxygen
+moieties of Lys109 and Gln124 and two water molecules in an octahedral coordination as shown in Fig. 3<xref ref-type="fig" rid="fig3">
+&#x25B6;</xref>; details of the molecular geometry are given in Table 5<xref ref-type="table" rid="table5"> &#x25B6;</xref>. The
+discovery of the Ca<sup>2+</sup>-binding site is consistent with binding studies of divalent cations to human and sheep ceruloplasmin,
+in which an effective one-step purification protocol based on the affinity of the protein for Ca<sup>2+</sup> ions has been developed
+(Musci <italic>et al.</italic>, 1996<xref ref-type="bibr" rid="bb28"> &#x25B6;</xref>). This Ca<sup>2+</sup>-binding site is almost
+identical to that found in the structure of C-inactivated bovine factor Va (Adams <italic>et al.</italic>, 2004<xref ref-type="bibr" rid="bb1"> &#x25B6;</xref>); the respective sequences in this region are as follows, with the ligands to the Ca<sup>2+</sup> ion shown
+in bold.<chem-struct id="scheme1"><graphic xlink:href="d-63-00240-scheme1.jpg" position="float" mimetype="image"/></chem-struct>Indeed, the A1 domain of factor Va can be superimposed on the motif comprising domains 1 and 2 of hCP
+with an r.m.s. fit of 1.36&#x2005;&#xC5; for 261 (of 340) C<sup>&#x3B1;</sup> atoms.</p>
+				<p>In the case of the factor Va chain,
+association between the light and heavy chains is required for the protein to function and this has been shown to be dependent on a
+Ca<sup>2+</sup> cation. However, the Ca<sup>2+</sup> cation does not bridge the light and heavy chains; it is entirely coordinated in
+the A1 domain. It has been proposed that the loop comprising Lys93&#x2013;Asp112 adopts a conformation that results in several
+essential interactions between the A1 and A3 domains, thereby mediating chain association. Lys93, Asp111 and Asp112 in factor Va are
+equivalent to Lys109, Asp127 and Asp128 in hCP, whereas the A3 domain in factor Va is equivalent to domains 5 and 6 of hCP. In hCP,
+Lys109 forms a hydrogen-bonding interaction with the carbonyl moiety of Ile1016 in domain 6 and the Ca<sup>2+</sup> ion is
+11.9&#x2005;&#xC5; from the type 2 copper of the trinuclear centre which lies between domains 1 and 6. Indeed, the Ca<sup>2+</sup> ion
+and type 2 copper can be linked through a pathway starting with Asp127&#x2005;OD2, which is 2.93&#x2005;&#xC5; from the main-chain N of
+Glu112. The carbonyl O of Glu112 is then 2.79&#x2005;&#xC5; from His101&#x2005;ND1, which in turn is bonded to Cu4 through its NE2
+atom.</p>
+				<p>In the case of hCP, its interaction with red blood cells has been shown to be a Ca<sup>2+</sup>-dependent process and is
+limited by hCP binding to the cell membrane (Saenko &amp; Yaropolov, 1990<xref ref-type="bibr" rid="bb35"> &#x25B6;</xref>), but not
+being transported through it. Further studies on the nature of the interactions have shown that terminal sialic residues both on the
+red blood-cell receptors and the hCP glycan moieties play determining roles. Although the Ca<sup>2+</sup> cation is entirely
+coordinated by residues in domain 1, it is only some 7.0&#x2013;8.0&#x2005;&#xC5; from the protein surface and 10.0&#x2005;&#xC5; from
+the C<sup>&#x3B1;</sup> atom of Asn119, a residue to which a glycan moiety is N-&#xAD;linked. It is therefore possible that the binding
+of a Ca<sup>2+</sup> ion can mediate the conformation of at least one of the glycan moieties and that this is turn can play a role in
+the binding of hCP to red blood cells.</p>
+			</sec>
+			<sec id="sec3.6">
+				<label>3.6.</label>
+				<title>The sodium-binding sites</title>
+				<p>The
+molecule of ceruloplasmin possesses an upper surface with three large protuberances. These features are formed from the loops between
+&#x3B2;-strands 1 and 2 of one odd and one even domain as shown in Fig. 4<xref ref-type="fig" rid="fig4">
+&#x25B6;</xref>(<italic>a</italic>) for the protuberance formed by domains 5 and 6. It has been proposed that they help to limit access
+to the putative oxidation sites close to the T1 copper-binding sites in domains 4 and 6 (Lindley <italic>et al.</italic>, 1997<xref ref-type="bibr" rid="bb20"> &#x25B6;</xref>; Zaitsev <italic>et al.</italic>, 1999<xref ref-type="bibr" rid="bb41"> &#x25B6;</xref>).
+Thus, metal cations and species such as the biogenic amines norepinephrine, epinethrine, dopamine and serotonin will have access,
+whereas larger molecules will not. This could rationalize the function of hCP as a ferroxidase and/or its control over the
+concentration of biogenic amines reaching the blood&#x2013;brain barrier. The locations of the T1 copper sites in the even domains that
+are oriented inside the protein as opposed to the odd domains that point towards the outside must also play an important role, but the
+rigidity of these structures will also be of importance. The hCP structure determined at cryotemperature identifies a metal-binding
+site near the base of each of the three protuberances that will greatly assist their rigidity. The behaviour of the isotropic thermal
+parameters of the metals during refinement and their chemical environment strongly suggests they are Na<sup>+</sup> cations. Indeed,
+the crystallization of the trigonal form of hCP has not been found to be possible in the absence of sodium chloride. The roles of
+Na<sup>+</sup> and K<sup>+</sup> ions in enzyme function have been comprehensively described (Page &amp; Di Cera, 2006<xref ref-type="bibr" rid="bb30"> &#x25B6;</xref>), but in hCP the Na<sup>+</sup> ions appear to have a predominantly structural function.
+Thus, as shown in Fig. 4<xref ref-type="fig" rid="fig4"> &#x25B6;</xref>(<italic>b</italic>), the metal at the base of the protuberance
+formed by domains 5 and 6 has a square-pyramidal environment with a tyrosine ligand (Tyr760) and three carboxyl O atoms (residues
+Phe748, Gly757 and Ser936) at its base and a water molecule (W64) in the apical position. Met939&#x2005;S<sup>&#x3B4;</sup> is some
+3.47&#x2005;&#xC5; distant on the other side of the base to the water molecule. The water molecule is in turn tetrahedrally coordinated
+to two further waters W115 and W129 and the peptide N atom of Gly757. W115 forms hydrogen bonds with Ser936&#x2005;O<sup>&#x3B3;</sup>
+and Asn93&#x2005;O<sup>&#x3B4;1</sup>, whereas W129 hydrogen bonds to the carboxyl oxygen moieties of Ala747 and Asp750. This system of
+covalent and hydrogen bonding ensures that the large loops between the first two &#x3B2;-strands of both domains 5 and 6 form a compact
+and stable arrangement (Fig. 4<xref ref-type="fig" rid="fig4"> &#x25B6;</xref> <italic>a</italic>). As indicated in Table 6<xref ref-type="table" rid="table6"> &#x25B6;</xref>, an almost identical situation is found for domains 3 and 4, with the addition of a
+further hydrogen bond for W171 (equivalent to W115 in the domain 5/6 interface), which forms an extra hydrogen bond to the peptide N
+atom of Ile397. However, the arrangement at the base of the protuberance formed by domains 1 and 2 is less well defined, mirroring the
+overall poorer definition of domain 1 with respect to the other five domains. Not only is Met240&#x2005;S<sup>&#x3B4;</sup> appreciably
+further away from the Na<sup>+</sup> cation (3.85&#x2005;&#xC5;) relative to the other two Na<sup>+</sup> cations, but the water bound
+to it and a second water equivalent to W129 in Fig. 4<xref ref-type="fig" rid="fig4"> &#x25B6;</xref>(<italic>b</italic>) are also
+missing. This could be taken as an indication of lower rigidity for this structure and could correlate with the copper ion in domain 2
+being in the fully reduced state (Machonkin <italic>et al.</italic>, 1998<xref ref-type="bibr" rid="bb22"> &#x25B6;</xref>) and the
+absence of any additional metal-binding site in this domain. In this context, it should also be noted that the Na<sup>+</sup> ion
+between domains 5 and 6 is relatively close to the additional binding site in domain 6. In this cryo-structure, the cation is liganded
+to the main chain of Ser936 which is adjacent to Glu935 and in turn is linked to the additional metal-binding site in domain 6 through
+W111. As indicated previously, Glu935 has been implicated in translocating metal ions to a holding site near the surface of the
+protein after oxidation. The Na<sup>+</sup> ion in domain 6 (and also domain 4) may therefore not only maintain the conformation of
+the upper surface protuberance, but may also be involved in the processes of metal oxidation and translocation.</p>
+			</sec>
+		</sec>
+		<sec id="sec4">
+			<label>4.</label>
+			<title>Summary</title>
+			<p>The preparation of crystals of human ceruloplasmin that can be flash-frozen to
+liquid-nitrogen temperature has resulted in the collection of X-ray diffraction data to 2.8&#x2005;&#xC5; at a temperature of
+100&#x2005;K, a marginally higher resolution, but certainly a significantly better quality data set than can be obtained at ambient
+temperatures. This has resulted in a structure with an overall better definition of the protein side chains, a re-examination of the
+trinuclear copper cluster with a bound dioxygen moiety and the identification of Ca<sup>2+</sup> and Na<sup>+</sup> centres. The
+Ca<sup>2+</sup> centre appears to be an integral component of the structure and may play a role in the interactions of the protein
+with red blood cells. The presence of sodium chloride in the crystallization medium is essential to obtain the trigonal crystals of
+hCP used in this analysis. The Na<sup>+</sup> ions appear to play a crucial role not only in the overall fold of the protein, but also
+in the formation of structural elements that restrict access to the type 1 copper sites.</p>
+			<p>The presence of these centres, together
+with previous studies on the binding of various transition metals, biogenic amines and aromatic diamines, further emphasizes the
+probability that ceruloplasmin is multi-functional. The multi-functional nature of oxidase activity of ceruloplasmin has also been
+revealed in anion-binding studies (Musci <italic>et al.</italic>, 1999<xref ref-type="bibr" rid="bb27"> &#x25B6;</xref>). In contrast
+to cations, the anions (azide and Cl<sup>&#x2212;</sup>) appear to act either as inhibitors or activators, thus modulating the oxidase
+activity of the enzyme, the effect of the anions being concentration-dependent and pH-dependent.</p>
+			<p>It should be remembered that
+the protein is an acute phase entity so that its concentration in the plasma increases twofold to threefold at the onset of infection
+or wounding. Under these circumstances, the multi-functionality may be highly important. However, there is no direct evidence from the
+structural viewpoint that the protein plays a dominant role in copper transport. Whilst copper can bind to the additional binding
+sites in domains 4 and 6 and presumably to other sites on the complex surface of this large protein and whilst catabolism of the
+protein will result in the integral mononuclear and trinuclear copper loaded in the hepatic liver cells being released into the
+general environment, the protein does not have a structure that is typical of other molecules involved in copper transport (Banci
+<italic>et al.</italic>, 2006<xref ref-type="bibr" rid="bb2"> &#x25B6;</xref>). The case for ceruloplasmin as a copper transporter
+appears to be, as yet, unresolved.</p>
+			<p>Future work will focus on obtaining larger crystals with the hope that this will lead to an
+even higher resolution definition of the ceruloplasmin structure.</p>
+		</sec>
+		<sec sec-type="supplementary-material">
+			<title>Supplementary
+Material</title>
+			<supplementary-material position="float" xlink:type="simple">
+				<p>PDB reference: <ext-link ext-link-type="pdb" xlink:href="2j5w" xlink:type="simple">ceruloplasmin, 2j5w, r2j5wsf</ext-link>
+</p>
+			</supplementary-material>
+		</sec>
+	</body>
+	<back>
+		<ack>
+			<p>We wish to acknowledge the European Synchrotron Radiation Facility in
+Grenoble, France for the provision of X-&#xAD;ray data-collection facilities and the assistance of the Macromolecular Crystallography
+project team in helping to optimize the data quality on beamline ID14-4. We would also like to thank the Laboratory of Animal Cell
+Technology (Professor Manuel Carrondo and Dr Paula Alves) at the Instituto de Biologia Experimental e Tecnol&#xF3;gica for help with
+the purification of the hCP. The Funda&#xE7;&#xE3;o para a Ci&#xEA;ncia e a Tecnologia, Portugal is also thanked for providing support
+to IB.</p>
+		</ack>
+		<ref-list>
+			<title>References</title>
+			<ref id="bb1">
+				<citation citation-type="journal">Adams, T. E., Hockin, M. F., Mann,
+K. G. &amp; Everse, S. J. (2004). <italic>Proc. Natl Acad. Sci. USA</italic>, <bold>101</bold>, 8918&#x2013;8923.</citation>
+			</ref>
+			<ref id="bb2">
+				<citation citation-type="journal">Banci, L., Bertini, I., Cantina, F., DellaMalva, N., Herrmann, T., Rosato, A. &amp;
+Wuthrich, K. (2006). <italic>J. Biol. Chem.</italic><bold>281</bold>, 29141&#x2013;29147.</citation>
+			</ref>
+			<ref id="bb3">
+				<citation citation-type="journal">Bento, I., Martins, L. O., Lopes, G. G., Carrondo, M. A. &amp; Lindley, P.&#xA0;F. (2005). <italic>Dalton
+Trans.</italic><bold>21</bold>, 3507&#x2013;3513.</citation>
+			</ref>
+			<ref id="bb4">
+				<citation citation-type="journal">Bielli, P.,
+Bellenchini, G. C. &amp; Calabrese, L. (2001). <italic>J. Biol. Chem.</italic><bold>276</bold>, 2678&#x2013;2685.</citation>
+			</ref>
+			<ref id="bb5">
+				<citation citation-type="journal">Bielli, P. &amp; Calabrese, L. (2002). <italic>Cell. Mol. Life
+Sci.</italic><bold>59</bold>, 1413&#x2013;1427.</citation>
+			</ref>
+			<ref id="bb6">
+				<citation citation-type="journal">Collaborative
+Computational Project, Number 4 (1994). <italic>Acta Cryst.</italic> D<bold>50</bold>, 760&#x2013;763.</citation>
+			</ref>
+			<ref id="bb7">
+				<citation citation-type="other">DeLano, W. L. (2002). <italic>The PyMOL Molecular Visualization System.</italic> DeLano
+Scientific, San Carlos, CA, USA. http://www.pymol.org.</citation>
+			</ref>
+			<ref id="bb8">
+				<citation citation-type="journal">Ducros, V.,
+Brzozowski, A. M., Wilson, K. S, Ostergaard, P., Schneider, P., Svendson, A. &amp; Davies, G. J. (2001). <italic>Acta Cryst.</italic>
+D<bold>57</bold>, 333&#x2013;336.</citation>
+			</ref>
+			<ref id="bb9">
+				<citation citation-type="journal">Emsley, P. &amp; Cowtan, K. (2004).
+<italic>Acta Cryst.</italic> D<bold>60</bold>, 2126&#x2013;2132.</citation>
+			</ref>
+			<ref id="bb10">
+				<citation citation-type="journal">Endo,
+M., Susuki, K., Schmidt, K., Fournet, B., Karamanos, Y., Montrueil, J., Dorland, L., Van Halbeek, H. &amp; Vliegenthart, J. F. G.
+(1982). <italic>J. Biol. Chem.</italic><bold>257</bold>, 8755&#x2013;8760.</citation>
+			</ref>
+			<ref id="bb11">
+				<citation citation-type="journal">Frieden, E. &amp; Hsieh, H. S. (1976). <italic>Adv. Enzymol. Relat. Areas Mol. Biol.</italic><bold>44</bold>,
+187&#x2013;236.</citation>
+			</ref>
+			<ref id="bb12">
+				<citation citation-type="journal">Garavaglia, S., Cambria, M. T., Miglio, M., Ragusa,
+S., Iacobazzi, V., Palmieri, F., D&#x2019;Ambrosio, C., Scaloni, A. &amp; Rizzi, M. (2004). <italic>J. Mol.
+Biol.</italic><bold>342</bold>, 1519&#x2013;1531.</citation>
+			</ref>
+			<ref id="bb13">
+				<citation citation-type="other">Holmberg, G. C.
+(1944). <italic>Acta Physiol. Scand.</italic><bold>8</bold>, 227&#x2013;229.</citation>
+			</ref>
+			<ref id="bb14">
+				<citation citation-type="journal">Jones, T. A., Zou, J.-Y., Cowan, S. W. &amp; Kjeldgaard, M. (1991). <italic>Acta Cryst.</italic>
+A<bold>47</bold>, 110&#x2013;119.</citation>
+			</ref>
+			<ref id="bb15">
+				<citation citation-type="journal">Laskowski, R. A., MacArthur, M. W.,
+Moss, D. S. &amp; Thornton, J. M. (1993). <italic>J. Appl. Cryst.</italic><bold>26</bold>, 283&#x2013;291.</citation>
+			</ref>
+			<ref id="bb16">
+				<citation citation-type="other">Laurie, S. N. &amp; Mohammed, E. H. (1980). <italic>Coord. Chem.
+Rev.</italic><bold>33</bold>, 279&#x2013;&#xAD;312.</citation>
+			</ref>
+			<ref id="bb17">
+				<citation citation-type="other">Leslie, A. G. W.
+(1992). <italic>Joint CCP4/ESF&#x2013;EACBM Newsl. Protein Crystallogr.</italic><bold>26</bold></citation>
+			</ref>
+			<ref id="bb18">
+				<citation citation-type="other">Lindley, P. F. (2001). <italic>Handbook on Metalloproteins</italic>, edited by I. Bertini,
+A. Sigel &amp; H. Sigel, pp. 763&#x2013;811. New York: Marcel Dekker.</citation>
+			</ref>
+			<ref id="bb19">
+				<citation citation-type="other">Lindley, P. F., Card, G., Zaitseva, I. &amp; Zaitsev, V. (1999). <italic>Perspectives on Bioinorganic
+Chemistry</italic>, Vol. 4, edited by R. W. Hay, J. R. Dilworth &amp; K. W. Nolan, pp. 51&#x2013;89. Greenwich, CT, USA: JAI
+Press.</citation>
+			</ref>
+			<ref id="bb20">
+				<citation citation-type="other">Lindley, P. F., Card, G., Zaitseva, I., Zaitsev, V., Reinhammer,
+B., Selin-Lindgren, E. &amp; Yoshida, K. (1997). <italic>J. Biol. Inorg. Chem.</italic><bold>2</bold>,
+454&#x2013;463.</citation>
+			</ref>
+			<ref id="bb21">
+				<citation citation-type="other">Machonkin, T. E. &amp; Solomon, E. I. (2000). <italic>J.
+Am. Chem. Soc.</italic><bold>122</bold>, 12547&#x2013;12560.</citation>
+			</ref>
+			<ref id="bb22">
+				<citation citation-type="journal">Machonkin, T. E., Zhang, H. H., Hedman, B., Hodgson, K. O. &amp; Solomon, E. I. (1998).
+<italic>Biochemistry</italic>, <bold>37</bold>, 9570&#x2013;9578.</citation>
+			</ref>
+			<ref id="bb23">
+				<citation citation-type="journal">Malmstr&#xF6;m, B. G. (1982). <italic>Ann. Rev. Biochem.</italic><bold>51</bold>,
+21&#x2013;59.</citation>
+			</ref>
+			<ref id="bb24">
+				<citation citation-type="journal">Messerschmidt, A., Ladenstein, R., Huber, R., Bolognesi,
+M., Avigliano, L., Petruzzelli, R., Rossi, A. &amp; Finazzi-Agro, A. (1992). <italic>J. Mol. Biol.</italic><bold>224</bold>,
+179&#x2013;205.</citation>
+			</ref>
+			<ref id="bb25">
+				<citation citation-type="journal">Moshkov, K. A., Lakatos, S., Hajdu, J., Zavodsky, P.
+&amp; Neifakh, S. A. (1979). <italic>Eur. J. Biochem.</italic><bold>94</bold>, 127&#x2013;134.</citation>
+			</ref>
+			<ref id="bb26">
+				<citation citation-type="journal">Murshudov, G. N., Vagin, A. A., Lebedev, A., Wilson, K. S. &amp; Dodson, E. J. (1999). <italic>Acta
+Cryst.</italic> D<bold>55</bold>, 247&#x2013;255.</citation>
+			</ref>
+			<ref id="bb27">
+				<citation citation-type="journal">Musci, G.,
+Bellenchi, G. C. &amp; Calabrese, L. (1999). <italic>Eur. J. Biochem.</italic><bold>265</bold>, 589&#x2013;597.</citation>
+			</ref>
+			<ref id="bb28">
+				<citation citation-type="journal">Musci, G., Bonaccorsi di Patti, M. C., Petruzzelli, R., Giartosio, A. &amp; Calabrese, L.
+(1996). <italic>Biometals</italic>, <bold>9</bold>, 66&#x2013;72.</citation>
+			</ref>
+			<ref id="bb29">
+				<citation citation-type="journal">Nakamura, K. &amp; Go, N. (2005). <italic>Cell. Mol. Life Sci.</italic><bold>62</bold>,
+2050&#x2013;2066.</citation>
+			</ref>
+			<ref id="bb30">
+				<citation citation-type="journal">Page, M. J. &amp; Di Cera, E. (2006).
+<italic>Physiol. Rev.</italic><bold>86</bold>, 1049&#x2013;1092.</citation>
+			</ref>
+			<ref id="bb31">
+				<citation citation-type="journal">Piontek, K., Antorini, M. &amp; Choinowski, T. (2002). <italic>J. Biol. Chem.</italic><bold>277</bold>,
+37663&#x2013;37669.</citation>
+			</ref>
+			<ref id="bb32">
+				<citation citation-type="journal">Ramakrishnan, C. &amp; Ramachandran, G. N. (1965).
+<italic>Biophys. J.</italic><bold>5</bold>, 909&#x2013;&#xAD;933.</citation>
+			</ref>
+			<ref id="bb33">
+				<citation citation-type="journal">Read, R. J. (1986). <italic>Acta Cryst.</italic> A<bold>42</bold>, 140&#x2013;149.</citation>
+			</ref>
+			<ref id="bb34">
+				<citation citation-type="other">Ryden, L. (1984). <italic>Copper Proteins and Copper Enzymes</italic>, Vol. 3, edited by R.
+Lontie, pp. 37&#x2013;100. Boca Raton, FL, USA: CRC Press.</citation>
+			</ref>
+			<ref id="bb35">
+				<citation citation-type="other">Saenko, E. L.
+&amp; Yaropolov, A. I. (1990). <italic>Biochem. Int.</italic><bold>20</bold>, 212&#x2013;225.</citation>
+			</ref>
+			<ref id="bb36">
+				<citation citation-type="journal">Takahashi, N., Bauman, R. A., Ortel, T. L., Dwulet, F. E., Wang, C. C. &amp; Putnam, F. W. (1983).
+<italic>Proc. Natl Acad. Sci. USA</italic>, <bold>80</bold>, 115&#x2013;119.</citation>
+			</ref>
+			<ref id="bb37">
+				<citation citation-type="journal">Takahashi, N., Ortel, T. L. &amp; Putnam, F. W. (1984). <italic>Proc. Natl Acad. Sci. USA</italic>,
+<bold>81</bold>, 390&#x2013;394.</citation>
+			</ref>
+			<ref id="bb38">
+				<citation citation-type="journal">Vagin, A. &amp; Teplyakov, A. (1997).
+<italic>J. Appl. Cryst.</italic><bold>30</bold>, 1022&#x2013;1025.</citation>
+			</ref>
+			<ref id="bb39">
+				<citation citation-type="journal">Yamashita, K., Liang, C. J., Funakoski, S. &amp; Kobata, A. (1981). <italic>J. Biol.
+Chem.</italic><bold>256</bold>, 1283&#x2013;1289.</citation>
+			</ref>
+			<ref id="bb40">
+				<citation citation-type="journal">Yoshida, K,.
+Furihata, K., Takeda, A., Nakamura, A., Yamamoto, K., Morita, H., Hiyamuta, S., Ikeda, S., Shimizu, N. &amp; Yanagisawa, N. (1995).
+<italic>Nature Genet.</italic><bold>9</bold>, 267&#x2013;272.</citation>
+			</ref>
+			<ref id="bb41">
+				<citation citation-type="journal">Zaitsev,
+V. N., Zaitseva, I., Papiz, M. &amp; Lindley, P. F. (1999). <italic>J. Biol. Inorg. Chem.</italic><bold>4</bold>,
+579&#x2013;587.</citation>
+			</ref>
+			<ref id="bb42">
+				<citation citation-type="other">Zaitseva, I., Zaitsev, V., Card, G., Moshkov, K., Bax,
+B., Ralph, A. &amp; Lindley, P. (1996). <italic>J. Biol. Inorg. Chem.</italic><bold>1</bold>,
+15&#x2013;23.</citation>
+			</ref>
+		</ref-list>
+	</back>
+	<floats-wrap>
+		<fig id="fig1" position="float">
+			<label>Figure 1</label>
+			<caption>
+				<p>The
+overall organization of the ceruloplasmin molecule, showing the six cupredoxin domains (domains 1, 2, 3, 4, 5 and 6 in red, orange,
+yellow, green, blue and purple, respectively) and the locations of the metal-binding sites: Cu<sup>2+</sup> as blue spheres,
+Ca<sup>2+</sup> as an olive-green sphere and Na<sup>+</sup> as red spheres. The relatively planar bottom surface and the protuberances
+at the top surface are clearly visible. The figures were prepared with the <italic>PyMOL</italic> program (DeLano, 2002<xref ref-type="bibr" rid="bb7"> &#x25B6;</xref>).</p>
+			</caption>
+			<graphic xlink:href="d-63-00240-fig1"/>
+		</fig>
+		<fig id="fig2" position="float">
+			<label>Figure 2</label>
+			<caption>
+				<p>The trinuclear cluster between domains 1 and 6, showing the water molecule
+attached to the type 2 copper Cu34. An OMIT electron-density map, <italic>F</italic> <sub>o</sub> &#x2212; <italic>F</italic>
+<sub>c</sub>, contoured at 7&#x2005;r.m.s. clearly confirms the presence of a diatomic species, assumed to be dioxygen, within the type
+3 cluster.</p>
+			</caption>
+			<graphic xlink:href="d-63-00240-fig2"/>
+		</fig>
+		<fig id="fig3" position="float">
+			<label>Figure
+3</label>
+			<caption>
+				<p>The Ca<sup>2+</sup>-binding site in domain 1. (<italic>a</italic>) Overall view of domain 1, showing the
+locations of the trinuclear copper cluster and the glycan chain at Asn119. (<italic>b</italic>) Details of the molecular geometry at
+the Ca<sup>2+</sup> centre.</p>
+			</caption>
+			<graphic xlink:href="d-63-00240-fig3"/>
+		</fig>
+		<fig id="fig4" position="float">
+			<label>Figure
+4</label>
+			<caption>
+				<p>The Na<sup>+</sup>-binding site between domains 5 and 6. (<italic>a</italic>) An overall view with the main
+chains of domains 5 and 6 coloured blue and green, respectively. (<italic>b</italic>) A detailed view of the bonding in the vicinity
+of the Na4 cation site. In (<italic>b</italic>) Ile756 is not shown for clarity, although its main-chain N atom forms a hydrogen bond
+with W115 on the left-hand side of the figure (see Table&#xA0;6<xref ref-type="table" rid="table6">
+&#x25B6;</xref>).</p>
+			</caption>
+			<graphic xlink:href="d-63-00240-fig4"/>
+		</fig>
+		<table-wrap id="table1" position="float">
+			<label>Table
+1</label>
+			<caption>
+				<title>Data-collection statistics for human ceruloplasmin</title>
+				<p>Values in parentheses are for the highest
+resolution shell (2.95&#x2013;2.80&#x2005;&#xC5;).</p>
+			</caption>
+			<table frame="hsides" rules="groups">
+				<tbody valign="top">
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Beamline at ESRF</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">ID14-4</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Wavelength (&#xC5;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.9393</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Crystal-to-detector
+distance (mm)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">250</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Resolution (&#xC5;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">75.3&#x2013;2.8</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Temperature (K)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">100</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Space group</td>
+						<td rowspan="1" colspan="1" align="left" valign="top"><italic>P</italic>3<sub>2</sub>21</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Unit-cell parameters
+(&#xC5;) </td>
+						<td rowspan="1" colspan="1" align="left" valign="top"><italic>a</italic> = 209.14, <italic>c</italic> =
+82.75</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Mosaicity (&#xB0;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.3</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Oscillation range (&#xB0;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">60.00</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Oscillation
+angle (&#xB0;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.25</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">No. of unique <italic>hkl</italic></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">51383
+(7464)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Completeness (%)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">100.0 (100.0)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top"><italic>I</italic>/&#x3C3;(<italic>I</italic>) </td>
+						<td rowspan="1" colspan="1" align="left" valign="top">6.4
+(2.3)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<italic>R</italic>
+							<sub>merge</sub>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.074 (0.319)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Multiplicity</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">3.7
+(3.8)</td>
+					</tr>
+				</tbody>
+			</table>
+		</table-wrap>
+		<table-wrap id="table2" position="float">
+			<label>Table 2</label>
+			<caption>
+				<title>Refinement
+and quality of refined model</title>
+			</caption>
+			<table frame="hsides" rules="groups">
+				<tbody valign="top">
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Refinement</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;No. of protein atoms</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">8338</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;No. of solvent atoms</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">341</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;No. of
+heteroatoms</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">14</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;No. of glycan units</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2 NAG</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;No. of glycerols</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Final <italic>R</italic> factors </td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Working + test set</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.178</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Working</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.175</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Final free <italic>R</italic> factor
+(5.1% of reflections)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.228</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Mean <italic>B</italic> values (&#xC5;<sup>2</sup>)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Protein</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">48.9</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Solvent</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">44.1</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Overall</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">48.8</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;ESU (&#xC5;) based on</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Free
+<italic>R</italic> value</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.27</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Maximum likelihood</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.19</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Correlation coefficients </td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003; <italic>F</italic><sub>o</sub> &#x2212; <italic>F</italic><sub>c</sub></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.95</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Free</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.91</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Distance deviations<xref ref-type="table-fn" rid="tfn1">&#x2020;</xref></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Bond distances
+(&#xC5;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.011 (0.022)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Bond angles (&#xC5;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1.505
+(1.940)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Planar groups (&#xC5;)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.004 (0.020)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Chiral volume deviation (&#xC5;<sup>3</sup>)</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">0.224 (0.200)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Quality of model<xref ref-type="table-fn" rid="tfn2">&#x2021;</xref></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Overall <italic>G</italic> factor</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2212;0.04</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Ramachandran analysis,
+number and % of residues in</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Favourable regions</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">749
+(86.7%)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Additional regions</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">109 (12.6%)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Generous regions</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">5 (0.6%)</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;&#x2003;Disallowed regions</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1 (0.1%)</td>
+					</tr>
+				</tbody>
+			</table>
+			<table-wrap-foot>
+				<fn id="tfn1">
+					<label>&#x2020;</label>
+					<p>Values in parentheses are
+r.m.s. deviations from target values.</p>
+				</fn>
+				<fn id="tfn2">
+					<label>&#x2021;</label>
+					<p>The <italic>G</italic> factor and Ramachandran
+analysis were determined using <italic>PROCHECK</italic> (Laskowski <italic>et al.</italic>, 1993<xref ref-type="bibr" rid="bb15">
+&#x25B6;</xref>). Regions 18&#x2013;32, 340&#x2013;350 and 703&#x2013;709 were omitted.</p>
+				</fn>
+			</table-wrap-foot>
+		</table-wrap>
+		<table-wrap id="table3" position="float">
+			<label>Table 3</label>
+			<caption>
+				<title>Molecular geometry at the metal-binding sites: the mononuclear
+binding sites (T1 type copper and the second metal centre in domain 6) and ligands</title>
+			</caption>
+			<table frame="hsides" rules="groups">
+				<thead valign="bottom">
+					<tr>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Atom <italic>A</italic></th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Atom <italic>B</italic></th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom"><italic>A</italic>&#x2014;<italic>B</italic> distance (&#xC5;)</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Atom <italic>C</italic></th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom"><italic>B</italic>&#x2014;<italic>C</italic> distance (&#xC5;)</th>
+					</tr>
+				</thead>
+				<tbody valign="top">
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Domain 2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Cu21</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His276&#x2005;N<sup>&#x3B4;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.02</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His324&#x2005;N<sup>&#x3B4;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1.88</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cys319&#x2005;S<sup>&#x3B3;</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1.94</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Leu329&#x2005;C<sup>&#x3B4;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">3.52</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Domain 4</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Cu41</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His637&#x2005;N<sup>&#x3B4;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.08</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His685&#x2005;N<sup>&#x3B4;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.01</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cys680&#x2005;S<sup>&#x3B3;</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.06</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Met690&#x2005;S<sup>&#x3B4;</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.89</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Domain 6</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+						<td rowspan="1" colspan="1">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;Cu61</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His975&#x2005;N<sup>&#x3B4;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1.97</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His1026&#x2005;N<sup>&#x3B4;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.02</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cys1021&#x2005;S<sup>&#x3B3;</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.14</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1031&#x2005;S<sup>&#x3B4;</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">3.32</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#x2003;M62<xref ref-type="table-fn" rid="tfn3">&#x2020;</xref></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His940&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.26</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp1025&#x2005;O<sup>&#x3B4;1</sup><xref ref-type="table-fn" rid="tfn3">&#x2020;</xref></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.31</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W111</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.43</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Glu935&#x2005;O<sup>&#x220A;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.80</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W200</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.41</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp1025&#x2005;O<sup>&#x220A;2</sup><xref ref-type="table-fn" rid="tfn3">&#x2020;</xref></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.96</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W292</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.24</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Glu272&#x2005;O<sup>&#x220A;1</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">3.18</td>
+					</tr>
+				</tbody>
+			</table>
+			<table-wrap-foot>
+				<fn id="tfn3">
+					<label>&#x2020;</label>
+					<p>M62 and Asp1025 were assigned an
+occupancy of 0.5.</p>
+				</fn>
+			</table-wrap-foot>
+		</table-wrap>
+		<table-wrap id="table4" position="float">
+			<label>Table
+4</label>
+			<caption>
+				<title>Molecular geometry at the metal-binding sites: the trinuclear copper cluster at the interface of domains 1
+and 6</title>
+			</caption>
+			<table frame="hsides" rules="groups">
+				<thead valign="bottom">
+					<tr>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Atom <italic>A</italic></th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Atom <italic>B</italic></th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Distance (&#xC5;)</th>
+					</tr>
+				</thead>
+				<tbody valign="top">
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cu2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His163&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.14</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His980&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1.97</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His1020&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.02</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Dioxygen O2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.64</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Dioxygen O1</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.77</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cu3</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">4.97</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cu4</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">4.02</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cu3</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His103&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1.90</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His161&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.09</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His1022&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.20</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Dioxygen O2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.36</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Dioxygen O1</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.58</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cu4</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">4.09</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Cu4</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His101&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">1.87</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">His978&#x2005;N<sup>&#x220A;2</sup></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.00</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Dioxygen O1</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.25</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">OH<xref ref-type="table-fn" rid="tfn4">&#x2020;</xref></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.05</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W148<xref ref-type="table-fn" rid="tfn4">&#x2020;</xref></td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.98</td>
+					</tr>
+				</tbody>
+			</table>
+			<table-wrap-foot>
+				<fn id="tfn4">
+					<label>&#x2020;</label>
+					<p>Assigned occupancies of 0.5.</p>
+				</fn>
+			</table-wrap-foot>
+		</table-wrap>
+		<table-wrap id="table5" position="float">
+			<label>Table 5</label>
+			<caption>
+				<title>Molecular geometry at the metal-binding sites: the Ca<sup>2+</sup>-binding site
+in domain 1</title>
+			</caption>
+			<table frame="hsides" rules="groups">
+				<thead valign="bottom">
+					<tr>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Atom <italic>A</italic></th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Atom <italic>B</italic></th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">Distance (&#xC5;)</th>
+					</tr>
+				</thead>
+				<tbody valign="top">
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Ca</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Lys109&#x2005;O </td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.36</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Gln124&#x2005;O </td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.44</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp127&#x2005;OD1 </td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.48</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp127&#x2005;OD2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.47</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp128&#x2005;OD1</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.52</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp128&#x2005;OD2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.25</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W17</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.33</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W69</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.53</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">W17</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Ala114&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.70</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Glu112&#x2005;OE1</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">3.03</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">W69</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp118&#x2005;OD2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.77</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Thr120&#x2005;OG1</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.85</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Gln124&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.76</td>
+					</tr>
+				</tbody>
+			</table>
+		</table-wrap>
+		<table-wrap id="table6" position="float">
+			<label>Table 6</label>
+			<caption>
+				<title>Molecular geometry at the metal-binding sites: the Na<sup>+</sup>-binding sites
+between the odd and even domains</title>
+				<p>Even-domain residues are in bold.</p>
+			</caption>
+			<table frame="hsides" rules="groups">
+				<thead valign="bottom">
+					<tr>
+						<th rowspan="1" colspan="3" align="left" valign="bottom">Domains 1 and 2</th>
+						<th rowspan="1" colspan="3" align="left" valign="bottom">Domains 3 and 4</th>
+						<th rowspan="1" colspan="3" align="left" valign="bottom">Domains 5 and
+6</th>
+					</tr>
+					<tr>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">
+							<italic>A</italic>
+						</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">
+							<italic>B</italic>
+						</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom"><italic>A</italic>&#x2014;<italic>B</italic> (&#xC5;)</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">
+							<italic>A</italic>
+						</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">
+							<italic>B</italic>
+						</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom"><italic>A</italic>&#x2014;<italic>B</italic> (&#xC5;)</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">
+							<italic>A</italic>
+						</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom">
+							<italic>B</italic>
+						</th>
+						<th rowspan="1" colspan="1" align="left" valign="bottom"><italic>A</italic>&#x2014;<italic>B</italic> (&#xC5;)</th>
+					</tr>
+				</thead>
+				<tbody valign="top">
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">Na2</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Tyr48&#x2005;OH</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.44</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Na3</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Tyr401&#x2005;OH</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.30</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Na4</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Tyr760&#x2005;OH</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.46</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Ser237&#x2005;O</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.43</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Ser598&#x2005;O</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.35</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Ser936&#x2005;O</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.32</bold>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Thr36&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.50</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Phe389&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.60</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Phe748&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.31</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Gly45&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.48</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Gly398&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.41</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Gly757&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.52</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W159</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.43</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W64</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.44</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Met240&#x2005;S<sup>&#x3B4;</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>3.85</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Met601&#x2005;S<sup>&#x3B4;</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>3.36</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Met939&#x2005;S<sup>&#x3B4;</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>3.40</bold>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W159</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W45</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.60</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W64</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W129</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.56</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W171</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.72</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W115</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.65</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Gly398&#x2005;N</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.98</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Gly757&#x2005;N</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.84</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W45</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Val388&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.96</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W129</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Ala747&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.93</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Glu391&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.58</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Asp750&#x2005;O</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.77</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">W40</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Ile44&#x2005;N</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">3.01</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W171</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Ile397&#x2005;N</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">2.95</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">W115</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">Ile756&#x2005;N</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">3.24</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Ser237&#x2005;O<sup>&#x3B3;</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.70</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Ser598&#x2005;O<sup>&#x3B3;</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.83</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Ser396&#x2005;O<sup>&#x3B3;</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.63</bold>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Asn238&#x2005;O<sup>&#x3B4;1</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.81</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Asn599&#x2005;O<sup>&#x3B4;1</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.64</bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">&#xA0;</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>Asn937&#x2005;O<sup>&#x3B4;1</sup></bold>
+						</td>
+						<td rowspan="1" colspan="1" align="left" valign="top">
+							<bold>2.62</bold>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</table-wrap>
+	</floats-wrap>
+</article>

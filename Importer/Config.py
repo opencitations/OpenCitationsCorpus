@@ -22,6 +22,7 @@ workdir = './workdir/' # a directory into which files can be uncompressed tempor
 # that a previous loop failed on. And it is no use for threaded processing
 startingfile = 1 
 
+skip_tar = True
 
 es_url = "localhost:9200" # where is the ES index?
 es_index = "test" # what is the name of the elasticsearch database to use?
@@ -34,7 +35,7 @@ es_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_indextype.lstrip(
 es_synchroniser_config_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
 es_synchroniser_config_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_synchroniser_config_type.lstrip('/').rstrip('/') + '/'
 
-es_prep = False # prep the index by making sure it exists and sending it a mapping before doing any uploads
+es_prep = True # prep the index by making sure it exists and sending it a mapping before doing any uploads
 es_delete_indextype = True # wipe the specified index before starting. This only happens if prep is also true
 
 es_mapping = { # the mapping to use for the ES index - this one here is the default record mapping for bibserver

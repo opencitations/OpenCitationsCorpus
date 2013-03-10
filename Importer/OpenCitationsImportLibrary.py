@@ -49,7 +49,10 @@ class Process(object):
     def __init__(self, filename):
         self.filename = filename
         self.procid = uuid.uuid4().hex
-        self.workdir = Config.workdir + self.procid + '/'
+        if Config.skip_tar:
+            self.workdir = Config.workdir + os.listdir(Config.workdir)[0] + '/'
+        else:
+            self.workdir = Config.workdir + self.procid + '/'
         self.b = Batch.Batch()
         self.m = MetadataReaders.MetadataReaderPMC()
         if not os.path.exists(Config.workdir):
@@ -63,10 +66,11 @@ class Process(object):
         print str(self.procid) + " processing " + self.filename
 
         # create folders in the workdir full of xml files to work on
-        tar = tarfile.open(Config.filedir + self.filename)
-        tar.extractall(path=self.workdir)
-        tar.close()
-        del tar
+        if not Config.skip_tar:
+            tar = tarfile.open(Config.filedir + self.filename)
+            tar.extractall(path=self.workdir)
+            tar.close()
+            del tar
 
         pmcoaList = os.listdir(self.workdir) # list the folders in the workdir
         for fl in pmcoaList:
@@ -79,14 +83,15 @@ class Process(object):
                 else:
                     self._ingest(self.workdir + fl + '/' + f)
         self.b.clear()
-        shutil.rmtree(self.workdir) # delete the folder in the workdir that was used for this process
+        if not Config.skip_tar:
+            shutil.rmtree(self.workdir) # delete the folder in the workdir that was used for this process
 
     # read in then delete the xml file
     # this causes delay and requires enough free memory to fit the file
     def _ingest(self, filepath):
         tree = ET.parse(filepath)
         elem = tree.getroot()
-        doc = self.m(elem)
+        doc = self.m(elem, nsprefix="")
         doc = doc.getMap()
         doc['_id'] = _get_bibserver_id(False)
         doc = _generic_bibjsonify(doc)
@@ -122,7 +127,7 @@ class PMCBulkImporter(object):
                     p.process()
 
 
-class OAIImporter:
+class OAIImporter(object):
 
     METADATA_FORMAT_OAI_DC = {"prefix": 'oai_dc', "reader": oai_dc_reader}
     METADATA_FORMAT_ARXIV = {"prefix": 'arXiv', "reader": MetadataReaders.MetadataReaderArXiv()}
@@ -440,15 +445,15 @@ def _get_bibserver_id(identifiers):
         if data["hits"]["total"] > 0:
             #return existing id as specified in BibServer
             bibserver_id = data["hits"]["hits"][0]["_id"]
-            print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
+            #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
         else:
             #Create new id using UUID
             bibserver_id = uuid.uuid4().hex
-            print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
+            #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
     else:
         #Create new id using UUID
         bibserver_id = uuid.uuid4().hex
-        print "Creating a new ID: %s" % (bibserver_id)
+        #print "Creating a new ID: %s" % (bibserver_id)
     return bibserver_id
 
 
