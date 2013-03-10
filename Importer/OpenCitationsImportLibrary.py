@@ -203,7 +203,7 @@ class OAIImporter:
         print "Synchronising period: %s - %s" % (start_date, end_date)
         records = list(self.get_records(client, start_date, end_date))
         for record in records:
-            batcher.add(_bibify_record(record))
+            batcher.add(self.bibify_record(record))
         return len(records)
 
 
@@ -214,7 +214,7 @@ class OAIImporter:
         for identifier in identifiers:
             print "Synchronising %s - %s" % (identifier.identifier(), identifier.datestamp())
             record = self.get_record(client, identifier.identifier())
-            batcher.add(_bibify_record(record))
+            batcher.add(self.bibify_record(record))
             counter += 1
         return counter
 
@@ -222,7 +222,7 @@ class OAIImporter:
     def synchronise_record(self, client, batcher, oaipmh_identifier):
         print "Synchronising record: %s" % (oaipmh_identifier)
         record = self.get_record(client, oaipmh_identifier)
-        batcher.add(_bibify_record(record))
+        batcher.add(self.bibify_record(record))
         return 1
         
 
@@ -367,7 +367,7 @@ class OAIImporter:
             #print 'Header setSpec: %s' % header.setSpec()
             #print 'Header isDeleted: %s' % header.isDeleted()
 
-    def _bibify_record(record):
+    def bibify_record(self, record):
         header, metadata, about = record
         bibjson = metadata.getMap()
         bibjson["_oaipmh_identifier"] = header.identifier()
