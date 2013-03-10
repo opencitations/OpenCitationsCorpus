@@ -101,9 +101,10 @@ class MetadataReaderArXiv(MetadataReaderAbstract):
         doi = self._find_element_text(arXiv, "arXiv:doi")
         
         if arXiv_id is not None:
-            map["identifier"].append({'type':'arXiv', 'id':arXiv_id})
+            map["identifier"].append({'type':'arXiv', 'id':arXiv_id, 'canonical':'arXiv:' + arXiv_id})
+
         if doi is not None:
-            map["identifier"].append({'type':'doi', 'id':doi})
+            map["identifier"].append({'type':'doi', 'id':doi, 'canonical':'doi:' + doi})
 
         #title
         self._set_map_with_element_text(map, "title", arXiv, "arXiv:title")
@@ -171,7 +172,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
                 if issns:
                     map["journal"]["identifier"] = []
                     for issn in issns:
-                        map["journal"]["identifier"].append({"type": issn.get('pub-type'), "id": issn.text})
+                        map["journal"]["identifier"].append({"type": issn.get('pub-type'), "id": issn.text, "canonical":issn.get('pub-type') + ':' + issn.text})
                 
                 self._set_map_with_element_text(map["journal"], "publisher", journal_meta, "nlmaa:publisher/nlmaa:publisher-name")
             except:
@@ -187,7 +188,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
                 if article_ids:
                     map["identifier"] = []
                     for article_id in article_ids:
-                        map["identifier"].append({"type": article_id.get('pub-id-type'), "id": article_id.text})
+                        map["identifier"].append({"type": article_id.get('pub-id-type'), "id": article_id.text, "canonical": article_id.get('pub-id-type') + ':' + article_id.text })
             except:
                 logging.error("Could not extract identifiers from article metadata")
             
@@ -329,7 +330,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
                         if pub_ids:
                             entity["identifier"] = []
                             for pub_id in pub_ids:
-                                entity["identifier"].append({"type": pub_id.get('pub-id-type'), "id": pub_id.text})
+                                entity["identifier"].append({"type": pub_id.get('pub-id-type'), "id": pub_id.text, 'canonical':pub_id.get('pub-id-type') + ':' +  pub_id.text})
                     # TODO: should this append happen even if the entity is empty? or bring into the above IF
                     map["citation"].append(entity)
                     # add code here to create a record for this citation if it does not already exist

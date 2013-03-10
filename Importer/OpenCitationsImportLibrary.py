@@ -158,14 +158,14 @@ class OAIImporter:
         batcher = Batch.Batch()
 
         synchronisation_config = self.get_synchronisation_config()
-        if synchronisation_config is not None and "to_date" in synchronisation_config:
+        if False and synchronisation_config is not None and "to_date" in synchronisation_config:
             last_synchronised = dateutil.parser.parse(synchronisation_config["to_date"])
         else:
-            last_synchronised = dateutil.parser.parse("2013-02-23")
+            last_synchronised = dateutil.parser.parse("2013-02-25")
 
         total_records = 0
 
-        #total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:1104.2274") #0804.2273
+        total_records += self.synchronise_record(client, batcher, "oai:pubmedcentral.nih.gov:3577499") #0804.2273  #"oai:arXiv.org:1104.2274"
         
 
 
@@ -177,7 +177,7 @@ class OAIImporter:
             print "Nothing to synchronise today."
         
         start = time.time()
-        while last_synchronised.date() < (date.today() - timedelta(days=1)):
+        while False and last_synchronised.date() < (date.today() - timedelta(days=1)):
             start_date = last_synchronised + timedelta(days=1)
             end_date = start_date + timedelta(days=self.delta_days)
             number_of_records = self.synchronise_by_block(client, batcher, start_date, end_date)
@@ -370,11 +370,13 @@ class OAIImporter:
     def bibify_record(self, record):
         header, metadata, about = record
         bibjson = metadata.getMap()
-        bibjson["_oaipmh_identifier"] = header.identifier()
         bibjson["_oaipmh_datestamp"] = header.datestamp().isoformat()
         bibjson["_oaipmh_setSpec"] = header.setSpec()
         bibjson["_oaipmh_isDeleted"] = header.isDeleted()
-        bibjson['_id'] = _get_bibserver_id(header.identifier())
+        if "identifier" not in bibjson:
+            bibjson["identifier"] = []
+        bibjson["identifier"].append({"type": "oaipmh", "id": header.identifier(), "canonical":"oaipmh:" + header.identifier()})
+        bibjson['_id'] = _get_bibserver_id(bibjson["identifier"])
         bibjson = _generic_bibjsonify(bibjson)
         return bibjson
 
@@ -391,7 +393,8 @@ def _generic_bibjsonify(bibjson):
         bibjson["identifier"] = []
     #this line crashes Elastic Search? Check with Mark
     #CHANGE THE PARSER TO USE A LIST OF OBJECTS
-    bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"],"url":bibjson["url"]})
+    #Not making BibSoup IDs anymore
+    #bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"], "url":bibjson["url"] })
 
     # set a date string
     y = bibjson.get('year',bibjson.get('journal',{}).get('year',False))
@@ -417,19 +420,31 @@ def _generic_bibjsonify(bibjson):
     return bibjson
 
 
-def _get_bibserver_id(oaipmh_identifier):
-    if oaipmh_identifier:
-        q = {"query":{"term":{"_oaipmh_identifier.exact": oaipmh_identifier}}}
+def _get_bibserver_id(identifiers):
+    if identifiers:
+        terms = []
+        for identifier in identifiers:
+            terms.append({"term":{"identifier.canonical.exact": identifier["type"] + ":" + identifier["id"]}})
+        q= {
+          "query": {
+            "bool": {
+              "should": terms
+            }
+          }
+        }
+
+        print q
+
         r = requests.get(Config.es_target + "_search", data=json.dumps(q))
         data = r.json()
-        if data["hits"]["total"] == 1:
+        if data["hits"]["total"] > 0:
             #return existing id as specified in BibServer
             bibserver_id = data["hits"]["hits"][0]["_id"]
-            print "Found existing ID for %s: %s" % (oaipmh_identifier, bibserver_id)
+            print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
         else:
             #Create new id using UUID
             bibserver_id = uuid.uuid4().hex
-            print "Creating a new ID for %s: %s" % (oaipmh_identifier, bibserver_id)
+            print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
     else:
         #Create new id using UUID
         bibserver_id = uuid.uuid4().hex

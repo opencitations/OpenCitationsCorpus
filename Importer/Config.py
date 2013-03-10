@@ -34,7 +34,7 @@ es_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_indextype.lstrip(
 es_synchroniser_config_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
 es_synchroniser_config_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_synchroniser_config_type.lstrip('/').rstrip('/') + '/'
 
-es_prep = True # prep the index by making sure it exists and sending it a mapping before doing any uploads
+es_prep = False # prep the index by making sure it exists and sending it a mapping before doing any uploads
 es_delete_indextype = True # wipe the specified index before starting. This only happens if prep is also true
 
 es_mapping = { # the mapping to use for the ES index - this one here is the default record mapping for bibserver
