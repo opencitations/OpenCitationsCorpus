@@ -19,12 +19,12 @@ def main():
     #arxiv = OpenCitationsImportLibrary.OAIImporter("http://export.arxiv.org/oai2", 0, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_ARXIV)
     #arxiv.run()
     
-    #pmc_oa = OpenCitationsImportLibrary.OAIImporter("http://www.pubmedcentral.nih.gov/oai/oai.cgi", 0, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_PMC)
-    #pmc_oa.run()
+    pmc_oa = OpenCitationsImportLibrary.OAIImporter("http://www.pubmedcentral.nih.gov/oai/oai.cgi", 0, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_PMC)
+    pmc_oa.run()
 
 
-    d = Downloader.DownloadArXiv()
-    d.bibify_with_tex2bib()
+    #d = Downloader.DownloadArXiv()
+    #d.bibify_with_tex2bib()
 
 
     print "Finished."
