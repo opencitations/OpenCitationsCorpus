@@ -96,8 +96,10 @@ use JSON;
 
 require 'getopt.pl' ;
 
-    Getopt("oikdrt:");             # ARGV now contains [inputfile] and
+    Getopt("aoikdrt:");             # ARGV now contains [inputfile] and
                                 #   $opt_o, $opt_i might be set.
+
+    die "source arXiv ID not specified (use -a 1234.5678)" if !$opt_a;
 	
 	$default_type = $opt_t || 'Article';
 	
@@ -144,6 +146,7 @@ foreach ( qw(a about an and by for from in of on the to von with) ) {
 
 $outitems =0;
 %keys_seen = {};
+my @citations = ();
 
 foreach $i (0..$#items) {
 	undef $title;
@@ -159,6 +162,7 @@ foreach $i (0..$#items) {
 	undef $address;
 	undef $chapter;
 	undef $rest;
+	undef $arxiv_id;
 	
 	#print "\n\n------------------\n";
 	#print "$items[$i]\n\n"; # if $opt_d;
@@ -303,6 +307,7 @@ foreach $i (0..$#items) {
 #	print "$items[$i]\n";
 			};
 	}
+	&parse_arxiv_id;
 
 	$rest =~ s/^\s+//;
 	$rest =~ s/$date([,]?)//;
@@ -328,27 +333,50 @@ foreach $i (0..$#items) {
 	#print ",\n    note\t= {$rest}" if $rest;
 	#print "\n\}\n";
 
+	my %cite = ('key'=>$key, 'type'=>$type);
+	$cite{'title'} = $title if $title;
+	$cite{'authors'} = $authors if $authors;
+	$cite{'year'} = $date if $date;
+	$cite{'booktitle'} = $booktitle if $booktitle;
+	$cite{'edition'} = $edition if $edition;
+	$cite{'editor'} = $editor if $editor;
+	$cite{'publisher'} = $publisher if $publisher;
+	$cite{'address'} = $address if $address;
+	$cite{'note'} = $note if $note;
+	$cite{'arxiv_id'} = $arxiv_id if $arxiv_id;
+	$cite{'unparsed_citation'} = &trim($items[$i]);
 	
-	my $data = {
-		'source_arxiv_article' => "TODO",
-		'title' => $title,
-        'authors' => $authors,
-        'year' => $date,
-        'note' => $rest,
-        'unparsed_citation' => $items[$i]
-	};
-
-	my $json = JSON->new->allow_nonref;
-	my $js = $json->encode($data);
-	print "$js\n";
-
+	push(@citations, {%cite});
 	
+	#push(@citations, {
+	#	'title' => $title,
+    #    'authors' => $authors,
+    #    'year' => $date,
+    #    'note' => $rest,
+    #    'unparsed_citation' => $items[$i]
+	#});
+
 	$outitems++;
 }
+
+my $json = JSON->new->allow_nonref;
+my $js = $json->encode({'source_arxiv_article'=>$opt_a, 'citations'=>(\@citations)});
+print "$js\n";
+
+
 print STDERR "$outitems items processed\n";
 exit;
 
 ########################### subroutines #############################
+
+sub parse_arxiv_id {
+	if ($items[$i] =~ m/arxiv\:(\d{4}\.\d{4})/i)
+	{
+		$arxiv_id = $1;
+	}
+	
+}
+
 
 # separate multiple authors with 'and'
 sub parse_authors {
@@ -464,4 +492,27 @@ sub generate_key {
 	}
 #	print STDERR "New key: $key (", join('|', @auth), ": $date)\n";
 	$key;
+}
+
+# Perl trim function to remove whitespace from the start and end of the string
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}
+# Left trim function to remove leading whitespace
+sub ltrim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	return $string;
+}
+# Right trim function to remove trailing whitespace
+sub rtrim($)
+{
+	my $string = shift;
+	$string =~ s/\s+$//;
+	return $string;
 }
