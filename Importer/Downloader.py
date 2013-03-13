@@ -10,6 +10,12 @@ sys.path.append('../ImportArxiv/RefExtract')  #TODO: Tidy this up
 from RefExtract import *
 import file_queue as fq
 from nb_input import nbRawInput
+import json
+
+import Config
+import hashlib, md5
+import requests
+import uuid
 
 class DownloadArXiv(object):
     """Methods to download an extract arXiv files.
@@ -117,7 +123,8 @@ class DownloadArXiv(object):
         for file_name in os.listdir(self.extract_dir):
             if not file_name.endswith('gz'): continue
             print "Processing", file_name
-            uncompressed_dir = self.uncompressed_dir + os.path.splitext(file_name)[0]
+            arxiv_id = os.path.splitext(file_name)[0]
+            uncompressed_dir = self.uncompressed_dir + arxiv_id
             if not os.path.exists(uncompressed_dir):
                 os.mkdir(uncompressed_dir)
             returncode = call(["tar", "xzf", self.extract_dir + file_name, "-C", uncompressed_dir])
@@ -127,20 +134,32 @@ class DownloadArXiv(object):
 
             #Now process .tex files
             for tex_file_name in os.listdir(uncompressed_dir):
-                if not tex_file_name.endswith('.tex'): continue
-                call([self.tex2bibjson, "-i", uncompressed_dir + "/" + tex_file_name, "-o", self.citations_dir + os.path.splitext(file_name)[0] + "_" +  os.path.splitext(tex_file_name)[0] + ".json"])
-
-                
+                if not (tex_file_name.endswith('.tex') or tex_file_name.endswith('.bbl')): continue
+                call([self.tex2bibjson, "-a", arxiv_id, "-i", uncompressed_dir + "/" + tex_file_name, "-o", self.citations_dir + arxiv_id + "_" + tex_file_name + ".json"])
 
 
-            #print "returncode = %s" % returncode
+    def load_citations(self):
+        if not os.path.exists(self.citations_dir):
+            os.mkdir(self.citations_dir)
+        
+        for file_name in os.listdir(self.citations_dir):
+            if not file_name.endswith('json'): continue
+            print "Loading", file_name
+            file_data = open(self.citations_dir + file_name)
+            json_data = json.load(file_data)
+            file_data.close()
+            print "Processing", json_data["source_arxiv_article"]
+            
+            q = {"query":{"term":{"identifier.canonical.exact": "arXiv:" + json_data["source_arxiv_article"]}}}
+            r = requests.get(Config.es_target + "_search", data=json.dumps(q))
 
-            #break
+            data = r.json()
+            if data["hits"]["total"] > 0:
+                #return existing id as specified in BibServer
+                bibserver_id = data["hits"]["hits"][0]["_id"]
+                print "Found existing ID for %s: %s" % (json_data["source_arxiv_article"], bibserver_id)
+                #TODO: Load citations
+            else:
+            #    #Could not find ID. nothing to do
+                print "Could not find ID for %s. Nothing to do" % json_data["source_arxiv_article"]
 
-            #ref_text = RefExtract(self.extract_dir + file_name)
-            #print "ref text = " + ref_text
-            #ref_file_name = file_name[:-3] + '.ref.txt'
-            #wh = open(self.citations_dir + ref_file_name,'w')
-            #wh.write(ref_text)
-            #wh.close()
-            #os.remove(gz_dir + file_name)

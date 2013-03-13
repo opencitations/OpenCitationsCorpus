@@ -1,11 +1,12 @@
 #! /usr/bin/perl
 #MW Version
 
-$Script = 'tex2bib'; 
-$Version=0.97;  # 22 Feb 2006 10:50:35
-$Author='Michael Friendly (friendly@yorku.ca)';
+$Script = 'tex2bibjson'; 
+$Version=0.98;  # 22 Feb 2006 10:50:35
+$Author='Based on Michael Friendlys script (friendly@yorku.ca), updated by Martyn Whitwell';
 
 # Copyright (c) 1997 Michael Friendly
+# 2013/03/13 Updated by Martyn Whitwell to export BibJson
 #
 # License:
 #  This is free software subject to copyright, released according to the
@@ -13,12 +14,13 @@ $Author='Michael Friendly (friendly@yorku.ca)';
 #  See: http://www.ctan.org/tex-archive/help/Catalogue/licenses.bsd.html
 #  for details and further information.
 
-# tex2bib
+# tex2bibjson
 #   Input a TeX document containing \bibitems, translate these
-#   to BibTeX format
+#   to BibJson citations
 #
 # Usage:
-#		tex2bib [-k][-i infile] [-o outfile]
+#		tex2bibjson -a arxive.id [-k][-i infile] [-o outfile]
+#		-a: specify the arxivId of the source file
 #		-k:  regenerate keys
 #		if infile not given, reads from stdin
 #		if outfile not given, prints to stdout
@@ -92,6 +94,8 @@ $Author='Michael Friendly (friendly@yorku.ca)';
 # can be expected at the end.
 
 #################################################################
+binmode STDOUT, ":utf8";
+use utf8;
 use JSON;
 
 require 'getopt.pl' ;
@@ -111,10 +115,13 @@ $bibs=0;
 while (<>)
 {
 	/^\s*\\end\{thebibliography/ && last;
-	if (/\\bibitem\s*\{([\w\d:-]+)\}/) {
+	
+	#if (/\\bibitem\s*\{([\w\d:-]+)\}/) {
+	#if (/\\bibitem\s*\[[^\]]*\]\s*\{([\w\d:-]+)\}/) { 
+	if (/\\bibitem\s*(?<label>\[([^\]]+)\])?\{(?<key>[^}]+)\}\s*/) {	
 		$bibs++;
-		$key = $1;
-#		print STDERR "$bibs key: $key\n";
+		$key = $+{key};
+		#print STDERR "$bibs key1: $key\n";
 	}
 	# skip if we're still reading tex text (no bibitems encountered)
 	next unless $bibs;
@@ -127,9 +134,9 @@ while (<>)
 # Now, split into separate items
 
 @items = split(/\\bibitem\s*/, $lines);
-print STDERR "items has ", scalar(@items), " items\n";
+print STDERR "Found ", scalar(@items), " bibitems\n";
 
-@months = qw(january february march april may jun july august september
+@months = qw(january february march april may june july august september
 	october november december);
 $month_pat = join('|', @months);
 
@@ -170,9 +177,15 @@ foreach $i (0..$#items) {
 	#	{key}Author, F.I. etc (date[a-z]?)
 #	$items[$i] =~ /^\{([^}]+)\}([^\(]*)\((\d{4})[a-z]?\)[,.]?\s*/;
 #	($key, $authors, $date) = ($1, $2, $3);
-	$items[$i] =~ /^\{([^}]+)\}\s*/;
-	$key = $1;
-	#print  "key: $key\n";
+
+
+	#if (/\\bibitem\s*\{([\w\d:-]+)\}/) {
+	#if (/\\bibitem\s*\[[^\]]*\]\s*\{([\w\d:-]+)\}/) { 
+
+	#$items[$i] =~ /^\{([^}]+)\}\s*/;
+	$items[$i] =~ /^(?<label>\[([^\]]+)\])?\{(?<key>[^}]+)\}\s*/;	
+	$key = $+{key};
+
 	$rest = $';
 		
 	$rest =~ /\((\d{4})[a-z]?\)[,.]?\s*/ &&
@@ -214,11 +227,11 @@ foreach $i (0..$#items) {
 	$keys_seen{$key}++;
 	
 	# assume it's an article at first
-	$type = '@' . $default_type;
+	$type = $default_type;
 
 	if ($rest =~ /^\{\\em\s+/) {
 	#tech report or book
-		$type = '@Book';
+		$type = 'Book';
 		$rest =~ m/^\{\\em\s+(['\w ,?:]+)\}[., ]*/;
 		$title = $1;
 		$rest = $';
@@ -227,7 +240,7 @@ foreach $i (0..$#items) {
 
 		$rest =~ m/\sreport(s?)[,]?\s*/i &&
 			do {
-				$type ='@TechReport';
+				$type ='TechReport';
 				$rest = $` . $';
 				&parse_report_number;
 			};
@@ -271,7 +284,7 @@ foreach $i (0..$#items) {
 			
 		$rest =~ m/(technical|tech\.)\s+report[,.]?/i &&
 			do {
-				$type ='@TechReport';
+				$type ='TechReport';
 				$rest = $` . $';
 				&parse_report_number;
 			};
@@ -279,12 +292,12 @@ foreach $i (0..$#items) {
 		$rest =~ m/^In\s+/i &&
 			do {
 				$rest = $';
-				$type ='@InCollection';  # maybe, proceedings
+				$type ='InCollection';  # maybe, proceedings
 				$rest =~ m/\{\\em\s+([\w ,':!?]+)\}[., ]*/ &&
 					do {
 					$booktitle = $1;
 					$rest = $` . $';
-					$type = '@InProceedings' if $booktitle =~ m/proceedings/i;
+					$type = 'InProceedings' if $booktitle =~ m/proceedings/i;
 					};
 				$rest =~ m/([\w., ]+)\s+\(eds?\.\)[,.]?\s*/i &&
 					do {
@@ -303,7 +316,7 @@ foreach $i (0..$#items) {
 
 		$rest =~ m/proceedings/i &&
 			do {
-				$type = '@InProceedings';
+				$type = 'InProceedings';
 #	print "$items[$i]\n";
 			};
 	}
@@ -315,25 +328,9 @@ foreach $i (0..$#items) {
 	$title = &case_title($title);
 	$booktitle = &case_title($booktitle) if $booktitle;
 	
-	#print "$type\{$key";
-	#print ",\n    author\t= {$authors}";
-	#print ",\n    year\t= $date";
-	#print ",\n    title\t= {$title}" if $title;
-	#print ",\n    booktitle\t= {$booktitle}" if $booktitle;
-	#print ",\n    edition\t= {$edition}" if $edition;
-	#print ",\n    editor\t= {$editor}" if $editor;
-	#print ",\n    publisher\t= {$publisher}" if $publisher;
-	#print ",\n    address\t= {$address}" if $address;
-	#print ",\n    journal\t= {$journal}" if $journal;
-	#print ",\n    volume\t= $volume" if $volume;
-	#print ",\n    month\t= $month" if $month;
-	#print ",\n    number\t= $number" if $number;
-	#print ",\n    pages\t= {$pages}" if $pages;
-	#print ",\n    chapter\t= {$chapter}" if $chapter;
-	#print ",\n    note\t= {$rest}" if $rest;
-	#print "\n\}\n";
 
 	my %cite = ('key'=>$key, 'type'=>$type);
+	$cite{'arxiv_id'} = $arxiv_id if $arxiv_id;
 	$cite{'title'} = $title if $title;
 	$cite{'authors'} = $authors if $authors;
 	$cite{'year'} = $date if $date;
@@ -342,20 +339,17 @@ foreach $i (0..$#items) {
 	$cite{'editor'} = $editor if $editor;
 	$cite{'publisher'} = $publisher if $publisher;
 	$cite{'address'} = $address if $address;
+	$cite{'journal'} = $journal if $journal;
+	$cite{'volume'} = $volume if $volume;
+	$cite{'month'} = $month if $month;
+	$cite{'number'} = $number if $number;
+	$cite{'pages'} = $pages if $pages;
+	$cite{'chapter'} = $chapter if $chapter;
 	$cite{'note'} = $note if $note;
-	$cite{'arxiv_id'} = $arxiv_id if $arxiv_id;
 	$cite{'unparsed_citation'} = &trim($items[$i]);
 	
 	push(@citations, {%cite});
 	
-	#push(@citations, {
-	#	'title' => $title,
-    #    'authors' => $authors,
-    #    'year' => $date,
-    #    'note' => $rest,
-    #    'unparsed_citation' => $items[$i]
-	#});
-
 	$outitems++;
 }
 

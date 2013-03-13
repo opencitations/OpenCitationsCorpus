@@ -23,11 +23,12 @@ def main():
     #pmc_oa.run()
 
 
-    #d = Downloader.DownloadArXiv()
+    d = Downloader.DownloadArXiv()
     #d.bibify_with_tex2bib()
+    d.load_citations()
 
-    pmc_parser = OpenCitationsImportLibrary.PMCBulkImporter()
-    pmc_parser.do()
+    #pmc_parser = OpenCitationsImportLibrary.PMCBulkImporter()
+    #pmc_parser.do()
 
 
 
