@@ -12,7 +12,14 @@ import os
 #import OpenCitationsImportLibrary
 import re
 
+# matches \em{, \emph{, {\em, {\emph, \textit{, {\textit
+_re_starts_with_emph_tag = re.compile(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{|\{\\textit\s+|\\textit\{)')
 
+# matches \em, \emph, \textit
+_re_split_emph_tag = re.compile(r'(\\emp?h?|\\textit)')
+_re_split_newblock = re.compile(r'\\newblock')
+
+#TODO : update compiiled tags
 
 
 def process(arxivid, infile, outfile):
@@ -108,90 +115,153 @@ def extract_label_key(bibitem):
 
 def extract_authors(bibitem):
     #try to split citation by \newblock and assume first section is the author list (it usually is?!)
-    sections = re.split(r'\\newblock', bibitem, 1)
+    sections = _re_split_newblock(bibitem, 1)
     if (len(sections) > 1):
-        return (remove_end_punctuation(remove_curly_braces_wrapper(sections[0].strip())), sections[1].strip())
+        # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
+        (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[-1])
     else:
-        #instead try to split on \em or \emph, as that usually demarcates the title
-        sections = re.split(r'\\emp?h?', bibitem, 1)
+        #instead try to split on \em or \emph or \textit, as that usually demarcates the title
+        sections = _re_split_emph_tag.split(bibitem, 1)
         if (len(sections) > 1):
-            return (remove_end_punctuation(remove_curly_braces_wrapper(sections[0].strip())), "\emph" + sections[1].strip())
+            # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
+            (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), "\emph" + sections[-1])
         else:
-            return (None, bibitem)
+            # try to split on \<space> as some publications have used this
+            sections = re.split(r'\\\s+', bibitem, 1)
+            if (len(sections) > 1):
+                # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
+                (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[-1])
+            else:
+                # give up and assume that the whole bibitem are the authors
+                (authors, remainder) = (bibitem, "")
+	authors = remove_end_punctuation(authors.strip())
+	if len(authors) == 0:
+		authors = None
+    return (authors, remainder.strip())
 
 
 def extract_title(bibitem):
-	# Ok, this is not so trivial!
-	# First we will see if there is a \newblock, and if so, assume that the title is everything in front of the first \newblock
-	# You must parse out the authors first before the title, as they will be infront of an earlier \newblock
-    sections = re.split(r'\\newblock', bibitem, 1)
+    # Ok, this is not so trivial!
+    # First we will see if there is a \newblock, and if so, assume that the title is everything in front of the first \newblock
+    # NB. You must call extract_authors() first to parse out the authors first before the title, as they will be infront of an earlier \newblock
+    sections = _re_split_newblock(bibitem, 1)
     if (len(sections) > 1):
-        #sometimes the title can be in an {\em } tag inside of the \newblock section. In this case, extract it
-        match = re.match(r'\s*\{\\emp?h?\s+(?P<title>[^\}]+)\}', sections[0])
+        # sometimes the title can be in an {\em } tag or \em{ } tag or \textit{} tag, inside of the \newblock section. In this case, extract using the full parser
+		match = _re_starts_with_emph_tag.match(bibitem)
         if match:
-            return (remove_end_punctuation(match.group('title').strip()), re.sub(r'\s*\{\\emp?h?\s+[^\}]+\}', "", sections[0]).strip() + " " + sections[1].strip())
+            (title, remainder) = full_parse_curly_braces(bibitem, 1, 1) #assume first bracket at level 1
+            #TODO strip out \em in title
         else:
-            return (remove_end_punctuation(remove_curly_braces_wrapper(sections[0].strip())), sections[1].strip())
+            # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
+            (title, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[1])
     else:
-		# No \newblock was found. So we need to try and parse on something else
-		# Check to see if the bibitem starts with \emph{. If so, assume the title is contained inside the \emph{} tag
-		# In this case, a full parser is required to extract the title, a regex is insufficient as it cannot match
-		# this case: \emph{this is {bla} the title ${bla}} bla bla \textbf{1234} => "this is {bla} the title ${bla}"  [not possible in regex]
-        match = re.match(r'^\s*\\emp?h?\{', bibitem)
+        # No \newblock was found. So we need to try and parse on something else
+        # Check to see if the bibitem starts with \emph{ or {\emph }. If so, assume the title is contained inside the \emph{} tag
+        # In this case, a full parser is required to extract the title, a regex is insufficient.
+        match = re.match(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{)', bibitem)
         if match:
-            return ("PARSED[" + parse_out_curly_braces(bibitem) + "]", "FIX ME TOO")
+            (title, remainder) = full_parse_curly_braces(bibitem, 1, 1) #assume first brack at level 1
         else:
-            #try to split on first full stop + space
+            # No \newblock or \emph{ was found. Instead, try to split on first full stop + space
             sections = re.split(r'\.\s+', bibitem, 1)
             if (len(sections) > 1):
-                return (remove_end_punctuation(sections[0].strip()), sections[1].strip())
+                (title, remainder) = (sections[0], sections[1])
             else:
-                return (None, None) #FIXME
+                # Ok, at this point we are not doing very well. Try to split on a full stop.
+                sections = re.split(r'\.', bibitem, 1)
+                if (len(sections) > 1):
+                    (title, remainder) = (sections[0], sections[1])
+                else:
+                    # One last try - we've attempted, \newblock, \emph, fullstop+space, fullstop. Now try a comma+space.
+                    sections = re.split(r'\,\s+', bibitem, 1)
+                    if (len(sections) > 1):
+                        (title, remainder) = (sections[0], sections[1])
+                    else:
+                        # Ok time to give up. Either we can assume that the whole string is a title, or that there is no title.
+                        # Lets go with the former.
+                        (title, remainder) = (bibitem, "")
+
+    # Finally, lets tidy-up the title and return it
+    return (remove_end_punctuation(title.strip()), remainder.strip())
 
 
-
-
-def remove_emph(bibitem):
-    match = re.match(r'^\{\em(?P<value>.+)\}\.?\s*$', bibitem)
-    if match:
-        return match.group('value').strip()
-    else:
-        return bibitem
 
 def remove_end_punctuation(bibitem):
     return re.sub(r'[\.\,\s]+$', "", bibitem)
 
+
+
+def full_parse_curly_braces(bibitem, brace_level=1, brace_number=1):
+    # This method iterates over a string, analysing the curly-braces contained therein. 
+    # It extracts the data for the specified level (and above) and specified brace number
+    #
+    # Some examples:
+    #
+    # INPUT:
+    #   bibitem = "level 0 { level 1a {level 2} level 1a} level 0 {level 1b} level 0"
+    #   brace_level = 1
+    #   brace_number = 1
+    # RESULT:
+    #   parsed ==> "level 1a {level 2} level 1a"
+    #   remainder ==> "level 0 {} level 0 {level 1b} level 0"
+    #
+    # INPUT:
+    #   bibitem = "level 0 { level 1a {level 2} level 1a} level 0 {level 1b} level 0"
+    #   brace_level = 1
+    #   brace_number = 2
+    # RESULT:
+    #   parsed ==> "level 1b"
+    #   remainder ==> "level 0 { level 1a {level 2} level 1a} level 0 {} level 0"
+    #
+    # INPUT:
+    #   bibitem = "level 0 { level 1a {level 2} level 1a} level 0 {level 1b} level 0"
+    #   brace_level = 2
+    #   brace_number = 1
+    # RESULT:
+    #   parsed ==> "level 2"
+    #   remainder ==> "level 0 { level 1a {} level 1a} level 0 {level 1b} level 0"
     
-def remove_curly_braces_wrapper(bibitem):
-    match = re.match(r'^\{(?P<value>.+)\}\.?\s*$', bibitem)
+    parser_level = 0
+    brace_count = 0
+    parsed = ""
+    remainder = ""
+
+    # iterate over every character in the string
+    for char in bibitem.strip():
+
+        # if we are closing the brace, decrement the parser_level
+        if char == '}':         
+            parser_level -= 1
+        
+        # if we are at or above the desired level, and in the correct brace_number, then parse the string
+        # otherwise, store the string in the remainder
+        if parser_level >= brace_level and brace_count == brace_number:
+            parsed += char
+        else:
+            remainder += char
+
+        # if we are opening the brace, increment the parser_level            
+        if char == '{':
+            parser_level += 1
+            #if we are now on the desired level, then increment the brace_count
+            if parser_level == brace_level:
+                brace_count += 1
+
+    # if the parsed string starts with '\em ' then this can be removed
+    parsed = re.sub(r'^\\emp?h?\s+', "", parsed, 1)
+    return (parsed, remainder)
+    
+
+    
+def remove_wrapping_curly_braces(bibitem):
+    match = re.match(r'^\s*\{(?P<value>.+)\}\.?\s*$', bibitem)
     if match:
         return match.group('value').strip()
     else:
         return bibitem
 
-def full_parse_out_curly_braces(bibitem):
-    parse_level = 0
-    started = False
-    value = ""
-    for char in bibitem.strip():
-        if char == '}':
-            parse_level -= 1
-            
-        if parse_level > 0:
-            started = True
-            value += char
-            
-        if char == '{':
-            parse_level += 1
-        
-        if started and parse_level == 0:
-            break
-    if len(value) > 0:
-        return value
-    else:
-        return None
-    
-    
+
+
 
 
 
