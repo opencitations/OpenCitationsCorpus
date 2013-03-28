@@ -25,7 +25,7 @@ def main():
 
     d = Downloader.DownloadArXiv()
     #d.bibify_with_tex2bib()
-    d.load_citations()
+    #d.load_citations()
 
     #pmc_parser = OpenCitationsImportLibrary.PMCBulkImporter()
     #pmc_parser.do()

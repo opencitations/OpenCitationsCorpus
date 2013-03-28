@@ -9,7 +9,6 @@ Created by Martyn Whitwell on 2013-03-14.
 
 import sys
 import os
-#import OpenCitationsImportLibrary
 import re
 
 # matches \em{, \emph{, {\em, {\emph, \textit{, {\textit
@@ -19,7 +18,6 @@ _re_starts_with_emph_tag = re.compile(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{|\{\\textit
 _re_split_emph_tag = re.compile(r'(\\emp?h?|\\textit)')
 _re_split_newblock = re.compile(r'\\newblock')
 
-#TODO : update compiiled tags
 
 
 def process(arxivid, infile, outfile):
@@ -115,7 +113,7 @@ def extract_label_key(bibitem):
 
 def extract_authors(bibitem):
     #try to split citation by \newblock and assume first section is the author list (it usually is?!)
-    sections = _re_split_newblock(bibitem, 1)
+    sections = _re_split_newblock.split(bibitem, 1)
     if (len(sections) > 1):
         # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
         (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[-1])
@@ -134,9 +132,9 @@ def extract_authors(bibitem):
             else:
                 # give up and assume that the whole bibitem are the authors
                 (authors, remainder) = (bibitem, "")
-	authors = remove_end_punctuation(authors.strip())
-	if len(authors) == 0:
-		authors = None
+    authors = remove_end_punctuation(authors.strip())
+    if len(authors) == 0:
+        authors = None
     return (authors, remainder.strip())
 
 
@@ -144,10 +142,10 @@ def extract_title(bibitem):
     # Ok, this is not so trivial!
     # First we will see if there is a \newblock, and if so, assume that the title is everything in front of the first \newblock
     # NB. You must call extract_authors() first to parse out the authors first before the title, as they will be infront of an earlier \newblock
-    sections = _re_split_newblock(bibitem, 1)
+    sections = _re_split_newblock.split(bibitem, 1)
     if (len(sections) > 1):
         # sometimes the title can be in an {\em } tag or \em{ } tag or \textit{} tag, inside of the \newblock section. In this case, extract using the full parser
-		match = _re_starts_with_emph_tag.match(bibitem)
+        match = _re_starts_with_emph_tag.match(bibitem)
         if match:
             (title, remainder) = full_parse_curly_braces(bibitem, 1, 1) #assume first bracket at level 1
             #TODO strip out \em in title
