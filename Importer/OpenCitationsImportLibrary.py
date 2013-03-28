@@ -125,6 +125,11 @@ class PMCBulkImporter(object):
                     print filecount, Config.filedir, filename
                     p = Process(filename)
                     p.process()
+        
+        # TODO: this would not work well with threaded bulking...
+        if Config.do_bulk_match:
+            m = Matcher()
+            m.matchall()
 
 
 class OAIImporter(object):

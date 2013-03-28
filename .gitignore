@@ -49,5 +49,4 @@ Importer/DATA/
 Importer/importer.log
 
 Importer/workdir
-
-Importer/pmcoa/articles.A-B.tar.gz
+Importer/pmcoa/*
