@@ -208,7 +208,7 @@ class Process(object):
 
 # Bulk Importer class for PubMedCentral
 # do a bulk import to instantiate an index from downloaded files rather than pulling from OAI feeds
-class PMCBulkImporter(object):
+class PMCBulkImporter(ImporterAbstract):
 
     def __init__(self):
         pass
