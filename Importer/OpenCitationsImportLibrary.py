@@ -152,7 +152,7 @@ class Processes(threading.Thread):
 
 
 # the process that the bulk importer (multiply) instantiates
-class Process(object):
+class Process(ImporterAbstract):
 
     def __init__(self, filename):
         self.filename = filename
