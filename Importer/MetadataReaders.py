@@ -13,7 +13,7 @@ Parses PubMed Central Front Matter (PMC-FM) and arXiv metadata
 from oaipmh import common
 from lxml import etree
 
-
+import re
 
 
 import logging
