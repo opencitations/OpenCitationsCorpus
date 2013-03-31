@@ -25,7 +25,7 @@ Here is an example install:
     cd occ
     mkdir src
     cd src
-    git clone https://github.com/opencitations/OpenCitationsCorpus.git
+    git clone git://github.com/opencitations/OpenCitationsCorpus.git
 
 To then go on and create an index, make sure your elasticsearch index is running then 
 edit the Importer/Config.py file to point at the relevant index address. Check out the 
@@ -40,6 +40,7 @@ don't want it wiped.
 Then do this to build a new index from scratch out of PMC OA bulk ftp files:
 
     cd OpenCitationsCorpus
+    source ../../bin/activate
     pip install -e .
     cd Importer
     python OpenCitationsImportLibrary.py
