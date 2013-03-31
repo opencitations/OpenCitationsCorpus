@@ -12,7 +12,7 @@ to run, you will need the following Python libraries
 pip install python-dateutil
 pip install pyoai
 pip install requests
-pip install lxml (and prop libxslt2-dev and libxml on your machine)
+pip install lxml (and prob libxslt2-dev and libxml on your machine)
 
 """
 
@@ -126,7 +126,7 @@ class PMCBulkImporter(object):
                     p = Process(filename)
                     p.process()
         
-        # TODO: this would not work well with threaded bulking...
+        # TODO: this may not work well with threaded bulking...
         if Config.do_bulk_match:
             m = Matcher()
             m.matchall()

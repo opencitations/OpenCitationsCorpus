@@ -50,3 +50,5 @@ Importer/importer.log
 
 Importer/workdir
 Importer/pmcoa/*
+
+opencitations.egg-info/*

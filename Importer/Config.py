@@ -31,7 +31,7 @@ skip_tar = False
 do_bulk_match = False
 
 es_url = "localhost:9200" # where is the ES index?
-es_index = "tests" # what is the name of the elasticsearch database to use?
+es_index = "occ" # what is the name of the elasticsearch database to use?
 es_indextype = "record" # what is the name of the index object type to save into?
 es_synchroniser_config_type = 'synchroniser_config'
 
