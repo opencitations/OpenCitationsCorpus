@@ -11,8 +11,8 @@ PMCBulkImporter and supporting classes added by Mark MacGillivray, 2013-03-06.
 to run, you will need the following Python libraries
 pip install python-dateutil
 pip install pyoai
-pip install requests
 pip install lxml (and prob libxslt2-dev and libxml on your machine)
+pip install -U requests #Upgrades to the latest version of requests
 
 """
 
@@ -33,6 +33,114 @@ from lxml import etree as ET
 
 
 filejobs = Queue.Queue()
+
+
+class ImporterAbstract(object): 
+    # Generic methods used by OAI-feed Importer and PMCBulkImporter
+    def generic_bibjsonify(self, bibjson):
+        bibjson["url"] = Config.bibjson_url + bibjson["_id"]
+        bibjson['_collection'] = [Config.bibjson_creator + '_____' + Config.bibjson_collname]
+        bibjson['_created'] = datetime.now().strftime("%Y-%m-%d %H%M"),
+        bibjson['_created_by'] = Config.bibjson_creator
+        if "identifier" not in bibjson:
+            bibjson["identifier"] = []
+        #this line crashes Elastic Search? Check with Mark
+        #CHANGE THE PARSER TO USE A LIST OF OBJECTS
+        #Not making BibSoup IDs anymore
+        #bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"], "url":bibjson["url"] })
+
+        # set a date string
+        y = bibjson.get('year',bibjson.get('journal',{}).get('year',False))
+        if y:
+            m = bibjson.get('month',bibjson.get('journal',{}).get('month','1'))
+            if m.lower().startswith('jan'): m = '01'
+            if m.lower().startswith('feb'): m = '02'
+            if m.lower().startswith('mar'): m = '03'
+            if m.lower().startswith('apr'): m = '04'
+            if m.lower().startswith('may'): m = '05'
+            if m.lower().startswith('jun'): m = '06'
+            if m.lower().startswith('jul'): m = '07'
+            if m.lower().startswith('aug'): m = '08'
+            if m.lower().startswith('sep'): m = '09'
+            if m.lower().startswith('oct'): m = '10'
+            if m.lower().startswith('nov'): m = '11'
+            if m.lower().startswith('dec'): m = '12'
+            if len(m) == 1: m = '0' + m
+            d = bibjson.get('day',bibjson.get('journal',{}).get('day','1'))
+            if len(d) == 1: d = '0' + d
+            bibjson['date'] = d + '/' + m + '/' + y
+        
+        return bibjson
+
+
+    def get_bibserver_id(self, identifiers):
+        if identifiers:
+            terms = []
+            for identifier in identifiers:
+                terms.append({"term":{"identifier.canonical.exact": identifier["type"] + ":" + identifier["id"]}})
+            q= {
+              "query": {
+                "bool": {
+                  "should": terms
+                }
+              }
+            }
+
+            print q
+
+            r = requests.get(Config.es_target + "_search", data=json.dumps(q))
+            data = r.json()
+            if data["hits"]["total"] > 0:
+                #return existing id as specified in BibServer
+                bibserver_id = data["hits"]["hits"][0]["_id"]
+                #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
+            else:
+                #Create new id using UUID
+                bibserver_id = uuid.uuid4().hex
+                #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
+        else:
+            #Create new id using UUID
+            bibserver_id = uuid.uuid4().hex
+            #print "Creating a new ID: %s" % (bibserver_id)
+        return bibserver_id
+
+
+    def prep_index(self):
+        # check ES is reachable
+        test = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/')
+        try:
+            hi = requests.get(test)
+            if hi.status_code != 200:
+                print "there is no elasticsearch index available at " + test + ". aborting."
+                sys.exit()
+        except:
+            print "there is no elasticsearch index available at " + test + ". aborting."
+            sys.exit()
+
+        print "prepping the index"
+        # delete the index if requested - leaves the database intact
+        if Config.es_delete_indextype:
+            print "deleting the index type " + Config.es_indextype
+            d = requests.delete(Config.es_target)
+            print d.status_code
+
+        # check to see if index exists - in which case it will have a mapping even if it is empty, create if not
+        dbaddr = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/') + '/' + Config.es_index
+        if requests.get(dbaddr + '/_mapping').status_code == 404:
+            print "creating the index"
+            c = requests.post(dbaddr)
+            print c.status_code
+
+        # check for mapping and create one if provided and does not already exist
+        # this will automatically create the necessary index type if it is not already there
+        if Config.es_mapping:
+            t = Config.es_target + '_mapping' 
+            if requests.get(t).status_code == 404:
+                print "putting the index type mapping"
+                p = requests.put(t, data=json.dumps(Config.es_mapping) )
+                print p.status_code
+
+
 # a wee class to thread the processes for the bulk importer
 class Processes(threading.Thread):
     def run(self):
@@ -93,11 +201,12 @@ class Process(object):
         elem = tree.getroot()
         doc = self.m(elem, nsprefix="")
         doc = doc.getMap()
-        doc['_id'] = _get_bibserver_id(False)
-        doc = _generic_bibjsonify(doc)
+        doc['_id'] = self.get_bibserver_id(False)
+        doc = self.generic_bibjsonify(doc)
         self.b.add( doc )
 
 
+# Bulk Importer class for PubMedCentral
 # do a bulk import to instantiate an index from downloaded files rather than pulling from OAI feeds
 class PMCBulkImporter(object):
 
@@ -106,7 +215,7 @@ class PMCBulkImporter(object):
                 
     # do everything
     def do(self):
-        if Config.es_prep: _prep_index() # prep the index if specified
+        if Config.es_prep: self.prep_index() # prep the index if specified
         dirList = os.listdir(Config.filedir) # list the contents of the directory where the source files are
         filecount = 0
 
@@ -132,7 +241,8 @@ class PMCBulkImporter(object):
             m.matchall()
 
 
-class OAIImporter(object):
+# OAI-feed Importer class for ArXiv and for PubMedCentral
+class OAIImporter(ImporterAbstract):
 
     METADATA_FORMAT_OAI_DC = {"prefix": 'oai_dc', "reader": oai_dc_reader}
     METADATA_FORMAT_ARXIV = {"prefix": 'arXiv', "reader": MetadataReaders.MetadataReaderArXiv()}
@@ -147,7 +257,7 @@ class OAIImporter(object):
         self.es_synchroniser_config = Config.es_synchroniser_config_target + hashlib.md5(uri).hexdigest()
 
     def run(self):
-        if Config.es_prep: _prep_index()
+        if Config.es_prep: self.prep_index()
 
         print "Importing from: %s" % self.uri
 
@@ -175,10 +285,8 @@ class OAIImporter(object):
 
         total_records = 0
 
-        total_records += self.synchronise_record(client, batcher, "oai:pubmedcentral.nih.gov:3577499") #0804.2273  #"oai:arXiv.org:1104.2274"
-        
-
-
+        #total_records += self.synchronise_record(client, batcher, "oai:pubmedcentral.nih.gov:3577499") #0804.2273  #"oai:arXiv.org:1104.2274"
+        total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:1104.2274") #0804.2273  #"oai:arXiv.org:1104.2274"
 
 
 
@@ -386,116 +494,11 @@ class OAIImporter(object):
         if "identifier" not in bibjson:
             bibjson["identifier"] = []
         bibjson["identifier"].append({"type": "oaipmh", "id": header.identifier(), "canonical":"oaipmh:" + header.identifier()})
-        bibjson['_id'] = _get_bibserver_id(bibjson["identifier"])
-        bibjson = _generic_bibjsonify(bibjson)
+        bibjson['_id'] = self.get_bibserver_id(bibjson["identifier"])
+        bibjson = self.generic_bibjsonify(bibjson)
         return bibjson
 
 
-
-# generic things used by both classes
-
-def _generic_bibjsonify(bibjson):
-    bibjson["url"] = Config.bibjson_url + bibjson["_id"]
-    bibjson['_collection'] = [Config.bibjson_creator + '_____' + Config.bibjson_collname]
-    bibjson['_created'] = datetime.now().strftime("%Y-%m-%d %H%M"),
-    bibjson['_created_by'] = Config.bibjson_creator
-    if "identifier" not in bibjson:
-        bibjson["identifier"] = []
-    #this line crashes Elastic Search? Check with Mark
-    #CHANGE THE PARSER TO USE A LIST OF OBJECTS
-    #Not making BibSoup IDs anymore
-    #bibjson["identifier"].append({"type":"bibsoup", "id":bibjson["_id"], "url":bibjson["url"] })
-
-    # set a date string
-    y = bibjson.get('year',bibjson.get('journal',{}).get('year',False))
-    if y:
-        m = bibjson.get('month',bibjson.get('journal',{}).get('month','1'))
-        if m.lower().startswith('jan'): m = '01'
-        if m.lower().startswith('feb'): m = '02'
-        if m.lower().startswith('mar'): m = '03'
-        if m.lower().startswith('apr'): m = '04'
-        if m.lower().startswith('may'): m = '05'
-        if m.lower().startswith('jun'): m = '06'
-        if m.lower().startswith('jul'): m = '07'
-        if m.lower().startswith('aug'): m = '08'
-        if m.lower().startswith('sep'): m = '09'
-        if m.lower().startswith('oct'): m = '10'
-        if m.lower().startswith('nov'): m = '11'
-        if m.lower().startswith('dec'): m = '12'
-        if len(m) == 1: m = '0' + m
-        d = bibjson.get('day',bibjson.get('journal',{}).get('day','1'))
-        if len(d) == 1: d = '0' + d
-        bibjson['date'] = d + '/' + m + '/' + y
-        
-    return bibjson
-
-
-def _get_bibserver_id(identifiers):
-    if identifiers:
-        terms = []
-        for identifier in identifiers:
-            terms.append({"term":{"identifier.canonical.exact": identifier["type"] + ":" + identifier["id"]}})
-        q= {
-          "query": {
-            "bool": {
-              "should": terms
-            }
-          }
-        }
-
-        print q
-
-        r = requests.get(Config.es_target + "_search", data=json.dumps(q))
-        data = r.json()
-        if data["hits"]["total"] > 0:
-            #return existing id as specified in BibServer
-            bibserver_id = data["hits"]["hits"][0]["_id"]
-            #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
-        else:
-            #Create new id using UUID
-            bibserver_id = uuid.uuid4().hex
-            #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
-    else:
-        #Create new id using UUID
-        bibserver_id = uuid.uuid4().hex
-        #print "Creating a new ID: %s" % (bibserver_id)
-    return bibserver_id
-
-
-def _prep_index():
-    # check ES is reachable
-    test = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/')
-    try:
-        hi = requests.get(test)
-        if hi.status_code != 200:
-            print "there is no elasticsearch index available at " + test + ". aborting."
-            sys.exit()
-    except:
-        print "there is no elasticsearch index available at " + test + ". aborting."
-        sys.exit()
-
-    print "prepping the index"
-    # delete the index if requested - leaves the database intact
-    if Config.es_delete_indextype:
-        print "deleting the index type " + Config.es_indextype
-        d = requests.delete(Config.es_target)
-        print d.status_code
-
-    # check to see if index exists - in which case it will have a mapping even if it is empty, create if not
-    dbaddr = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/') + '/' + Config.es_index
-    if requests.get(dbaddr + '/_mapping').status_code == 404:
-        print "creating the index"
-        c = requests.post(dbaddr)
-        print c.status_code
-
-    # check for mapping and create one if provided and does not already exist
-    # this will automatically create the necessary index type if it is not already there
-    if Config.es_mapping:
-        t = Config.es_target + '_mapping' 
-        if requests.get(t).status_code == 404:
-            print "putting the index type mapping"
-            p = requests.put(t, data=json.dumps(Config.es_mapping) )
-            print p.status_code
 
 
 # add options to this to run bulk or not
