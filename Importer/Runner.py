@@ -13,9 +13,19 @@ import argparse
 #import OpenCitationsImportLibrary
 
 
-def main(command, source):
-    os.system('clear')
-    print "OPEN CITATIONS IMPORTER: %s on %s" % (command, source)
+def main(action, source, id):
+	if (action=="load"):
+		print "Loading"
+		
+	elif (action=="synchronise"):
+		
+	else:
+		print "Unknown action: %s" % action
+		
+		
+
+    #os.system('clear')
+    #print "OPEN CITATIONS IMPORTER: %s on %s for id %s" % (action, source, id)
 
 
     #arxiv = OpenCitationsImportLibrary.OAIImporter("http://export.arxiv.org/oai2", 0, OpenCitationsImportLibrary.OAIImporter.METADATA_FORMAT_ARXIV)
@@ -39,9 +49,10 @@ def main(command, source):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("command", help="Importer action to perform either: BULKLOAD or SYNCHRONISE")
-    parser.add_argument("source", help="Source either: PMCOA or ARXIV")
+    parser = argparse.ArgumentParser(description='Open Citations Importer')
+    parser.add_argument("-a", "--action", required=True, choices=["load", "synchonise"], help="Importer action to perform either: load or synchronise")
+    parser.add_argument("-s", "--source", required=True, choices=["pubmedcentral", "arxiv"], help="Source either: pubmedcentral or arxiv")
+    parser.add_argument("-i", "--id", required=False, help="Synchronise only the record specified by the given identifier")
     args = parser.parse_args()
-    main(args.command.lower(), args.source.lower())
-
+    
+    main(args.action, args.source, args.id)
