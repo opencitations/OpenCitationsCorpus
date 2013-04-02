@@ -25,7 +25,7 @@ from oaipmh.metadata import MetadataRegistry, oai_dc_reader
 import MetadataReaders
 import Batch
 import Config
-import Matcher
+from Matcher import Matcher
 import hashlib, md5
 import requests, json
 import uuid
