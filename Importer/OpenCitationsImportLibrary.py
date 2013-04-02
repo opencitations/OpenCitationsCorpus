@@ -11,7 +11,7 @@ PMCBulkImporter and supporting classes added by Mark MacGillivray, 2013-03-06.
 to run, you will need the following Python libraries
 pip install python-dateutil
 pip install pyoai
-pip install lxml (and prob libxslt2-dev and libxml on your machine)
+pip install lxml (and probably libxslt2-dev and libxml on your machine)
 pip install -U requests #Upgrades to the latest version of requests
 
 """
