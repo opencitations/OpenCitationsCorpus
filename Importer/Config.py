@@ -1,3 +1,5 @@
+# Need to import MetadataReaders to reference them later on in the Config
+import MetadataReaders
 
 # set threads to a number of threads to run. Note you need enough disk and RAM to support them all
 # and there is little point if you don't have enough processors to run them
@@ -13,7 +15,7 @@ bibjson_creator = "occ" # the name of the creator of this record for bibsoup
 
 # note when batching that NLM medline files come with 30000 records per file
 # you need enough memory to have the NLM XML file open and parsed, and enough for the temp store of records
-batchsize = 5000 # size of batches to bundle and send to the index. If zero they will all be kept and done at the end.
+#batchsize = 5000 # size of batches to bundle and send to the index. If zero they will all be kept and done at the end.
 filedir = './pmcoa/'
 workdir = './workdir/'
 #filedir = '../../../contracting/cottage/open citations/early_code/pmcoa/' # where are the raw files? trailing slash required
@@ -31,6 +33,7 @@ skip_tar = False
 do_bulk_match = False
 
 elasticsearch = {
+    "batchsize": 5000, # size of batches to bundle and send to the index. If zero they will all be kept and done at the end.
     "uri_base": "http://localhost:9200", # where is the ES index?
     "index": "occ", # what is the name of the elasticsearch database to use?
     "type_record": "record",  # what is the name of the index object type to save into?
@@ -71,20 +74,22 @@ elasticsearch['uri_configs'] = elasticsearch['uri_index'] + elasticsearch['type_
 importer = {
     "load" : {
         "pubmedcentral" : {
-            "name": "PubMedCentral Open Access"
+            "name": "PubMedCentral Open Access Files"
         }
     },
     "synchronise" : {
         "arxiv": {
-            "name": "arXiv",
+            "name": "arXiv OAI-PMH",
             "uri": "http://export.arxiv.org/oai2",
             "metadata_format": "arXiv",
+            "metadata_reader": MetadataReaders.MetadataReaderArXiv(),
             "delta_days": 0
         },
         "pubmedcentral" : {
-            "name": "PubMedCentral Open Access",
+            "name": "PubMedCentral Open Access OAI-PMH",
             "uri": "http://www.pubmedcentral.nih.gov/oai/oai.cgi",
             "metadata_format": "pmc_fm",
+            "metadata_reader": MetadataReaders.MetadataReaderPMC(),
             "delta_days": 0
         }
     }

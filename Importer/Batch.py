@@ -9,7 +9,7 @@ class Batch(object):
         
     def add(self,doc):
         self.temp.append( doc )
-        if len(self.temp) == Config.batchsize:
+        if len(self.temp) == Config.elasticsearch['batchsize']:
             self._es_bulk_load()
 
     def clear(self):
@@ -24,7 +24,7 @@ class Batch(object):
             data += json.dumps( {'index':{'_id': r['_id']}} ) + '\n'
             data += json.dumps( r ) + '\n'
         self.temp = []
-        r = requests.post(Config.es_target + '_bulk', data=data)
+        r = requests.post(Config.elasticsearch['uri_records'] + '_bulk', data=data)
 
         return r # passing back the POST info in case it is useful
 

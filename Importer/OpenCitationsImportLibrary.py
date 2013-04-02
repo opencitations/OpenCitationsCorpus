@@ -19,7 +19,7 @@ pip install -U requests #Upgrades to the latest version of requests
 import sys, os, time, requests, json, tarfile, shutil
 from datetime import date, datetime, timedelta
 import dateutil.parser
-from oaipmh.error import NoRecordsMatchError
+from oaipmh.error import NoRecordsMatchError, IdDoesNotExistError
 from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry, oai_dc_reader
 import MetadataReaders
@@ -93,6 +93,7 @@ class ImporterAbstract(object):
         bibjson['_created_by'] = Config.bibjson_creator
         if "identifier" not in bibjson:
             bibjson["identifier"] = []
+
         #this line crashes Elastic Search? Check with Mark
         #CHANGE THE PARSER TO USE A LIST OF OBJECTS
         #Not making BibSoup IDs anymore
@@ -122,6 +123,7 @@ class ImporterAbstract(object):
         return bibjson
 
 
+
     def get_bibserver_id(self, identifiers):
         if identifiers:
             terms = []
@@ -135,22 +137,20 @@ class ImporterAbstract(object):
               }
             }
 
-            print q
-
-            r = requests.get(Config.es_target + "_search", data=json.dumps(q))
+            r = requests.get(Config.elasticsearch['uri_records'] + "_search", data=json.dumps(q))
             data = r.json()
             if data["hits"]["total"] > 0:
                 #return existing id as specified in BibServer
                 bibserver_id = data["hits"]["hits"][0]["_id"]
-                #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
+                print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
             else:
                 #Create new id using UUID
                 bibserver_id = uuid.uuid4().hex
-                #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
+                print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
         else:
             #Create new id using UUID
             bibserver_id = uuid.uuid4().hex
-            #print "Creating a new ID: %s" % (bibserver_id)
+            print "Creating a new ID: %s" % (bibserver_id)
         return bibserver_id
 
 
@@ -260,18 +260,10 @@ class PMCBulkImporter(ImporterAbstract):
 # OAI-feed Importer class for ArXiv and for PubMedCentral
 class OAIImporter(ImporterAbstract):
 
-   
-
-    #default to OAI Dublin Core metadata format if note specified
-    # (self, uri, delta_days = 0, metadata = METADATA_FORMAT_OAI_DC):
     def __init__(self, settings, options):
         self.settings = settings # relevant configuration settings
         self.options = options # command-line options/arguments
-
-        #self.es_synchroniser_config = Config.es_synchroniser_config_target + hashlib.md5(settings['uri']).hexdigest()
-        #self.uri = uri
-        #self.delta_days = delta_days
-        #self.metadata = metadata
+        self.es_uri_config = Config.elasticsearch['uri_configs'] + hashlib.md5(settings['uri']).hexdigest()
         
 
     def run(self):
@@ -282,26 +274,48 @@ class OAIImporter(ImporterAbstract):
         if self.options['rebuild']:
             self.rebuild_index()
 
-        # Now import from the feed
-
-        print "Importing from: %s" % self.uri
-
+        # Connect to the repository
         registry = MetadataRegistry()
-        registry.registerReader(self.metadata["prefix"], self.metadata["reader"])
+        registry.registerReader(self.settings["metadata_format"], self.settings["metadata_reader"])
 
-        client = Client(self.uri, registry)
+        client = Client(self.settings["uri"], registry)
         identity = client.identify()
 
-        print "Repository: %s" % identity.repositoryName()
-        #print "Metadata formats: %s" % client.listMetadataFormats()
+        print "Connected to repository: %s" % identity.repositoryName()
 
         # got to update granularity or we barf with: 
         # oaipmh.error.BadArgumentError: Max granularity is YYYY-MM-DD:2003-04-10T00:00:00Z
         client.updateGranularity()
 
-        #ElasticSearch batcher
+        # Initialise some variables
         batcher = Batch.Batch()
+        total_records = 0
+        start = time.time()
+        
+        # Now do the synchonisation
+        
+        # If the user specified an identifier, then synchronise this record
+        if (self.options['identifier'] is not None):
+            total_records += self.synchronise_record(client, batcher, self.options['identifier'])
+        else:
+            print "doing something else"
+            
+        # Store the records in the index
+        batcher.clear()
+        
+        # Print out some statistics
+        time_spent = time.time() - start
+        print 'Total time spent: %d seconds' % (time_spent)
 
+        if time_spent > 0.001: # careful as its not an integer
+            print 'Total records synchronised: %i records (%d records/second)' % (total_records, (total_records/time_spent))
+        else:
+            print 'Total records synchronised: %i records' % (total_records)
+        return total_records
+
+        sys.exit()
+        
+        #####################
         synchronisation_config = self.get_synchronisation_config()
         if False and synchronisation_config is not None and "to_date" in synchronisation_config:
             last_synchronised = dateutil.parser.parse(synchronisation_config["to_date"])
@@ -311,7 +325,7 @@ class OAIImporter(ImporterAbstract):
         total_records = 0
 
         #total_records += self.synchronise_record(client, batcher, "oai:pubmedcentral.nih.gov:3577499") #0804.2273  #"oai:arXiv.org:1104.2274"
-        total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:1104.2274") #0804.2273  #"oai:arXiv.org:1104.2274"
+        #total_records += self.synchronise_record(client, batcher, "oai:arXiv.org:1104.2274") #0804.2273  #"oai:arXiv.org:1104.2274"
 
 
 
@@ -319,7 +333,7 @@ class OAIImporter(ImporterAbstract):
         if not (last_synchronised.date() < (date.today() - timedelta(days=1))):
             print "Nothing to synchronise today."
         
-        start = time.time()
+
         while False and last_synchronised.date() < (date.today() - timedelta(days=1)):
             start_date = last_synchronised + timedelta(days=1)
             end_date = start_date + timedelta(days=self.delta_days)
@@ -365,13 +379,16 @@ class OAIImporter(ImporterAbstract):
     def synchronise_record(self, client, batcher, oaipmh_identifier):
         print "Synchronising record: %s" % (oaipmh_identifier)
         record = self.get_record(client, oaipmh_identifier)
-        batcher.add(self.bibify_record(record))
-        return 1
+        if record is not None:
+            batcher.add(self.bibify_record(record))
+            return 1
+        else:
+            return 0
         
 
     def get_synchronisation_config(self):
-        print "Getting synchronisation_config for %s" % (self.uri)
-        r = requests.get(self.es_synchroniser_config)
+        print "Getting synchronisation_config for: %s" % (self.settings['uri'])
+        r = requests.get(self.es_uri_config)
         if r.status_code == 404 or not r.json()["exists"]:
             print "No synchronisation_config found"
             return None
@@ -380,9 +397,9 @@ class OAIImporter(ImporterAbstract):
 
 
     def put_synchronisation_config(self, from_date, to_date, number_of_records):
-        print "Putting synchronisation_config for %s to %s" % (self.uri, self.es_synchroniser_config)
-        data = {'uri': self.uri, 'from_date': from_date.isoformat(), 'to_date': to_date.isoformat(), 'number_of_records': number_of_records}
-        r = requests.put(self.es_synchroniser_config, data=json.dumps(data))
+        print "Putting synchronisation_config for %s to %s" % (self.settings['uri'], self.es_uri_config)
+        data = {'uri': self.settings['uri'], 'from_date': from_date.isoformat(), 'to_date': to_date.isoformat(), 'number_of_records': number_of_records}
+        r = requests.put(self.es_uri_config, data=json.dumps(data))
 
 
 
@@ -460,9 +477,14 @@ class OAIImporter(ImporterAbstract):
 
 
     def get_record(self, client, oaipmh_identifier):
-        return list(client.getRecord(
-            identifier = oaipmh_identifier,
-            metadataPrefix = self.metadata["prefix"]))
+        try:
+            record = client.getRecord(
+                identifier = oaipmh_identifier,
+                metadataPrefix = self.settings["metadata_format"])
+        except IdDoesNotExistError:
+            print "Error: No record found for identifier: %s" % (oaipmh_identifier)
+            record = None
+        return record
         
 
     def print_records(self, records, max_recs = 2):
@@ -510,6 +532,7 @@ class OAIImporter(ImporterAbstract):
             #print 'Header setSpec: %s' % header.setSpec()
             #print 'Header isDeleted: %s' % header.isDeleted()
 
+
     def bibify_record(self, record):
         header, metadata, about = record
         bibjson = metadata.getMap()
@@ -518,7 +541,7 @@ class OAIImporter(ImporterAbstract):
         bibjson["_oaipmh_isDeleted"] = header.isDeleted()
         if "identifier" not in bibjson:
             bibjson["identifier"] = []
-        bibjson["identifier"].append({"type": "oaipmh", "id": header.identifier(), "canonical":"oaipmh:" + header.identifier()})
+        bibjson["identifier"].append({"type": "oaipmh", "id": header.identifier(), "canonical": "oaipmh:" + header.identifier()})
         bibjson['_id'] = self.get_bibserver_id(bibjson["identifier"])
         bibjson = self.generic_bibjsonify(bibjson)
         return bibjson

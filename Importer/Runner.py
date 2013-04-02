@@ -40,7 +40,7 @@ def main(args):
             print "Warning: from-date option (%s) is ignored during the load operation" % (args['from_date'])
         if (args['to_date'] is not None):
             print "Warning: to-date option (%s) is ignored during the load operation" % (args['to_date'])
-        if (args['rebuild'] is not None):
+        if (args['rebuild']):
             print "Warning: index will be dropped and rebuilt. All existing records will be deleted."
         importer = OpenCitationsImportLibrary.PMCBulkImporter(importer_settings, args)
         importer.run()
@@ -49,7 +49,7 @@ def main(args):
         print "Synchronising from source: %s" % importer_settings['name']
         print "Metadata format: %s" % importer_settings['metadata_format']
         print "Source Uri: %s" % importer_settings['uri']
-        if (args['rebuild'] is not None):
+        if (args['rebuild']):
             print "Warning: index will be dropped and rebuilt. All existing records will be deleted."
         if (args['identifier'] is not None):
             print "Limiting to identifier: %s" % (args['identifier'])
