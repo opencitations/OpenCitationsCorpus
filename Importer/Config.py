@@ -30,55 +30,78 @@ skip_tar = False
 # if this is true matching will be performed on every record after a bulk load
 do_bulk_match = False
 
-es_url = "localhost:9200" # where is the ES index?
-es_index = "occ" # what is the name of the elasticsearch database to use?
-es_indextype = "record" # what is the name of the index object type to save into?
-es_synchroniser_config_type = 'synchroniser_config'
-
-es_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
-es_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_indextype.lstrip('/').rstrip('/') + '/'
-
-es_synchroniser_config_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
-es_synchroniser_config_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_synchroniser_config_type.lstrip('/').rstrip('/') + '/'
-
-es_prep = True # prep the index by making sure it exists and sending it a mapping before doing any uploads
-es_delete_indextype = True # wipe the specified index before starting. This only happens if prep is also true
-
-es_mapping = { # the mapping to use for the ES index - this one here is the default record mapping for bibserver
-    "record" : {
-        "dynamic_templates" : [
-            {
-                "default" : {
-                    "match" : "*",
-                    "match_mapping_type": "string",
-                    "mapping" : {
-                        "type" : "multi_field",
-                        "fields" : {
-                            "{name}" : {"type" : "{dynamic_type}", "index" : "analyzed", "store" : "no"},
-                            "exact" : {"type" : "{dynamic_type}", "index" : "not_analyzed", "store" : "yes"}
+elasticsearch = {
+    "uri_base": "http://localhost:9200", # where is the ES index?
+    "index": "occ", # what is the name of the elasticsearch database to use?
+    "type_record": "record",  # what is the name of the index object type to save into?
+    "type_config": "config",
+    "mapping": { # the mapping to use for the ES index - this one here is the default record mapping for bibserver
+        "record" : {
+            "dynamic_templates" : [
+                {
+                    "default" : {
+                        "match" : "*",
+                        "match_mapping_type": "string",
+                        "mapping" : {
+                            "type" : "multi_field",
+                            "fields" : {
+                                "{name}" : {"type" : "{dynamic_type}", "index" : "analyzed", "store" : "no"},
+                                "exact" : {"type" : "{dynamic_type}", "index" : "not_analyzed", "store" : "yes"}
+                            }
                         }
                     }
                 }
+            ],
+            "properties":{
+                "date":{
+                    "type": "date",
+                    "index": "not_analyzed",
+                    "format": "dd/MM/yyyy"
+                }
             }
-        ],
-        "properties":{
-            "date":{
-                "type": "date",
-                "index": "not_analyzed",
-                "format": "dd/MM/yyyy"
-            }#,
-           #"_oaipmh_identifier":{
-           #     "type": "string",
-           #      "index": "not_analyzed",
-           #      "include_in_all": True,
-           #      "store": "yes"},
-           #"_oaipmh_datestamp":{
-           #     "type": "date",
-           #      "index": "not_analyzed",
-           #      "include_in_all": True,
-           #      "store": "yes"}
+        }
+    }
+}
+elasticsearch['uri_index'] = elasticsearch['uri_base'].rstrip('/') + '/' + elasticsearch['index'] + '/'
+elasticsearch['uri_records'] = elasticsearch['uri_index'] + elasticsearch['type_record'] + '/'
+elasticsearch['uri_configs'] = elasticsearch['uri_index'] + elasticsearch['type_config'] + '/'
 
+
+
+importer = {
+    "load" : {
+        "pubmedcentral" : {
+            "name": "PubMedCentral Open Access"
+        }
+    },
+    "synchronise" : {
+        "arxiv": {
+            "name": "arXiv",
+            "uri": "http://export.arxiv.org/oai2",
+            "metadata_format": "arXiv",
+            "delta_days": 0
+        },
+        "pubmedcentral" : {
+            "name": "PubMedCentral Open Access",
+            "uri": "http://www.pubmedcentral.nih.gov/oai/oai.cgi",
+            "metadata_format": "pmc_fm",
+            "delta_days": 0
         }
     }
 }
 
+
+
+#es_url = "localhost:9200" # where is the ES index?
+#es_index = "occ" # what is the name of the elasticsearch database to use?
+#es_indextype = "record" # what is the name of the index object type to save into?
+#es_synchroniser_config_type = 'synchroniser_config'
+
+#es_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
+#es_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_indextype.lstrip('/').rstrip('/') + '/'
+
+#es_synchroniser_config_target = 'http://' + str( es_url ).lstrip('http://').rstrip('/')
+#es_synchroniser_config_target += '/' + es_index.lstrip('/').rstrip('/') + '/' + es_synchroniser_config_type.lstrip('/').rstrip('/') + '/'
+
+#es_prep = True # prep the index by making sure it exists and sending it a mapping before doing any uploads
+#es_delete_indextype = True # wipe the specified index before starting. This only happens if prep is also true

@@ -38,6 +38,54 @@ filejobs = Queue.Queue()
 
 class ImporterAbstract(object): 
     # Generic methods used by OAI-feed Importer and PMCBulkImporter
+
+    def check_index(self):
+        # check that ElasticSearch is awake
+        try:
+            r = requests.get(Config.elasticsearch['uri_base'])
+            if r.status_code != 200:
+                print "The elasticsearch index %s responded with an unexpected status %s. Aborting." % (Config.elasticsearch['uri_base'], r.status_code)
+                sys.exit(1)
+        except:
+            print "There is no elasticsearch index available at %s. Aborting." % Config.elasticsearch['uri_base']
+            sys.exit(1)
+
+
+    def rebuild_index(self):
+        # check that ElasticSearch is awake
+        self.check_index()
+
+        print "Deleting type: %s" % (Config.elasticsearch['type_record'])
+        r = requests.delete(Config.elasticsearch['uri_records'])
+        print "...response from: %s (%s)" % (r.url, r.status_code)
+
+        print "Deleting type: %s" % (Config.elasticsearch['type_config'])
+        r = requests.delete(Config.elasticsearch['uri_configs'])
+        print "...response from: %s (%s)" % (r.url, r.status_code)
+
+        # check to see if index exists - in which case it will have a mapping even if it is empty, create if not
+        if requests.get(Config.elasticsearch['uri_index'] + '/_mapping').status_code == 404:
+            print "Creating index: %s" % (Config.elasticsearch['index'])
+            r = requests.post(Config.elasticsearch['uri_index'])
+            print "...response from: %s (%s)" % (r.url, r.status_code)
+
+        # check for mapping and create one if provided and does not already exist
+        # this will automatically create the necessary index type if it is not already there
+        if Config.elasticsearch['mapping']:
+            r = requests.get(Config.elasticsearch['uri_records'] + '_mapping')
+            if r.status_code == 404:
+                print "Creating mapping for type: %s" % (Config.elasticsearch['type_record'])
+                r = requests.put(Config.elasticsearch['uri_records'] + '_mapping', data=json.dumps(Config.elasticsearch['mapping']))
+                print "...response from: %s (%s)" % (r.url, r.status_code)
+
+                print "Creating mapping for type: %s" % (Config.elasticsearch['type_config'])
+                r = requests.put(Config.elasticsearch['uri_configs'] + '_mapping', data=json.dumps(Config.elasticsearch['mapping']))
+                print "...response from: %s (%s)" % (r.url, r.status_code)
+        else:
+            print "Warning: no elasticsearch mapping defined in Config.py."
+
+
+
     def generic_bibjsonify(self, bibjson):
         bibjson["url"] = Config.bibjson_url + bibjson["_id"]
         bibjson['_collection'] = [Config.bibjson_creator + '_____' + Config.bibjson_collname]
@@ -106,40 +154,7 @@ class ImporterAbstract(object):
         return bibserver_id
 
 
-    def prep_index(self):
-        # check ES is reachable
-        test = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/')
-        try:
-            hi = requests.get(test)
-            if hi.status_code != 200:
-                print "there is no elasticsearch index available at " + test + ". aborting."
-                sys.exit()
-        except:
-            print "there is no elasticsearch index available at " + test + ". aborting."
-            sys.exit()
 
-        print "prepping the index"
-        # delete the index if requested - leaves the database intact
-        if Config.es_delete_indextype:
-            print "deleting the index type " + Config.es_indextype
-            d = requests.delete(Config.es_target)
-            print d.status_code
-
-        # check to see if index exists - in which case it will have a mapping even if it is empty, create if not
-        dbaddr = 'http://' + str( Config.es_url ).lstrip('http://').rstrip('/') + '/' + Config.es_index
-        if requests.get(dbaddr + '/_mapping').status_code == 404:
-            print "creating the index"
-            c = requests.post(dbaddr)
-            print c.status_code
-
-        # check for mapping and create one if provided and does not already exist
-        # this will automatically create the necessary index type if it is not already there
-        if Config.es_mapping:
-            t = Config.es_target + '_mapping' 
-            if requests.get(t).status_code == 404:
-                print "putting the index type mapping"
-                p = requests.put(t, data=json.dumps(Config.es_mapping) )
-                print p.status_code
 
 
 # a wee class to thread the processes for the bulk importer
@@ -245,20 +260,29 @@ class PMCBulkImporter(ImporterAbstract):
 # OAI-feed Importer class for ArXiv and for PubMedCentral
 class OAIImporter(ImporterAbstract):
 
-    METADATA_FORMAT_OAI_DC = {"prefix": 'oai_dc', "reader": oai_dc_reader}
-    METADATA_FORMAT_ARXIV = {"prefix": 'arXiv', "reader": MetadataReaders.MetadataReaderArXiv()}
-    METADATA_FORMAT_PMC_FM = {"prefix": 'pmc_fm', "reader": MetadataReaders.MetadataReaderPMC()}
-    METADATA_FORMAT_PMC = {"prefix": 'pmc', "reader": MetadataReaders.MetadataReaderPMC()}
+   
 
     #default to OAI Dublin Core metadata format if note specified
-    def __init__(self, uri, delta_days = 0, metadata = METADATA_FORMAT_OAI_DC):
-        self.uri = uri
-        self.delta_days = delta_days
-        self.metadata = metadata
-        self.es_synchroniser_config = Config.es_synchroniser_config_target + hashlib.md5(uri).hexdigest()
+    # (self, uri, delta_days = 0, metadata = METADATA_FORMAT_OAI_DC):
+    def __init__(self, settings, options):
+        self.settings = settings # relevant configuration settings
+        self.options = options # command-line options/arguments
+
+        #self.es_synchroniser_config = Config.es_synchroniser_config_target + hashlib.md5(settings['uri']).hexdigest()
+        #self.uri = uri
+        #self.delta_days = delta_days
+        #self.metadata = metadata
+        
 
     def run(self):
-        if Config.es_prep: self.prep_index()
+        # Check that ElasticSearch is alive
+        self.check_index()
+
+        # If the user specified the --REBUILD flag, recreate the index
+        if self.options['rebuild']:
+            self.rebuild_index()
+
+        # Now import from the feed
 
         print "Importing from: %s" % self.uri
 

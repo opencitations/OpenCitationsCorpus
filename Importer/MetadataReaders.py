@@ -39,6 +39,11 @@ class MetadataReaderAbstract(object):
         'mml' : 'http://www.w3.org/1998/Math/MathML',
         'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
 
+    #METADATA_FORMAT_OAI_DC = {"prefix": 'oai_dc', "reader": oai_dc_reader}
+    #METADATA_FORMAT_ARXIV = {"prefix": 'arXiv', "reader": MetadataReaders.MetadataReaderArXiv()}
+    #METADATA_FORMAT_PMC_FM = {"prefix": 'pmc_fm', "reader": MetadataReaders.MetadataReaderPMC()}
+    #METADATA_FORMAT_PMC = {"prefix": 'pmc', "reader": MetadataReaders.MetadataReaderPMC()}
+
     def __init__(self):
         pass
 
