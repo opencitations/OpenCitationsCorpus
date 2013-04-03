@@ -83,14 +83,16 @@ importer = {
             "uri": "http://export.arxiv.org/oai2",
             "metadata_format": "arXiv",
             "metadata_reader": MetadataReaders.MetadataReaderArXiv(),
-            "delta_days": 0
+            "delta_days": 1, #synchronise 1 day at a time
+            "default_from_date": "2000-01-01"
         },
         "pubmedcentral" : {
             "name": "PubMedCentral Open Access OAI-PMH",
             "uri": "http://www.pubmedcentral.nih.gov/oai/oai.cgi",
             "metadata_format": "pmc_fm",
             "metadata_reader": MetadataReaders.MetadataReaderPMC(),
-            "delta_days": 0
+            "delta_days": 1, #synchronise 1 day at a time
+            "default_from_date": "2000-01-01"
         }
     }
 }

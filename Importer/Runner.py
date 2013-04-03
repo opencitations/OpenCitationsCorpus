@@ -16,8 +16,10 @@ pip install -U requests #Upgrades to the latest version of requests
 import sys
 import os
 import argparse
+import dateutil.parser
 import OpenCitationsImportLibrary
 import Config
+
 
 def main(args):
     # Validate the parameters against the config again (better safe than sorry...)
@@ -54,9 +56,9 @@ def main(args):
         if (args['identifier'] is not None):
             print "Limiting to identifier: %s" % (args['identifier'])
         if (args['from_date'] is not None):
-            print "Limiting to from-date: %s" % (args['from_date'])
+            print "Limiting on from-date: %s" % (args['from_date'])
         if (args['to_date'] is not None):
-            print "Limiting to to-date: %s" % (args['to_date'])
+            print "Limiting on to-date: %s" % (args['to_date'])
         importer = OpenCitationsImportLibrary.OAIImporter(importer_settings, args)
         importer.run()
 
@@ -85,9 +87,20 @@ if __name__ == '__main__':
 
     args = vars(parser.parse_args())
 
-
     # Validate the arguments provided by the user with those supported in the Config
     if args['action'] in Config.importer and args['source'] in Config.importer[args['action']]:
+        if args['from_date'] is not None:
+            try:
+                args['from_date'] = dateutil.parser.parse(args['from_date']).date()
+            except ValueError:
+                print "Error: cannot parse '%s' as a date. Please use the form YYYY-MM-DD." % args['from_date']
+                exit(1)
+        if args['to_date'] is not None:
+            try:
+                args['to_date'] = dateutil.parser.parse(args['to_date']).date()
+            except ValueError:
+                print "Error: cannot parse '%s' as a date. Please use the form YYYY-MM-DD." % args['to_date']
+                exit(1)
         # Do some importing
         main(args)
     else:
