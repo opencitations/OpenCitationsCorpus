@@ -15,7 +15,8 @@ import Config
 class Matcher(object):
 
     def __init__(self):
-        self.target = Config.es_target
+        # self.target = Config.es_target
+        self.target = Config.elasticsearch['uri_records']
         self.qry = {
             "query": {
                 "bool": {
