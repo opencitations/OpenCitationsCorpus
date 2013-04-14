@@ -159,6 +159,10 @@ class ImporterAbstract(object):
 
 # a wee class to thread the processes for the bulk importer
 class Processes(threading.Thread):
+    
+    # MW: This won't work as we need to initialise Process() with (settings, options, filename), 
+    # and so need to pass settings and options to Processes() first. Mark, can you help fix this??
+    
     def run(self):
         while 1:
             fn = filejobs.get()
@@ -170,18 +174,20 @@ class Processes(threading.Thread):
 # the process that the bulk importer (multiply) instantiates
 class Process(ImporterAbstract):
 
-    def __init__(self, filename):
+    def __init__(self, settings, options, filename):
+        self.settings = settings # relevant configuration settings
+        self.options = options # command-line options/arguments
         self.filename = filename
         self.procid = uuid.uuid4().hex
-        if Config.skip_tar:
-            self.workdir = Config.workdir + os.listdir(Config.workdir)[0] + '/'
+        if self.settings['skip_tar']:
+            self.workdir = self.settings['workdir'] + os.listdir(self.settings['workdir'])[0] + '/'
         else:
-            self.workdir = Config.workdir + self.procid + '/'
+            self.workdir = self.settings['workdir'] + self.procid + '/'
         self.b = Batch.Batch()
         self.m = MetadataReaders.MetadataReaderPMC()
-        if not os.path.exists(Config.workdir):
+        if not os.path.exists(self.settings['workdir']):
             try:
-                os.makedirs(Config.workdir)
+                os.makedirs(self.settings['workdir'])
             except:
                 pass
         if not os.path.exists(self.workdir): os.makedirs(self.workdir)
@@ -190,8 +196,8 @@ class Process(ImporterAbstract):
         print str(self.procid) + " processing " + self.filename
 
         # create folders in the workdir full of xml files to work on
-        if not Config.skip_tar:
-            tar = tarfile.open(Config.filedir + self.filename)
+        if not self.settings['skip_tar']:
+            tar = tarfile.open(self.settings['filedir'] + self.filename)
             tar.extractall(path=self.workdir)
             tar.close()
             del tar
@@ -207,7 +213,7 @@ class Process(ImporterAbstract):
                 else:
                     self._ingest(self.workdir + fl + '/' + f)
         self.b.clear()
-        if not Config.skip_tar:
+        if not self.settings['skip_tar']:
             shutil.rmtree(self.workdir) # delete the folder in the workdir that was used for this process
 
     # read in then delete the xml file
@@ -226,18 +232,27 @@ class Process(ImporterAbstract):
 # do a bulk import to instantiate an index from downloaded files rather than pulling from OAI feeds
 class PMCBulkImporter(ImporterAbstract):
 
-    def __init__(self):
-        pass
+    def __init__(self, settings, options):
+        self.settings = settings # relevant configuration settings
+        self.options = options # command-line options/arguments
+
                 
     # do everything
-    def do(self):
-        if Config.es_prep: self.prep_index() # prep the index if specified
-        dirList = os.listdir(Config.filedir) # list the contents of the directory where the source files are
+    def run(self):
+        # Check that ElasticSearch is alive
+        self.check_index()
+
+        # If the user specified the --REBUILD flag, recreate the index
+        if self.options['rebuild']:
+            self.rebuild_index()
+
+
+        dirList = os.listdir(self.settings['filedir']) # list the contents of the directory where the source files are
         filecount = 0
 
-        if Config.threads:
+        if self.settings['threads']:
             print "starting threaded processing"
-            for x in xrange(Config.threads):
+            for x in xrange(self.settings['threads']):
                 Processes().start()
             for i in dirList:
                 filejobs.put(i)
@@ -246,13 +261,13 @@ class PMCBulkImporter(ImporterAbstract):
         else:
             for filename in dirList:
                 filecount += 1
-                if filecount >= Config.startingfile: # skip ones already done by changing the > X
-                    print filecount, Config.filedir, filename
-                    p = Process(filename)
+                if filecount >= self.settings['startingfile']: # skip ones already done by changing the > X
+                    print filecount, self.settings['filedir'], filename
+                    p = Process(self.settings, self.options, filename)
                     p.process()
         
         # TODO: this may not work well with threaded bulking...
-        if Config.do_bulk_match:
+        if self.settings['do_bulk_match']:
             m = Matcher()
             m.matchall()
 
