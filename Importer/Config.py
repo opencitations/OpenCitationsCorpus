@@ -86,7 +86,9 @@ importer = {
 
 # ----------------------------------------- OLD SETTINGS --------------------
 # MW: 2013-04-14
-# THESE CONFIGURATION OPTIONS ARE DEFUNCT - SEE THE importer definition below instead
+# THESE CONFIGURATION OPTIONS ARE DEFUNCT 
+# See the importer definition above instead
+
 # set threads to a number of threads to run. Note you need enough disk and RAM to support them all
 # and there is little point if you don't have enough processors to run them
 # leave as zero if you don't want threading
