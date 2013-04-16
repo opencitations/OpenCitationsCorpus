@@ -25,7 +25,6 @@ from oaipmh.metadata import MetadataRegistry, oai_dc_reader
 import MetadataReaders
 import Batch
 import Config
-from Matcher import Matcher
 import hashlib, md5
 import requests, json
 import uuid
@@ -160,9 +159,6 @@ class ImporterAbstract(object):
 # a wee class to thread the processes for the bulk importer
 class Processes(threading.Thread):
     
-    # MW: This won't work as we need to initialise Process() with (settings, options, filename), 
-    # and so need to pass settings and options to Processes() first. Mark, can you help fix this??
-    
     def run(self):
         while 1:
             fn = filejobs.get()
@@ -174,7 +170,7 @@ class Processes(threading.Thread):
 # the process that the bulk importer (multiply) instantiates
 class Process(ImporterAbstract):
 
-    def __init__(self, settings, options, filename):
+    def __init__(self, filename, settings=Config.importer['load']['pubmedcentral'], options=[]):
         self.settings = settings # relevant configuration settings
         self.options = options # command-line options/arguments
         self.filename = filename
@@ -263,14 +259,9 @@ class PMCBulkImporter(ImporterAbstract):
                 filecount += 1
                 if filecount >= self.settings['startingfile']: # skip ones already done by changing the > X
                     print filecount, self.settings['filedir'], filename
-                    p = Process(self.settings, self.options, filename)
+                    p = Process(filename, self.settings, self.options)
                     p.process()
         
-        # TODO: this may not work well with threaded bulking...
-        if self.settings['do_bulk_match']:
-            m = Matcher()
-            m.matchall()
-
 
 # OAI-feed Importer class for ArXiv and for PubMedCentral
 class OAIImporter(ImporterAbstract):

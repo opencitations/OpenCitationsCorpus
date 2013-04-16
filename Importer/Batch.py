@@ -1,8 +1,8 @@
 import requests, json
 import Config
+from Matcher import Matcher
 
 # a batch class for managing batches of records to send to ES, that also does the bulk loading
-# this is used by the main PMC2ES class below
 class Batch(object):
     def __init__(self):
         self.temp = []
@@ -25,6 +25,11 @@ class Batch(object):
             data += json.dumps( r ) + '\n'
         self.temp = []
         r = requests.post(Config.elasticsearch['uri_records'] + '_bulk', data=data)
+
+        # if matching is enabled, then try to match whatever was in the batch to the rest of the index content
+        if Config.importer['load']['pubmedcentral']['do_bulk_match']:
+            m = Matcher()
+            m.citesandcitedby(self.temp)
 
         return r # passing back the POST info in case it is useful
 
