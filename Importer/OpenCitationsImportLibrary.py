@@ -272,6 +272,7 @@ class BulkImporter(ImporterAbstract):
         if self.options['rebuild']:
             self.rebuild_index()
 
+        # Now do the bulk importing. Choose an appropriate class based on the source.
         if self.options['source'] == "pubmedcentral":
             PMCBulkImporter(self.settings, self.options).run()
         elif self.options['source'] == "arxiv":
