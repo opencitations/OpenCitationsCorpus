@@ -28,6 +28,7 @@ class Batch(object):
 
         # if matching is enabled, then try to match whatever was in the batch to the rest of the index content
         if Config.importer['load']['pubmedcentral']['do_bulk_match']:
+            print "matching"
             m = Matcher()
             m.citesandcitedby(self.temp)
 
