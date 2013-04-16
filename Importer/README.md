@@ -34,7 +34,8 @@ The importer can operate in two different modes: as a bulk loader and also as
 an OAI-PMH feed synchroniser. The bulk loader is only suitable for running on
 PubMedCentral OA data, and will quickly build a near-complete index of
 PubMedCentral OA records. The OAI-PMH synchroniser is designed to be run as a
-scheduled job (e.g. via cron) to keep the index up-to-date, and will work on both the PubMedCentral OA and arXiv OAI-PMH feeds.
+scheduled job (e.g. via cron) to keep the index up-to-date, and will work on 
+both the PubMedCentral OA and arXiv OAI-PMH feeds.
 
 
 Code
@@ -58,8 +59,31 @@ Instructions subject to change - this section will be expanded on shortly.
 
 To run the Open Citations Importer:
 
-1. Download, install and run elasticsearch:
-   http://www.elasticsearch.org/download/
-2. Download this code and update the values in Config.py to suit your setup
-3. Execute Runner.py from the commandline, specifying the COMMAND and the
-   SOURCE
+1. Download, install and run [ElasticSearch](http://www.elasticsearch.org/download/)
+2. Download this code from [GitHub](https://github.com/opencitations/OpenCitationsCorpus.git)
+3. Configure settings and the values in `Config.py` to suit your setup
+4. Execute `Runner.py` from the command-line, specifying the *Action* and the
+   *Source* parameters.
+
+   For example, to synchronise with the arXiv source via the OAI-PMH feed,
+   run:
+
+   `$ python Runner.py --action synchronise --source arxiv`
+
+   Or, to synchronise with the PubMedCentral source via the OAI-PMH feed for
+   records updated in the first three days of August 2009, run:
+
+   `$ python Runner.py --action synchronise --source pubmedcentral --from 2009-08-01 --to 2009-08-03`
+
+   Or, to rebuild (drop and recreate) the index and then bulk-load the
+   PubMedCentral Open Access files, run:
+
+   `$ python Runner.py --action load --source pubmedcentral --REBUILD`
+
+   Or, to synchronise a specific record (`id=1856264`) from PubMedCentral, run:
+
+   `$ python Runner.py --action synchronise --source pubmedcentral --id oai:pubmedcentral.nih.gov:1856264`
+
+   For full list of command options, run:
+
+   `$ python Runner.py --help`

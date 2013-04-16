@@ -52,6 +52,11 @@ elasticsearch['uri_configs'] = elasticsearch['uri_index'] + elasticsearch['type_
 
 importer = {
     "load" : {
+        "arxiv": {
+            "name": "arXiv Tar Files",
+            "filedir": "./DATA/arXiv/source/",
+            "workdir": "./DATA/arXiv/workdir/"
+        },
         "pubmedcentral" : {
             "name": "PubMedCentral Open Access Files",
             "filedir": './pmcoa/',
@@ -60,7 +65,6 @@ importer = {
             "startingfile": 1,
             "do_bulk_match": False,
             "skip_tar": False
-            
         }
     },
     "synchronise" : {
