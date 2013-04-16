@@ -370,12 +370,13 @@ class CitationExtractorTex(object):
     """A citation extractor for ArXiv Latex
     """
 
-    # matches \em{, \emph{, {\em, {\emph, \textit{, {\textit
-    _re_starts_with_emph_tag = re.compile(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{|\{\\textit\s+|\\textit\{)')
+    def __init__(self):
+        # matches \em{, \emph{, {\em, {\emph, \textit{, {\textit
+        self._re_starts_with_emph_tag = re.compile(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{|\{\\textit\s+|\\textit\{)')
 
-    # matches \em, \emph, \textit
-    _re_split_emph_tag = re.compile(r'(\\emp?h?|\\textit)')
-    _re_split_newblock = re.compile(r'\\newblock')
+        # matches \em, \emph, \textit
+        self._re_split_emph_tag = re.compile(r'(\\emp?h?|\\textit)')
+        self._re_split_newblock = re.compile(r'\\newblock')
 
 
     def process(self, arxivid, infile):
@@ -402,20 +403,20 @@ class CitationExtractorTex(object):
                 bibstring_to_process = bibitem.strip()
                 #print "Abibstring_to_process:\t", bibstring_to_process
 
-                (arxiv_id, bibstring_to_process) = extract_arxiv_id(bibstring_to_process)
+                (arxiv_id, bibstring_to_process) = self.extract_arxiv_id(bibstring_to_process)
                 #print "Bbibstring_to_process:\t", bibstring_to_process
 
-                (label, key, bibstring_to_process) = extract_label_key(bibstring_to_process)
+                (label, key, bibstring_to_process) = self.extract_label_key(bibstring_to_process)
                 #print "Cbibstring_to_process:\t", bibstring_to_process
 
-                (url, bibstring_to_process) = extract_url(bibstring_to_process)
+                (url, bibstring_to_process) = self.extract_url(bibstring_to_process)
 
-                (authors, bibstring_to_process) = extract_authors(bibstring_to_process)
+                (authors, bibstring_to_process) = self.extract_authors(bibstring_to_process)
                 #print "Dbibstring_to_process:\t", bibstring_to_process
 
 
                 #print "BeforeTitle:\t", bibstring_to_process
-                (title, bibstring_to_process) = extract_title(bibstring_to_process)
+                (title, bibstring_to_process) = self.extract_title(bibstring_to_process)
                 #print "AfterTitle:\t", bibstring_to_process
             
             
@@ -471,26 +472,26 @@ class CitationExtractorTex(object):
 
     def extract_authors(self, bibitem):
         #try to split citation by \newblock and assume first section is the author list (it usually is?!)
-        sections = _re_split_newblock.split(bibitem, 1)
+        sections = self._re_split_newblock.split(bibitem, 1)
         if (len(sections) > 1):
             # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-            (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[-1])
+            (authors, remainder) = (self.remove_wrapping_curly_braces(sections[0]), sections[-1])
         else:
             #instead try to split on \em or \emph or \textit, as that usually demarcates the title
-            sections = _re_split_emph_tag.split(bibitem, 1)
+            sections = self._re_split_emph_tag.split(bibitem, 1)
             if (len(sections) > 1):
                 # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-                (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), "\emph" + sections[-1])
+                (authors, remainder) = (self.remove_wrapping_curly_braces(sections[0]), "\emph" + sections[-1])
             else:
                 # try to split on \<space> as some publications have used this
                 sections = re.split(r'\\\s+', bibitem, 1)
                 if (len(sections) > 1):
                     # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-                    (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[-1])
+                    (authors, remainder) = (self.remove_wrapping_curly_braces(sections[0]), sections[-1])
                 else:
                     # give up and assume that the whole bibitem are the authors
                     (authors, remainder) = (bibitem, "")
-        authors = remove_end_punctuation(authors.strip())
+        authors = self.remove_end_punctuation(authors.strip())
         if len(authors) == 0:
             authors = None
         return (authors, remainder.strip())
@@ -500,23 +501,23 @@ class CitationExtractorTex(object):
         # Ok, this is not so trivial!
         # First we will see if there is a \newblock, and if so, assume that the title is everything in front of the first \newblock
         # NB. You must call extract_authors() first to parse out the authors first before the title, as they will be infront of an earlier \newblock
-        sections = _re_split_newblock.split(bibitem, 1)
+        sections = self._re_split_newblock.split(bibitem, 1)
         if (len(sections) > 1):
             # sometimes the title can be in an {\em } tag or \em{ } tag or \textit{} tag, inside of the \newblock section. In this case, extract using the full parser
-            match = _re_starts_with_emph_tag.match(bibitem)
+            match = self._re_starts_with_emph_tag.match(bibitem)
             if match:
-                (title, remainder) = full_parse_curly_braces(bibitem, 1, 1) #assume first bracket at level 1
+                (title, remainder) = self.full_parse_curly_braces(bibitem, 1, 1) #assume first bracket at level 1
                 #TODO strip out \em in title
             else:
                 # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-                (title, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[1])
+                (title, remainder) = (self.remove_wrapping_curly_braces(sections[0]), sections[1])
         else:
             # No \newblock was found. So we need to try and parse on something else
             # Check to see if the bibitem starts with \emph{ or {\emph }. If so, assume the title is contained inside the \emph{} tag
             # In this case, a full parser is required to extract the title, a regex is insufficient.
             match = re.match(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{)', bibitem)
             if match:
-                (title, remainder) = full_parse_curly_braces(bibitem, 1, 1) #assume first brack at level 1
+                (title, remainder) = self.full_parse_curly_braces(bibitem, 1, 1) #assume first brack at level 1
             else:
                 # No \newblock or \emph{ was found. Instead, try to split on first full stop + space
                 sections = re.split(r'\.\s+', bibitem, 1)
@@ -538,7 +539,7 @@ class CitationExtractorTex(object):
                             (title, remainder) = (bibitem, "")
 
         # Finally, lets tidy-up the title and return it
-        return (remove_end_punctuation(title.strip()), remainder.strip())
+        return (self.remove_end_punctuation(title.strip()), remainder.strip())
 
 
 

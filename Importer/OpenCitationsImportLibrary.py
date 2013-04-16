@@ -298,33 +298,48 @@ class ArXivBulkImporter(ImporterAbstract):
         self.current_dir = os.getcwd()
         self.filedir = self.current_dir + lstrip(self.settings['filedir'], '.')
         self.workdir = self.current_dir + lstrip(self.settings['workdir'], '.')
+
         self.contents_file = self.filedir + "arXiv_s3_downloads.txt"
+
+        
+        self.tmp_dir = self.workdir + "tmp/"
+        self.extract_dir = self.workdir + "extract/"
+        self.citation_dir = self.workdir + "citation/"
+        self.extraction_queue = self.workdir + "arXiv_extraction_queue.txt"
+        self.citation_queue = self.workdir + "arXiv_citation_queue.txt"
+
         self.s3_cmd_ex = self.current_dir + "/../ImportArxiv/tools/s3cmd/s3cmd" #TODO: Tidy this up
 
-        # "filedir": "./DATA/arXiv/source/",
-        # "workdir": "./DATA/arXiv/workdir/"
+        if not os.path.exists(self.filedir):
+            os.makedirs(self.filedir)
+
+        if not os.path.exists(self.workdir):
+            os.makedirs(self.workdir)
 
                 
     # do everything
     def run(self):
-        #First of all, download the arXiv source files
+    
+        # First of all, download the arXiv source files.
+        # Warning this is a lot of data and will cost $$$
         self.download()
+
+        # Next, extract the archives
+        self.extract()
+
+        # Now, retrieve the citations
+        self.retrieve_citations()
 
 
     def download(self):
-    
-        if not os.path.exists(self.filedir):
-            os.makedirs(self.filedir)
-
         if not os.path.exists(self.contents_file):
             print "Error: arXiv contents file %s does not exist" % (self.contents_file)
             sys.exit(1)
 
-
         # Change directory to source folder
         os.chdir(self.filedir)
 
-        print "Press 'x' to suspend after the current download."
+        print "Press 'x' to break after the current download."
         while True:
             arxiv_file_line = fq.get(self.contents_file)
             if arxiv_file_line == None: 
@@ -348,6 +363,84 @@ class ArXivBulkImporter(ImporterAbstract):
         os.chdir(self.current_dir)
 
 
+    def extract(self):
+        print "Press 'x' to interupt the extraction process"
+        if not os.path.exists(self.tmp_dir):
+            os.mkdir(self.tmp_dir)
+
+        if not os.path.exists(self.extract_dir):
+            os.mkdir(self.extract_dir)
+
+        #Creates arXiv_extraction_queue.txt if it doesn't exist by finding all the tar files in the download folder
+        if not os.path.exists(self.extraction_queue):
+            call('find {source_dir}*.tar -type f > {target_file}'.format(
+                    source_dir = self.filedir,
+                    target_file = self.extraction_queue 
+                    ) , shell = True)
+
+        while True:
+            file_name = fq.get(self.extraction_queue)
+            if file_name is None: break
+
+            print "Extracting bucket" , file_name
+            if call(['tar','xf',file_name,'-C',self.tmp_dir]):
+                # call returns 1 on error.
+                break
+
+            if call('find %s -name *.gz -type f -exec mv {} %s \;' % (self.tmp_dir, self.extract_dir), shell = True):
+                break
+
+            if call('rm -R ' + self.tmp_dir + '*', shell=True):
+                break
+
+            fq.pop(self.extraction_queue)
+
+            # break if x was pressed
+            if nbRawInput('',timeout=1) == 'x':
+                print "Extraction suspended. Restart script to resume."
+                break
+
+
+    def retrieve_citations(self):
+        if not os.path.exists(self.citation_dir):
+            os.mkdir(self.citation_dir)
+
+        if not os.path.exists(self.tmp_dir):
+            os.mkdir(self.tmp_dir)
+
+        #Creates arXiv_citationqueue.txt if it doesn't exist by finding all the gz files in the extract folder
+        if not os.path.exists(self.citation_queue):
+            call('find {source_dir}*.gz -type f > {target_file}'.format(
+                    source_dir = self.extract_dir,
+                    target_file = self.citation_queue 
+                    ) , shell = True)
+
+        while True:
+            file_name = fq.get(self.citation_queue)
+            if file_name is None: break
+            
+            arxiv_id = os.path.splitext(os.path.split(file_name)[1])[0]
+            print "Retrieving citations", arxiv_id
+
+            uncompressed_tmp = self.tmp_dir + arxiv_id
+            if not os.path.exists(uncompressed_tmp):
+                os.mkdir(uncompressed_tmp)
+            returncode = call(["tar", "xzf", file_name, "-C", uncompressed_tmp])
+            if (returncode == 1): #there was an error, so perhaps its not a Tar file. Instead try to decompress with plain old gunzip
+                print "trying to gunzip instead for " + file_name
+                os.system("gunzip -c %s > %s" % (file_name, uncompressed_tmp + "/file.tex"))
+
+            #Now process .tex files
+            for tex_file_name in os.listdir(uncompressed_tmp):
+                if not (tex_file_name.endswith('.tex') or tex_file_name.endswith('.bbl')): continue
+                self.settings["metadata_reader"].process(arxiv_id, uncompressed_tmp + '/' + tex_file_name)
+                #call([self.tex2bibjson, "-a", arxiv_id, "-i", uncompressed_dir + "/" + tex_file_name, "-o", self.citations_dir + arxiv_id + "_" + tex_file_name + ".json"])
+
+
+            if call('rm -R ' + uncompressed_tmp + '*', shell=True):
+                break
+
+            fq.pop(self.citation_queue)
 
 
 

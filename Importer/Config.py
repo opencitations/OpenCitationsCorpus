@@ -55,7 +55,8 @@ importer = {
         "arxiv": {
             "name": "arXiv Tar Files",
             "filedir": "./DATA/arXiv/source/",
-            "workdir": "./DATA/arXiv/workdir/"
+            "workdir": "./DATA/arXiv/workdir/",
+            "metadata_reader": MetadataReaders.CitationExtractorTex()
         },
         "pubmedcentral" : {
             "name": "PubMedCentral Open Access Files",
