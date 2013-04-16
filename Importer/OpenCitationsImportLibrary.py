@@ -235,14 +235,6 @@ class PMCBulkImporter(ImporterAbstract):
                 
     # do everything
     def run(self):
-        # Check that ElasticSearch is alive
-        self.check_index()
-
-        # If the user specified the --REBUILD flag, recreate the index
-        if self.options['rebuild']:
-            self.rebuild_index()
-
-
         dirList = os.listdir(self.settings['filedir']) # list the contents of the directory where the source files are
         filecount = 0
 
@@ -262,6 +254,50 @@ class PMCBulkImporter(ImporterAbstract):
                     p = Process(filename, self.settings, self.options)
                     p.process()
         
+
+# Generic Bulk Importer class for all sources
+class BulkImporter(ImporterAbstract):
+
+    def __init__(self, settings, options):
+        self.settings = settings # relevant configuration settings
+        self.options = options # command-line options/arguments
+
+                
+    # do everything
+    def run(self):
+        # Check that ElasticSearch is alive
+        self.check_index()
+
+        # If the user specified the --REBUILD flag, recreate the index
+        if self.options['rebuild']:
+            self.rebuild_index()
+
+        if self.options['source'] == "pubmedcentral":
+            PMCBulkImporter(self.settings, self.options).run()
+        elif self.options['source'] == "arxiv":
+            ArXivBulkImporter(self.settings, self.options).run()
+        else:
+            print "Error: unhandled source ", self.options['source']
+
+
+
+# Generic Bulk Importer class for all sources
+class ArXivBulkImporter(ImporterAbstract):
+
+    def __init__(self, settings, options):
+        self.settings = settings # relevant configuration settings
+        self.options = options # command-line options/arguments
+
+                
+    # do everything
+    def run(self):
+        print "Arxiv Bulk Importer"
+        
+
+
+
+
+
 
 # OAI-feed Importer class for ArXiv and for PubMedCentral
 class OAIImporter(ImporterAbstract):
