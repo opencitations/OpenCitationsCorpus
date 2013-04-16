@@ -28,6 +28,11 @@ import Config
 import hashlib, md5
 import requests, json
 import uuid
+from string import lstrip
+sys.path.append('../ImportArxiv/tools')  #TODO: Tidy this up
+import file_queue as fq
+from nb_input import nbRawInput
+from subprocess import call
 import threading, Queue
 from lxml import etree as ET
 
@@ -289,12 +294,58 @@ class ArXivBulkImporter(ImporterAbstract):
         self.settings = settings # relevant configuration settings
         self.options = options # command-line options/arguments
 
+        # We need to cast paths as absolute, not relative, as we change dir later
+        self.current_dir = os.getcwd()
+        self.filedir = self.current_dir + lstrip(self.settings['filedir'], '.')
+        self.workdir = self.current_dir + lstrip(self.settings['workdir'], '.')
+        self.contents_file = self.filedir + "arXiv_s3_downloads.txt"
+        self.s3_cmd_ex = self.current_dir + "/../ImportArxiv/tools/s3cmd/s3cmd" #TODO: Tidy this up
+
+        # "filedir": "./DATA/arXiv/source/",
+        # "workdir": "./DATA/arXiv/workdir/"
+
                 
     # do everything
     def run(self):
-        print "Arxiv Bulk Importer"
-        
+        #First of all, download the arXiv source files
+        self.download()
 
+
+    def download(self):
+    
+        if not os.path.exists(self.filedir):
+            os.makedirs(self.filedir)
+
+        if not os.path.exists(self.contents_file):
+            print "Error: arXiv contents file %s does not exist" % (self.contents_file)
+            sys.exit(1)
+
+
+        # Change directory to source folder
+        os.chdir(self.filedir)
+
+        print "Press 'x' to suspend after the current download."
+        while True:
+            arxiv_file_line = fq.get(self.contents_file)
+            if arxiv_file_line == None: 
+                break
+
+            print "Processing ", arxiv_file_line
+    
+            return_code = call([self.s3_cmd_ex,'get','--add-header=x-amz-request-payer: requester','--skip-existing', arxiv_file_line])
+
+            if return_code != 0:
+                print "Error downloading", arxiv_file_line 
+                break
+
+            fq.pop(self.contents_file)
+            # break if x was pressed
+            if 'x' in nbRawInput('',timeout=1):
+                print "Download suspended. Restart script to resume."
+                break        
+
+        # Change directory to project current folder
+        os.chdir(self.current_dir)
 
 
 
