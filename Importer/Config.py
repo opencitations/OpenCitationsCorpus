@@ -80,7 +80,7 @@ importer = {
         "pubmedcentral" : {
             "name": "PubMedCentral Open Access OAI-PMH",
             "uri": "http://www.pubmedcentral.nih.gov/oai/oai.cgi",
-            "metadata_format": "pmc_fm",
+            "metadata_format": "pmc",  #pmc includes full text for a small subset of the PubMedCentral open access set. Otherwise use pmc_fm to get basic metadata (excluding citations)
             "metadata_reader": MetadataReaders.MetadataReaderPMC(),
             "delta_days": 1, #synchronise 1 day at a time
             "default_from_date": "2000-01-01"

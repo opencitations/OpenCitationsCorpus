@@ -14,10 +14,15 @@ from oaipmh import common
 from lxml import etree
 
 import re
-
-
+import datetime
 import logging
-logging.basicConfig(filename='importer.log',level=logging.DEBUG)
+import os
+
+if not os.path.exists('./log/'):
+    os.mkdir('./log/')
+
+now = datetime.datetime.now()
+logging.basicConfig(filename=now.strftime('./log/importer-%Y-%m-%d.log'),level=logging.DEBUG)
 
 #logger = logging.getLogger('importer')
 #hdlr = logging.FileHandler('importer.log')
@@ -38,6 +43,9 @@ class MetadataReaderAbstract(object):
         'xlink': 'http://www.w3.org/1999/xlink',
         'mml' : 'http://www.w3.org/1998/Math/MathML',
         'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+
+    # Note that PubmedCentral Front-Matter format (pmc_fm) DOES NOT include the full text (or citations), only basic metadata
+    # Note that PubMedCentral format (pmc) does include full text and citations, it is only available for a small number of articles
 
     #METADATA_FORMAT_OAI_DC = {"prefix": 'oai_dc', "reader": oai_dc_reader}
     #METADATA_FORMAT_ARXIV = {"prefix": 'arXiv', "reader": MetadataReaders.MetadataReaderArXiv()}
@@ -158,7 +166,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
     def __call__(self, metadata_element, nsprefix="nlmaa:"):
         map = {}
 
-        #logging.info("Parsing " + etree.tostring(metadata_element))
+        #logging.debug("Parsing " + etree.tostring(metadata_element))
 
         article = self._find_element(metadata_element,"{0}article".format(nsprefix))
 
@@ -362,6 +370,9 @@ class MetadataReaderPMC(MetadataReaderAbstract):
         else:
             logging.info("No back metadata for ")
 
+        #logging.debug("MAP: ")
+        #logging.debug(map)
+
         return common.Metadata(map)
 
 
@@ -379,10 +390,11 @@ class CitationExtractorTex(object):
         self._re_split_newblock = re.compile(r'\\newblock')
 
 
-    def process(self, arxivid, infile):
+    def process(self, identifier, infile):
         file_handle = open(infile, 'r')
         raw_data = file_handle.read()
         file_handle.close()
+        citations = []
     
         #remove latex comments, to avoid confusion in processing
         data = re.sub(r"^\s*\%.*$", "", raw_data, 0, re.MULTILINE)
@@ -400,39 +412,41 @@ class CitationExtractorTex(object):
             for bibitem in re.split(r"\\bibitem", data)[1:]:
 
                 #trim the string
-                bibstring_to_process = bibitem.strip()
-                #print "Abibstring_to_process:\t", bibstring_to_process
+                bibitem_trimmed = bibitem.strip()
+                citation = {"raw": bibitem_trimmed}
+
+                bibstring_to_process = bibitem_trimmed
 
                 (arxiv_id, bibstring_to_process) = self.extract_arxiv_id(bibstring_to_process)
-                #print "Bbibstring_to_process:\t", bibstring_to_process
+                if arxiv_id is not None:
+                    citation["identifier"] = [{"type":"arXiv", "id":arxiv_id, "canonical":"arXiv:" + arxiv_id}]
 
                 (label, key, bibstring_to_process) = self.extract_label_key(bibstring_to_process)
-                #print "Cbibstring_to_process:\t", bibstring_to_process
+                if (label is not None): citation["label"] = label
+                if (key is not None): citation["key"] = key
 
                 (url, bibstring_to_process) = self.extract_url(bibstring_to_process)
-
+                if (url is not None): citation["url"] = url
+                
                 (authors, bibstring_to_process) = self.extract_authors(bibstring_to_process)
-                #print "Dbibstring_to_process:\t", bibstring_to_process
+                if (authors is not None): citation["authors"] = authors
 
+                (year, bibstring_to_process) = self.extract_year(bibstring_to_process)
+                if (year is not None): citation["year"] = year
 
-                #print "BeforeTitle:\t", bibstring_to_process
+                
                 (title, bibstring_to_process) = self.extract_title(bibstring_to_process)
-                #print "AfterTitle:\t", bibstring_to_process
+                if (title is not None): citation["title"] = title
             
-            
+                citations.append(citation)
+
                 #print "Counter: %i\tarxiv_id: %s\tlabel: %s\tkey: %s\turl: %s\tauthors: %s\ttitle: %s" % (counter, arxiv_id, label, key, url, authors, title)
-                print "COUNTER: %i \t AUTHORS: %s \t TITLE: %s" % (counter, authors, title)
+                #print "COUNTER: %i \t AUTHORS: %s \t TITLE: %s" % (counter, authors, title)
                 #print "bibstring_to_process:\t", bibstring_to_process
-                print bibitem, "\n"
+                #print bibitem, "\n"
                 counter += 1
-                #break
             
-            
-        
-    
-        #out = open(args.outfile,'w')
-        #out.write(json.dumps(d,indent=4))
-        #out.close()
+        return citations
 
     def extract_arxiv_id(self, bibitem):
         #New arxiv citation format
@@ -541,6 +555,14 @@ class CitationExtractorTex(object):
         # Finally, lets tidy-up the title and return it
         return (self.remove_end_punctuation(title.strip()), remainder.strip())
 
+
+    def extract_year(self, bibitem):
+        # search for (20XX), (19XX) or (18XX). Year must be four digits enclosed by parentheses ()
+        match = re.search(r'\((?P<year>((1[98])|(20))\d{2})\)', bibitem)
+        if match:
+            return (match.group('year'), re.sub(r'\((((1[98])|(20))\d{2})\)', "", bibitem, 0).strip())
+        else:
+            return (None, bibitem)
 
 
     def remove_end_punctuation(self, bibitem):

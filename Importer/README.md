@@ -80,9 +80,13 @@ To run the Open Citations Importer:
 
    `$ python Runner.py --action load --source pubmedcentral --REBUILD`
 
-   Or, to synchronise a specific record (`id=1856264`) from PubMedCentral, run:
+   Or, to synchronise a specific record (`id=3625889`) from PubMedCentral, run:
 
-   `$ python Runner.py --action synchronise --source pubmedcentral --id oai:pubmedcentral.nih.gov:1856264`
+   `$ python Runner.py --action synchronise --source pubmedcentral --id oai:pubmedcentral.nih.gov:3625889`
+
+   Or, to synchronise a specific record (`id=1209.0458`) from arXiv, run:
+
+   `$ python Runner.py --action synchronise --source arxiv --id oai:arXiv.org:1209.0458`
 
    For full list of command options, run:
 

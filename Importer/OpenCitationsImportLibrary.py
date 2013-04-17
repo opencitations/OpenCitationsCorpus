@@ -127,8 +127,8 @@ class ImporterAbstract(object):
         return bibjson
 
 
-
-    def get_bibserver_id(self, identifiers):
+    # Returns the first document matching any of the supplied identifiers
+    def get_bibserver_document(self, identifiers):
         if identifiers:
             terms = []
             for identifier in identifiers:
@@ -144,20 +144,24 @@ class ImporterAbstract(object):
             r = requests.get(Config.elasticsearch['uri_records'] + "_search", data=json.dumps(q))
             data = r.json()
             if data["hits"]["total"] > 0:
-                #return existing id as specified in BibServer
-                bibserver_id = data["hits"]["hits"][0]["_id"]
-                #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
+                #return first document matching the id
+                return data["hits"]["hits"][0]['_source']
             else:
-                #Create new id using UUID
-                bibserver_id = uuid.uuid4().hex
-                #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
+                return None
         else:
-            #Create new id using UUID
+            return None
+
+    # Returns the first document ID matching any of the supplied identifiers,
+    # Or creates a new uuid if one could not be found
+    def get_bibserver_id(self, identifiers):
+        document = self.get_bibserver_document(identifiers)
+        if document is not None:
+            bibserver_id = document["_id"]
+            #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
+        else:
             bibserver_id = uuid.uuid4().hex
-            #print "Creating a new ID: %s" % (bibserver_id)
+            #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
         return bibserver_id
-
-
 
 
 
@@ -304,7 +308,6 @@ class ArXivBulkImporter(ImporterAbstract):
         
         self.tmp_dir = self.workdir + "tmp/"
         self.extract_dir = self.workdir + "extract/"
-        self.citation_dir = self.workdir + "citation/"
         self.extraction_queue = self.workdir + "arXiv_extraction_queue.txt"
         self.citation_queue = self.workdir + "arXiv_citation_queue.txt"
 
@@ -402,9 +405,6 @@ class ArXivBulkImporter(ImporterAbstract):
 
 
     def retrieve_citations(self):
-        if not os.path.exists(self.citation_dir):
-            os.mkdir(self.citation_dir)
-
         if not os.path.exists(self.tmp_dir):
             os.mkdir(self.tmp_dir)
 
@@ -414,6 +414,9 @@ class ArXivBulkImporter(ImporterAbstract):
                     source_dir = self.extract_dir,
                     target_file = self.citation_queue 
                     ) , shell = True)
+
+        # Initialise some variables
+        batcher = Batch.Batch()
 
         while True:
             file_name = fq.get(self.citation_queue)
@@ -433,7 +436,13 @@ class ArXivBulkImporter(ImporterAbstract):
             #Now process .tex files
             for tex_file_name in os.listdir(uncompressed_tmp):
                 if not (tex_file_name.endswith('.tex') or tex_file_name.endswith('.bbl')): continue
-                self.settings["metadata_reader"].process(arxiv_id, uncompressed_tmp + '/' + tex_file_name)
+                citations = self.settings["metadata_reader"].process(arxiv_id, uncompressed_tmp + '/' + tex_file_name)
+
+                #Store the citations in BibServer
+                self.store_citations(batcher, arxiv_id, citations)
+
+                #print "CITATIONS for " + arxiv_id
+                #print citations
 
             # Delete temporary files
             if call('rm -R ' + uncompressed_tmp + '*', shell=True):
@@ -441,6 +450,19 @@ class ArXivBulkImporter(ImporterAbstract):
 
             fq.pop(self.citation_queue)
 
+        batcher.clear()
+
+
+    def store_citations(self, batcher, arxiv_id, citations):
+        if len(citations) > 0:
+            identifiers = [{"type": "arXiv", "id": arxiv_id, "canonical": "arXiv:" + arxiv_id}]
+            bibjson = self.get_bibserver_document(identifiers)
+            if bibjson is None:
+                bibjson = {"identifier": identifiers}
+                bibjson['_id'] = self.get_bibserver_id(False) #create a new id
+            bibjson['citation'] = citations
+            bibjson = self.generic_bibjsonify(bibjson)
+            batcher.add(bibjson)
 
 
 # OAI-feed Importer class for ArXiv and for PubMedCentral
