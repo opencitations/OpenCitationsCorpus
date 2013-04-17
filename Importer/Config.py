@@ -12,7 +12,7 @@ bibjson_creator = "occ" # the name of the creator of this record for bibsoup
 
 
 elasticsearch = {
-    "batchsize": 5000, # size of batches to bundle and send to the index. If zero they will all be kept and done at the end.
+    "batchsize": 10, # size of batches to bundle and send to the index. If zero they will all be kept and done at the end.
     "uri_base": "http://localhost:9200", # where is the ES index?
     "index": "occ", # what is the name of the elasticsearch database to use?
     "type_record": "record",  # what is the name of the index object type to save into?
