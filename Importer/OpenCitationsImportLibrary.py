@@ -434,9 +434,8 @@ class ArXivBulkImporter(ImporterAbstract):
             for tex_file_name in os.listdir(uncompressed_tmp):
                 if not (tex_file_name.endswith('.tex') or tex_file_name.endswith('.bbl')): continue
                 self.settings["metadata_reader"].process(arxiv_id, uncompressed_tmp + '/' + tex_file_name)
-                #call([self.tex2bibjson, "-a", arxiv_id, "-i", uncompressed_dir + "/" + tex_file_name, "-o", self.citations_dir + arxiv_id + "_" + tex_file_name + ".json"])
 
-
+            # Delete temporary files
             if call('rm -R ' + uncompressed_tmp + '*', shell=True):
                 break
 
