@@ -441,7 +441,7 @@ class CitationExtractorTex(object):
 
                 #trim the string
                 bibitem_trimmed = bibitem.strip()
-                citation = {"raw": bibitem_trimmed}
+                citation = {"_latex": bibitem_trimmed, "cite_order": counter}
 
                 bibstring_to_process = bibitem_trimmed
 
@@ -455,16 +455,18 @@ class CitationExtractorTex(object):
 
                 (url, bibstring_to_process) = self.extract_url(bibstring_to_process)
                 if (url is not None): citation["url"] = url
-                
-                (authors, bibstring_to_process) = self.extract_authors(bibstring_to_process)
-                if (authors is not None): citation["authors"] = authors
 
                 (year, bibstring_to_process) = self.extract_year(bibstring_to_process)
                 if (year is not None): citation["year"] = year
-
+                
+                (authors, bibstring_to_process) = self.extract_authors(bibstring_to_process)
+                if (authors is not None): citation["authors"] = authors
                 
                 (title, bibstring_to_process) = self.extract_title(bibstring_to_process)
                 if (title is not None): citation["title"] = title
+
+                (publisher, bibstring_to_process) = self.extract_publisher(bibstring_to_process)
+                if (publisher is not None): citation["publisher"] = publisher
             
                 citations.append(citation)
 
@@ -581,8 +583,15 @@ class CitationExtractorTex(object):
                             (title, remainder) = (bibitem, "")
 
         # Finally, lets tidy-up the title and return it
-        return (self.remove_end_punctuation(title.strip()), remainder.strip())
+        title = self.remove_end_punctuation(title.strip())
+        if len(title) == 0: title=None
+        return (title, remainder.strip())
 
+    def extract_publisher(self, bibitem):
+        # Assume authors, title, url and year are extracted. So hopefully all that is left is publisher/publication and pagination.
+        publisher = self.remove_wrapping_curly_braces(bibitem).strip()
+        if len(publisher) == 0: publisher=None
+        return (publisher, bibitem)
 
     def extract_year(self, bibitem):
         # search for (20XX), (19XX) or (18XX). Year must be four digits enclosed by parentheses ()
