@@ -414,10 +414,10 @@ class CitationExtractorTex(object):
         file_handle = codecs.open(infile, encoding=encoding, mode='r')
 
         try:
-			#Always re-encode files as UTF-8 for processing, as this is what ElasticSearch is expecting
+            #Always re-encode files as UTF-8 for processing, as this is what ElasticSearch is expecting
             raw_data = file_handle.read().encode("UTF-8")
         except UnicodeDecodeError as e:
-			#Otherwise, give up trying to read this file
+            #Otherwise, give up trying to read this file
             print "Error: could not re-encode %s to UTF-8: %s %s" % (identifier, e, infile)
             raw_data = ""
             
