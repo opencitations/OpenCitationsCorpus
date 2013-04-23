@@ -17,6 +17,8 @@ import re
 import datetime
 import logging
 import os
+import codecs
+from chardet.universaldetector import UniversalDetector
 
 if not os.path.exists('./log/'):
     os.mkdir('./log/')
@@ -382,6 +384,10 @@ class CitationExtractorTex(object):
     """
 
     def __init__(self):
+    
+        #File encoding to use if it cannot be detected in the Latex files
+        self.DEFAULT_ENCODING = "UTF-8"
+        
         # matches \em{, \emph{, {\em, {\emph, \textit{, {\textit
         self._re_starts_with_emph_tag = re.compile(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{|\{\\textit\s+|\\textit\{)')
 
@@ -391,8 +397,30 @@ class CitationExtractorTex(object):
 
 
     def process(self, identifier, infile):
-        file_handle = open(infile, 'r')
-        raw_data = file_handle.read()
+    
+        # Need to use some guesswork to detect the file encoding of the latex files.
+        u = UniversalDetector()
+        for line in open(infile, 'rb'):
+            u.feed(line)
+        u.close()
+        result = u.result
+        if result['encoding']:
+            encoding = result['encoding']
+            print "Detected encoding for %s: %s" % (identifier, encoding)
+        else:
+            encoding = self.DEFAULT_ENCODING
+            print "Warning: using default encoding (%s) - as a file encoding could not be detected for %s" % (encoding, infile)
+
+        file_handle = codecs.open(infile, encoding=encoding, mode='r')
+
+        try:
+			#Always re-encode files as UTF-8 for processing, as this is what ElasticSearch is expecting
+            raw_data = file_handle.read().encode("UTF-8")
+        except UnicodeDecodeError as e:
+			#Otherwise, give up trying to read this file
+            print "Error: could not re-encode %s to UTF-8: %s %s" % (identifier, e, infile)
+            raw_data = ""
+            
         file_handle.close()
         citations = []
     
