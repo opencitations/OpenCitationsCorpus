@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+    
+    <head>
+        <title>Open Citations Timeline</title>
+        <!-- Adapted from https://github.com/spinscale/elasticsearch-facetgrapher -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/nv.d3.css" rel="stylesheet">
+        <script src="js/jquery-1.8.2.min.js" type="text/javascript"></script>
+        <script src="js/underscore-min.js" type="text/javascript"></script>
+        <script src="js/moment.min.js" type="text/javascript"></script>
+        <script src="js/d3.v2.min.js" type="text/javascript"></script>
+        <script src="js/nv.d3.min.js" type="text/javascript"></script>
+        <script src="js/bootstrap.min.js" type="text/javascript"></script>
+
+        <!-- get jquery-ui js and css -->
+        <link rel="stylesheet" href="../graphview/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+        <script type="text/javascript" src="../graphview/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+        <script type="text/javascript">
+
+            // add extension to jQuery with a function to get URL parameters
+            jQuery.extend({
+                getUrlVars: function() {
+                    var params = new Object;
+                    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                    for ( var i = 0; i < hashes.length; i++ ) {
+                        hash = hashes[i].split('=');
+                        if ( hash.length > 1 ) {
+                            if ( hash[1].replace(/%22/gi,"")[0] == "[" || hash[1].replace(/%22/gi,"")[0] == "{" ) {
+                                hash[1] = hash[1].replace(/^%22/,"").replace(/%22$/,"");
+                                var newval = JSON.parse(unescape(hash[1].replace(/%22/gi,'"')));
+                            } else {
+                                var newval = unescape(hash[1].replace(/%22/gi,'"'));
+                            }
+                            params[hash[0]] = newval;
+                        }
+                    }
+                    return params;
+                },
+                getUrlVar: function(name){
+                    return jQuery.getUrlVars()[name];
+                }
+            });
+
+
+            var chartData = [];
+            var mChartType = "line";
+
+             $(document).ready(function () {
+
+                var opts = {
+                    inline: true,
+                    dateFormat: 'dd/mm/yy',
+                    defaultDate: new Date(),
+                    changeYear: true
+                };
+                $('.datepicker').datepicker(opts);
+
+
+                // add listener to the graph button
+                $("#graphform").submit(function (event) {
+                    event.preventDefault();
+                    chartData = [];
+                    nv.graphs = [];
+                    nv.render.active = false;
+                    nv.render.queue = [];
+                    nv.dispatch.render_end();
+                    executeRequest();
+                });
+
+                nv.graphs = [];
+                nv.render.active = false;
+                nv.render.queue = [];
+                nv.dispatch.render_end();
+                executeRequest();
+            });
+
+            function executeRequest() {
+                var qry = $.getUrlVar('source');
+                if ( qry == undefined ) {
+                    qry = {
+                        "size": 0,
+                        "query": {
+                            "match_all": {}
+                        },
+                        "facets": {
+                            "range": {
+                                "date_histogram": {
+                                    "field": "date",
+                                    "interval": "month"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                var url = 'http://test.cottagelabs.com:9200/occ/record/_search';
+                var chartType = $('#graphform select[name=chart-type]').val();
+                var from = $('#graphform input[name=from]').val();
+                var to = $('#graphform input[name=to]').val();
+                var interval = $('#graphform select[name=interval]').val();
+                qry.facets.range.date_histogram.interval = interval;
+                qry.facets.range["facet_filter"] = {
+                    "range": {
+                        "date": {
+                            "from": from,
+                            "to": to
+                        }
+                    }
+                };
+
+                $.ajax({
+                    processData: false,
+                    url: url,
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify(qry),
+                    success: function (data) {
+                        drawChart(data, {
+                            type: chartType,
+                            legend: "query"
+                        });
+                    }
+                });
+            }
+
+
+            function drawChart(data, cfg) {
+                
+                var counts = _.map(data.facets.range.entries, function (entry) {
+                    return entry.count;
+                });
+                var tooltips = _.map(data.facets.range.entries, function (entry) {
+                    return moment(new Date(entry.time)).format("DD.MM") + ": " + entry.count + " items";
+                });
+
+                // has many {x:foo, y:bar} entries
+                var x = 0
+                var dataArray = _.map(data.facets.range.entries, function (entry) {
+                    return {
+                        x: x++,
+                        y: entry.count,
+                        label: d3.time.format('%d/%m/%y')(new Date(entry.time))
+                    }
+                });
+
+                // has many { values: data, key: 'name', color: '#5050ff'} entries
+                chartData.push({
+                    values: dataArray,
+                    key: cfg.legend,
+                    area: true
+                })
+
+                var labelYAxis = "";
+                var labelXAxis = "";
+
+                nv.addGraph(function () {
+                    var chart = nv.models.lineChart()
+                    switch (cfg.type) {
+                    case "bar":
+                        chart = nv.models.multiBarChart()
+                        break
+                    case "area":
+                        chart = nv.models.stackedAreaChart()
+                        break
+                    }
+
+                    chart.xAxis.axisLabel(labelXAxis)
+                        .tickFormat(function (d) {
+                        if (d >= 0 && dataArray[d] != null) {
+                            return dataArray[d].label
+                        }
+                        return d;
+                    });
+
+                    chart.yAxis.axisLabel(labelYAxis)
+                        .tickFormat(d3.format(',r'));
+                        
+                    var svg = d3.select("#chart svg")
+                    // If the type of chart has changed, remove the svg
+                    // element and re-add  
+                    if (mChartType != cfg.type) {
+                        d3.select("#chart").selectAll("svg").remove()
+                        svg = d3.select("#chart").append("svg")
+                                .attr("height", 500)
+                    }
+                    mChartType = cfg.type
+                       
+                    svg.datum(chartData)
+                        .transition().duration(500)
+                        .call(chart);
+
+                    nv.utils.windowResize(chart.update);
+
+                    return chart;
+                });
+
+            }
+        </script>
+    </head>
+    
+    <body>
+        <div class="container">
+            
+            <form class="form-inline" id="graphform">
+                <input type="text" class="input-medium datepicker" name="from" value="01/01/2011">
+                <input type="text" class="input-medium datepicker" name="to" value="01/01/2012">
+                <select name="interval">
+                    <option>day</option>
+                    <option selected="true">month</option>
+                    <option>year</option>
+                </select>
+                <select name="chart-type">
+                    <option>line</option>
+                    <option>bar</option>
+                    <option>area</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Draw</button>
+            </form>
+            <div id='chart'>
+                <svg style='height:500px'></svg>
+            </div>
+            <div class="data-select data-select-template" style="display : none">
+                <input type="text" name="legend" value="" placeholder="enter a search value" />
+                <i class="icon-minus-sign" style="cursor: pointer"></i>
+                <i class="icon-plus-sign" style="cursor: pointer"></i>
+            </div>
+        </div>
+    </body>
+
+</html>

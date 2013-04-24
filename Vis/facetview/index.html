@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>FacetView</title>
+
+  <script type="text/javascript" src="vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <script type="text/javascript" src="vendor/bootstrap/js/bootstrap.min.js"></script>  
+
+  <script type="text/javascript" src="vendor/linkify/1.0/jquery.linkify-1.0-min.js"></script>  
+  
+  <link rel="stylesheet" href="vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+  <script type="text/javascript" src="vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+  <script type="text/javascript" src="jquery.facetview.js"></script>
+
+  <link rel="stylesheet" href="css/facetview.css">
+
+  <script type="text/javascript">
+jQuery(document).ready(function($) {
+
+var resdisplay = [
+    [
+        {
+            "pre": '<strong><a alt="view record" title="view record" target="_blank" href="http://test.cottagelabs.com:9200/occ/record/',
+            "field": "_id",
+            "post":'">&laquo;</a></strong>&nbsp;&nbsp;'
+        },
+        {
+            "field": "author.name"
+        },
+        {
+            "pre": "(",
+            "field": "year",
+            "post": ")"
+        }
+    ],
+    [
+        {
+            "pre": "<strong>",
+            "field": "title",
+            "post": "</strong>"
+        }
+    ],
+    [
+        {
+            "field": "howpublished"
+        },
+        {
+            "pre": "in <em>",
+            "field": "journal.name",
+            "post": "</em>,"
+        },
+        {
+            "pre": "<em>",
+            "field": "booktitle",
+            "post": "</em>,"
+        },
+        {
+            "pre": "vol. ",
+            "field": "volume",
+            "post": ","
+        },
+        {
+            "pre": "p. ",
+            "field": "pages"
+        },
+        {
+            "field": "publisher"
+        }
+    ],
+    [
+        {
+            "field": "link.url"
+        }
+    ]
+];
+
+
+  $('.facet-view-simple').each(function() {
+  $(this).facetview({
+    search_url: 'http://test.cottagelabs.com:9200/occ/record/_search?',
+    search_index: 'elasticsearch',
+    pager_on_top: true,
+    result_display: resdisplay,
+    facets: [
+        {'field': 'journal.name.exact', 'display': 'journal'},
+        {'field': 'year.exact', 'display': 'year'},
+        {'field': 'citation.identifier.id.exact', 'display':'articles citing an ID'},
+    	{'field':'citation.identifier.type.exact', 'display':'citation ID types'},
+	    {'field':'author.name.exact', 'display':'author name'}
+    ],
+    search_sortby: [{'display':'year', 'field':'year.exact'},{'display':'journal','field':'journal.name.exact'}],
+    searchbox_fieldselect: [{'display':'author','field':'author.name'},{'display':'journal','field':'journal.name'}],
+    paging: {
+      size: 10
+    }
+  });
+  });
+});
+  </script>
+
+<style type="text/css">
+.facet-view-simple{
+    width:1000px;
+    height:800px;
+    margin:20px auto 0 auto;
+}
+</style>
+
+</head>
+<body>
+
+    <div class="facet-view-simple"></div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>GraphView</title>
+    <meta name="description" content="GraphView">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- get jquery -->
+    <script type="text/javascript" src="vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+
+    <!-- get bootstrap js and css -->
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-responsive.min.css">
+    <script type="text/javascript" src="vendor/bootstrap/js/bootstrap.min.js"></script>  
+
+    <!-- get jquery-ui js and css -->
+    <link rel="stylesheet" href="vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+                
+    <!-- get select2-->
+    <link rel="stylesheet" href="vendor/select2-release-3.2/select2.css">
+    <script type="text/javascript" src="vendor/select2-release-3.2/select2.min.js"></script>
+
+    <!-- get d3 -->
+    <script type="text/javascript" src="vendor/d3/d3.min.js"></script>
+
+    <!-- get graphview and launch -->
+    <script type="text/javascript" src="jquery.graphview.js"></script>
+    <link rel="stylesheet" href="graphview.css">
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        $('#graph').css({"height":$(window).height() - 5});
+        $('#graph').graphview({
+            /*"search_url": 'http://test.cottagelabs.com:5010/graph',
+            "graphable": {
+                //"ignore":[], 
+                "only":["project"], 
+                //"promote":{'record':['keywords','tags']}, 
+                //"links":{'wikipedia':['topic'],'reference':['_parents'],'record':['children']},
+                "ignoreisolated":false,
+                "dropfacets":true,
+                "drophits":true
+            },*/
+            "search_url": 'http://test.cottagelabs.com:9200/occ/record/_search',
+        });
+    });
+    </script>
+
+</head>
+
+<body>
+
+<div id="graph" style="width:100%;"></div>
+
+</body>
+</html>
