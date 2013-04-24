@@ -52,3 +52,7 @@ Importer/workdir
 Importer/pmcoa/*
 
 opencitations.egg-info/*
+Importer/log/*
+
+
+Importer/test_arxiv_importer.sh

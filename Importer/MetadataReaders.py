@@ -14,10 +14,17 @@ from oaipmh import common
 from lxml import etree
 
 import re
-
-
+import datetime
 import logging
-logging.basicConfig(filename='importer.log',level=logging.DEBUG)
+import os
+import codecs
+from chardet.universaldetector import UniversalDetector
+
+if not os.path.exists('./log/'):
+    os.mkdir('./log/')
+
+now = datetime.datetime.now()
+logging.basicConfig(filename=now.strftime('./log/importer-%Y-%m-%d.log'),level=logging.DEBUG)
 
 #logger = logging.getLogger('importer')
 #hdlr = logging.FileHandler('importer.log')
@@ -38,6 +45,9 @@ class MetadataReaderAbstract(object):
         'xlink': 'http://www.w3.org/1999/xlink',
         'mml' : 'http://www.w3.org/1998/Math/MathML',
         'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+
+    # Note that PubmedCentral Front-Matter format (pmc_fm) DOES NOT include the full text (or citations), only basic metadata
+    # Note that PubMedCentral format (pmc) does include full text and citations, it is only available for a small number of articles
 
     #METADATA_FORMAT_OAI_DC = {"prefix": 'oai_dc', "reader": oai_dc_reader}
     #METADATA_FORMAT_ARXIV = {"prefix": 'arXiv', "reader": MetadataReaders.MetadataReaderArXiv()}
@@ -158,7 +168,7 @@ class MetadataReaderPMC(MetadataReaderAbstract):
     def __call__(self, metadata_element, nsprefix="nlmaa:"):
         map = {}
 
-        #logging.info("Parsing " + etree.tostring(metadata_element))
+        #logging.debug("Parsing " + etree.tostring(metadata_element))
 
         article = self._find_element(metadata_element,"{0}article".format(nsprefix))
 
@@ -362,6 +372,9 @@ class MetadataReaderPMC(MetadataReaderAbstract):
         else:
             logging.info("No back metadata for ")
 
+        #logging.debug("MAP: ")
+        #logging.debug(map)
+
         return common.Metadata(map)
 
 
@@ -370,18 +383,46 @@ class CitationExtractorTex(object):
     """A citation extractor for ArXiv Latex
     """
 
-    # matches \em{, \emph{, {\em, {\emph, \textit{, {\textit
-    _re_starts_with_emph_tag = re.compile(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{|\{\\textit\s+|\\textit\{)')
+    def __init__(self):
+    
+        #File encoding to use if it cannot be detected in the Latex files
+        self.DEFAULT_ENCODING = "UTF-8"
+        
+        # matches \em{, \emph{, {\em, {\emph, \textit{, {\textit
+        self._re_starts_with_emph_tag = re.compile(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{|\{\\textit\s+|\\textit\{)')
 
-    # matches \em, \emph, \textit
-    _re_split_emph_tag = re.compile(r'(\\emp?h?|\\textit)')
-    _re_split_newblock = re.compile(r'\\newblock')
+        # matches \em, \emph, \textit
+        self._re_split_emph_tag = re.compile(r'(\\emp?h?|\\textit)')
+        self._re_split_newblock = re.compile(r'\\newblock')
 
 
-    def process(self, arxivid, infile):
-        file_handle = open(infile, 'r')
-        raw_data = file_handle.read()
+    def process(self, identifier, infile):
+    
+        # Need to use some guesswork to detect the file encoding of the latex files.
+        u = UniversalDetector()
+        for line in open(infile, 'rb'):
+            u.feed(line)
+        u.close()
+        result = u.result
+        if result['encoding']:
+            encoding = result['encoding']
+            print "Detected encoding for %s: %s" % (identifier, encoding)
+        else:
+            encoding = self.DEFAULT_ENCODING
+            print "Warning: using default encoding (%s) - as a file encoding could not be detected for %s" % (encoding, infile)
+
+        file_handle = codecs.open(infile, encoding=encoding, mode='r')
+
+        try:
+            #Always re-encode files as UTF-8 for processing, as this is what ElasticSearch is expecting
+            raw_data = file_handle.read().encode("UTF-8")
+        except UnicodeDecodeError as e:
+            #Otherwise, give up trying to read this file
+            print "Error: could not re-encode %s to UTF-8: %s %s" % (identifier, e, infile)
+            raw_data = ""
+            
         file_handle.close()
+        citations = []
     
         #remove latex comments, to avoid confusion in processing
         data = re.sub(r"^\s*\%.*$", "", raw_data, 0, re.MULTILINE)
@@ -399,39 +440,43 @@ class CitationExtractorTex(object):
             for bibitem in re.split(r"\\bibitem", data)[1:]:
 
                 #trim the string
-                bibstring_to_process = bibitem.strip()
-                #print "Abibstring_to_process:\t", bibstring_to_process
+                bibitem_trimmed = bibitem.strip()
+                citation = {"_latex": bibitem_trimmed, "cite_order": counter}
 
-                (arxiv_id, bibstring_to_process) = extract_arxiv_id(bibstring_to_process)
-                #print "Bbibstring_to_process:\t", bibstring_to_process
+                bibstring_to_process = bibitem_trimmed
 
-                (label, key, bibstring_to_process) = extract_label_key(bibstring_to_process)
-                #print "Cbibstring_to_process:\t", bibstring_to_process
+                (arxiv_id, bibstring_to_process) = self.extract_arxiv_id(bibstring_to_process)
+                if arxiv_id is not None:
+                    citation["identifier"] = [{"type":"arXiv", "id":arxiv_id, "canonical":"arXiv:" + arxiv_id}]
 
-                (url, bibstring_to_process) = extract_url(bibstring_to_process)
+                (label, key, bibstring_to_process) = self.extract_label_key(bibstring_to_process)
+                if (label is not None): citation["label"] = label
+                if (key is not None): citation["key"] = key
 
-                (authors, bibstring_to_process) = extract_authors(bibstring_to_process)
-                #print "Dbibstring_to_process:\t", bibstring_to_process
+                (url, bibstring_to_process) = self.extract_url(bibstring_to_process)
+                if (url is not None): citation["url"] = url
 
+                (year, bibstring_to_process) = self.extract_year(bibstring_to_process)
+                if (year is not None): citation["year"] = year
+                
+                (authors, bibstring_to_process) = self.extract_authors(bibstring_to_process)
+                if (authors is not None): citation["authors"] = authors
+                
+                (title, bibstring_to_process) = self.extract_title(bibstring_to_process)
+                if (title is not None): citation["title"] = title
 
-                #print "BeforeTitle:\t", bibstring_to_process
-                (title, bibstring_to_process) = extract_title(bibstring_to_process)
-                #print "AfterTitle:\t", bibstring_to_process
+                (publisher, bibstring_to_process) = self.extract_publisher(bibstring_to_process)
+                if (publisher is not None): citation["publisher"] = publisher
             
-            
+                citations.append(citation)
+
                 #print "Counter: %i\tarxiv_id: %s\tlabel: %s\tkey: %s\turl: %s\tauthors: %s\ttitle: %s" % (counter, arxiv_id, label, key, url, authors, title)
-                print "COUNTER: %i \t AUTHORS: %s \t TITLE: %s" % (counter, authors, title)
+                #print "COUNTER: %i \t AUTHORS: %s \t TITLE: %s" % (counter, authors, title)
                 #print "bibstring_to_process:\t", bibstring_to_process
-                print bibitem, "\n"
+                #print bibitem, "\n"
                 counter += 1
-                #break
             
-            
-        
-    
-        #out = open(args.outfile,'w')
-        #out.write(json.dumps(d,indent=4))
-        #out.close()
+        return citations
 
     def extract_arxiv_id(self, bibitem):
         #New arxiv citation format
@@ -471,26 +516,26 @@ class CitationExtractorTex(object):
 
     def extract_authors(self, bibitem):
         #try to split citation by \newblock and assume first section is the author list (it usually is?!)
-        sections = _re_split_newblock.split(bibitem, 1)
+        sections = self._re_split_newblock.split(bibitem, 1)
         if (len(sections) > 1):
             # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-            (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[-1])
+            (authors, remainder) = (self.remove_wrapping_curly_braces(sections[0]), sections[-1])
         else:
             #instead try to split on \em or \emph or \textit, as that usually demarcates the title
-            sections = _re_split_emph_tag.split(bibitem, 1)
+            sections = self._re_split_emph_tag.split(bibitem, 1)
             if (len(sections) > 1):
                 # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-                (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), "\emph" + sections[-1])
+                (authors, remainder) = (self.remove_wrapping_curly_braces(sections[0]), "\emph" + sections[-1])
             else:
                 # try to split on \<space> as some publications have used this
                 sections = re.split(r'\\\s+', bibitem, 1)
                 if (len(sections) > 1):
                     # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-                    (authors, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[-1])
+                    (authors, remainder) = (self.remove_wrapping_curly_braces(sections[0]), sections[-1])
                 else:
                     # give up and assume that the whole bibitem are the authors
                     (authors, remainder) = (bibitem, "")
-        authors = remove_end_punctuation(authors.strip())
+        authors = self.remove_end_punctuation(authors.strip())
         if len(authors) == 0:
             authors = None
         return (authors, remainder.strip())
@@ -500,23 +545,23 @@ class CitationExtractorTex(object):
         # Ok, this is not so trivial!
         # First we will see if there is a \newblock, and if so, assume that the title is everything in front of the first \newblock
         # NB. You must call extract_authors() first to parse out the authors first before the title, as they will be infront of an earlier \newblock
-        sections = _re_split_newblock.split(bibitem, 1)
+        sections = self._re_split_newblock.split(bibitem, 1)
         if (len(sections) > 1):
             # sometimes the title can be in an {\em } tag or \em{ } tag or \textit{} tag, inside of the \newblock section. In this case, extract using the full parser
-            match = _re_starts_with_emph_tag.match(bibitem)
+            match = self._re_starts_with_emph_tag.match(bibitem)
             if match:
-                (title, remainder) = full_parse_curly_braces(bibitem, 1, 1) #assume first bracket at level 1
+                (title, remainder) = self.full_parse_curly_braces(bibitem, 1, 1) #assume first bracket at level 1
                 #TODO strip out \em in title
             else:
                 # call remove_wrapping_curly_braces() as sometimes the records are wrapped in them. A full parser is not necessary in this case.
-                (title, remainder) = (remove_wrapping_curly_braces(sections[0]), sections[1])
+                (title, remainder) = (self.remove_wrapping_curly_braces(sections[0]), sections[1])
         else:
             # No \newblock was found. So we need to try and parse on something else
             # Check to see if the bibitem starts with \emph{ or {\emph }. If so, assume the title is contained inside the \emph{} tag
             # In this case, a full parser is required to extract the title, a regex is insufficient.
             match = re.match(r'^\s*(\{\\emp?h?\s+|\\emp?h?\{)', bibitem)
             if match:
-                (title, remainder) = full_parse_curly_braces(bibitem, 1, 1) #assume first brack at level 1
+                (title, remainder) = self.full_parse_curly_braces(bibitem, 1, 1) #assume first brack at level 1
             else:
                 # No \newblock or \emph{ was found. Instead, try to split on first full stop + space
                 sections = re.split(r'\.\s+', bibitem, 1)
@@ -538,8 +583,23 @@ class CitationExtractorTex(object):
                             (title, remainder) = (bibitem, "")
 
         # Finally, lets tidy-up the title and return it
-        return (remove_end_punctuation(title.strip()), remainder.strip())
+        title = self.remove_end_punctuation(title.strip())
+        if len(title) == 0: title=None
+        return (title, remainder.strip())
 
+    def extract_publisher(self, bibitem):
+        # Assume authors, title, url and year are extracted. So hopefully all that is left is publisher/publication and pagination.
+        publisher = self.remove_wrapping_curly_braces(bibitem).strip()
+        if len(publisher) == 0: publisher=None
+        return (publisher, bibitem)
+
+    def extract_year(self, bibitem):
+        # search for (20XX), (19XX) or (18XX). Year must be four digits enclosed by parentheses ()
+        match = re.search(r'\((?P<year>((1[98])|(20))\d{2})\)', bibitem)
+        if match:
+            return (match.group('year'), re.sub(r'\((((1[98])|(20))\d{2})\)', "", bibitem, 0).strip())
+        else:
+            return (None, bibitem)
 
 
     def remove_end_punctuation(self, bibitem):

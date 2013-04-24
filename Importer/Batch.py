@@ -16,14 +16,23 @@ class Batch(object):
         if self.temp:
             self._es_bulk_load()
 
+   
     def _es_bulk_load(self):
         print "sending batch of " + str(len(self.temp))
         # http://www.elasticsearch.org/guide/reference/api/bulk.html
         data = ''
         for r in self.temp:
+            #print("\n\nRAW DATA")
+            #print(r)
+            #print("\n\n To CONVERT")
+            #print(self.convert(r))
+            #print("\nJSON")
+            #print(json.dumps( r ))
+
             data += json.dumps( {'index':{'_id': r['_id']}} ) + '\n'
             data += json.dumps( r ) + '\n'
         self.temp = []
+
         r = requests.post(Config.elasticsearch['uri_records'] + '_bulk', data=data)
 
         # if matching is enabled, then try to match whatever was in the batch to the rest of the index content

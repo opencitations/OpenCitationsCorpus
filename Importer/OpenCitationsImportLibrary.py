@@ -28,6 +28,11 @@ import Config
 import hashlib, md5
 import requests, json
 import uuid
+from string import lstrip
+sys.path.append('../ImportArxiv/tools')  #TODO: Tidy this up
+import file_queue as fq
+from nb_input import nbRawInput
+from subprocess import call
 import threading, Queue
 from lxml import etree as ET
 
@@ -122,8 +127,8 @@ class ImporterAbstract(object):
         return bibjson
 
 
-
-    def get_bibserver_id(self, identifiers):
+    # Returns the first document matching any of the supplied identifiers
+    def get_bibserver_document(self, identifiers):
         if identifiers:
             terms = []
             for identifier in identifiers:
@@ -139,20 +144,24 @@ class ImporterAbstract(object):
             r = requests.get(Config.elasticsearch['uri_records'] + "_search", data=json.dumps(q))
             data = r.json()
             if data["hits"]["total"] > 0:
-                #return existing id as specified in BibServer
-                bibserver_id = data["hits"]["hits"][0]["_id"]
-                #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
+                #return first document matching the id
+                return data["hits"]["hits"][0]['_source']
             else:
-                #Create new id using UUID
-                bibserver_id = uuid.uuid4().hex
-                #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
+                return None
         else:
-            #Create new id using UUID
+            return None
+
+    # Returns the first document ID matching any of the supplied identifiers,
+    # Or creates a new uuid if one could not be found
+    def get_bibserver_id(self, identifiers):
+        document = self.get_bibserver_document(identifiers)
+        if document is not None:
+            bibserver_id = document["_id"]
+            #print "Found existing ID for %s: %s" % (identifiers, bibserver_id)
+        else:
             bibserver_id = uuid.uuid4().hex
-            #print "Creating a new ID: %s" % (bibserver_id)
+            #print "Creating a new ID for %s: %s" % (identifiers, bibserver_id)
         return bibserver_id
-
-
 
 
 
@@ -235,14 +244,6 @@ class PMCBulkImporter(ImporterAbstract):
                 
     # do everything
     def run(self):
-        # Check that ElasticSearch is alive
-        self.check_index()
-
-        # If the user specified the --REBUILD flag, recreate the index
-        if self.options['rebuild']:
-            self.rebuild_index()
-
-
         dirList = os.listdir(self.settings['filedir']) # list the contents of the directory where the source files are
         filecount = 0
 
@@ -262,6 +263,207 @@ class PMCBulkImporter(ImporterAbstract):
                     p = Process(filename, self.settings, self.options)
                     p.process()
         
+
+# Generic Bulk Importer class for all sources
+class BulkImporter(ImporterAbstract):
+
+    def __init__(self, settings, options):
+        self.settings = settings # relevant configuration settings
+        self.options = options # command-line options/arguments
+
+                
+    # do everything
+    def run(self):
+        # Check that ElasticSearch is alive
+        self.check_index()
+
+        # If the user specified the --REBUILD flag, recreate the index
+        if self.options['rebuild']:
+            self.rebuild_index()
+
+        # Now do the bulk importing. Choose an appropriate class based on the source.
+        if self.options['source'] == "pubmedcentral":
+            PMCBulkImporter(self.settings, self.options).run()
+        elif self.options['source'] == "arxiv":
+            ArXivBulkImporter(self.settings, self.options).run()
+        else:
+            print "Error: unhandled source ", self.options['source']
+
+
+
+# Generic Bulk Importer class for all sources
+class ArXivBulkImporter(ImporterAbstract):
+
+    def __init__(self, settings, options):
+        self.settings = settings # relevant configuration settings
+        self.options = options # command-line options/arguments
+
+        # We need to cast paths as absolute, not relative, as we change dir later
+        self.current_dir = os.getcwd()
+        self.filedir = self.current_dir + lstrip(self.settings['filedir'], '.')
+        self.workdir = self.current_dir + lstrip(self.settings['workdir'], '.')
+
+        self.contents_file = self.filedir + "arXiv_s3_downloads.txt"
+
+        
+        self.tmp_dir = self.workdir + "tmp/"
+        self.extract_dir = self.workdir + "extract/"
+        self.extraction_queue = self.workdir + "arXiv_extraction_queue.txt"
+        self.citation_queue = self.workdir + "arXiv_citation_queue.txt"
+
+        self.s3_cmd_ex = self.current_dir + "/../ImportArxiv/tools/s3cmd/s3cmd" #TODO: Tidy this up
+
+        if not os.path.exists(self.filedir):
+            os.makedirs(self.filedir)
+
+        if not os.path.exists(self.workdir):
+            os.makedirs(self.workdir)
+
+                
+    # do everything
+    def run(self):
+    
+        # First of all, download the arXiv source files.
+        # Warning this is a lot of data and will cost $$$
+        self.download()
+
+        # Next, extract the archives
+        self.extract()
+
+        # Now, retrieve the citations
+        self.retrieve_citations()
+
+
+    def download(self):
+        if not os.path.exists(self.contents_file):
+            print "Error: arXiv contents file %s does not exist" % (self.contents_file)
+            sys.exit(1)
+
+        # Change directory to source folder
+        os.chdir(self.filedir)
+
+        print "Press 'x' to break after the current download."
+        while True:
+            arxiv_file_line = fq.get(self.contents_file)
+            if arxiv_file_line == None: 
+                break
+
+            print "Processing ", arxiv_file_line
+    
+            return_code = call([self.s3_cmd_ex,'get','--add-header=x-amz-request-payer: requester','--skip-existing', arxiv_file_line])
+
+            if return_code != 0:
+                print "Error downloading", arxiv_file_line 
+                break
+
+            fq.pop(self.contents_file)
+            # break if x was pressed
+            if 'x' in nbRawInput('',timeout=1):
+                print "Download suspended. Restart script to resume."
+                break        
+
+        # Change directory to project current folder
+        os.chdir(self.current_dir)
+
+
+    def extract(self):
+        print "Press 'x' to interupt the extraction process"
+        if not os.path.exists(self.tmp_dir):
+            os.mkdir(self.tmp_dir)
+
+        if not os.path.exists(self.extract_dir):
+            os.mkdir(self.extract_dir)
+
+        #Creates arXiv_extraction_queue.txt if it doesn't exist by finding all the tar files in the download folder
+        if not os.path.exists(self.extraction_queue):
+            call('find {source_dir}*.tar -type f > {target_file}'.format(
+                    source_dir = self.filedir,
+                    target_file = self.extraction_queue 
+                    ) , shell = True)
+
+        while True:
+            file_name = fq.get(self.extraction_queue)
+            if file_name is None: break
+
+            print "Extracting bucket" , file_name
+            if call(['tar','xf',file_name,'-C',self.tmp_dir]):
+                # call returns 1 on error.
+                break
+
+            if call('find %s -name *.gz -type f -exec mv {} %s \;' % (self.tmp_dir, self.extract_dir), shell = True):
+                break
+
+            if call('rm -R ' + self.tmp_dir + '*', shell=True):
+                break
+
+            fq.pop(self.extraction_queue)
+
+            # break if x was pressed
+            if nbRawInput('',timeout=1) == 'x':
+                print "Extraction suspended. Restart script to resume."
+                break
+
+
+    def retrieve_citations(self):
+        if not os.path.exists(self.tmp_dir):
+            os.mkdir(self.tmp_dir)
+
+        #Creates arXiv_citationqueue.txt if it doesn't exist by finding all the gz files in the extract folder
+        if not os.path.exists(self.citation_queue):
+            call('find {source_dir}*.gz -type f > {target_file}'.format(
+                    source_dir = self.extract_dir,
+                    target_file = self.citation_queue 
+                    ) , shell = True)
+
+        # Initialise some variables
+        batcher = Batch.Batch()
+
+        while True:
+            file_name = fq.get(self.citation_queue)
+            if file_name is None: break
+            
+            arxiv_id = os.path.splitext(os.path.split(file_name)[1])[0]
+            print "Retrieving citations", arxiv_id
+
+            uncompressed_tmp = self.tmp_dir + arxiv_id
+            if not os.path.exists(uncompressed_tmp):
+                os.mkdir(uncompressed_tmp)
+            returncode = call(["tar", "xzf", file_name, "-C", uncompressed_tmp])
+            if (returncode == 1): #there was an error, so perhaps its not a Tar file. Instead try to decompress with plain old gunzip
+                print "trying to gunzip instead for " + file_name
+                os.system("gunzip -c %s > %s" % (file_name, uncompressed_tmp + "/file.tex"))
+
+            #Now process .tex files
+            for tex_file_name in os.listdir(uncompressed_tmp):
+                if not (tex_file_name.endswith('.tex') or tex_file_name.endswith('.bbl')): continue
+                citations = self.settings["metadata_reader"].process(arxiv_id, uncompressed_tmp + '/' + tex_file_name)
+
+                #Store the citations in BibServer
+                self.store_citations(batcher, arxiv_id, citations)
+
+                #print "CITATIONS for " + arxiv_id
+                #print citations
+
+            # Delete temporary files
+            if call('rm -R ' + uncompressed_tmp + '*', shell=True):
+                break
+
+            fq.pop(self.citation_queue)
+
+        batcher.clear()
+
+
+    def store_citations(self, batcher, arxiv_id, citations):
+        if len(citations) > 0:
+            identifiers = [{"type": "arXiv", "id": arxiv_id, "canonical": "arXiv:" + arxiv_id}]
+            bibjson = self.get_bibserver_document(identifiers)
+            if bibjson is None:
+                bibjson = {"identifier": identifiers}
+                bibjson['_id'] = self.get_bibserver_id(False) #create a new id
+            bibjson['citation'] = citations
+            bibjson = self.generic_bibjsonify(bibjson)
+            batcher.add(bibjson)
+
 
 # OAI-feed Importer class for ArXiv and for PubMedCentral
 class OAIImporter(ImporterAbstract):
@@ -342,6 +544,11 @@ class OAIImporter(ImporterAbstract):
                 self.put_synchronisation_config(from_date, next_date, number_of_records)
                 from_date += timedelta(days=(self.settings['delta_days']))
                 total_records += number_of_records
+
+                # Pause so as not to get banned.
+                to = 20
+                print "Sleeping for %i seconds so as not to get banned." % to
+                time.sleep(to)
 
             
         # Store the records in the index

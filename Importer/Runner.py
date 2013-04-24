@@ -44,7 +44,7 @@ def main(args):
             print "Warning: to-date option (%s) is ignored during the load operation" % (args['to_date'])
         if (args['rebuild']):
             print "Warning: index will be dropped and rebuilt. All existing records will be deleted."
-        importer = OpenCitationsImportLibrary.PMCBulkImporter(importer_settings, args)
+        importer = OpenCitationsImportLibrary.BulkImporter(importer_settings, args)
         importer.run()
 
     elif (args['action']=="synchronise"):
@@ -61,6 +61,7 @@ def main(args):
             print "Limiting on to-date: %s" % (args['to_date'])
         importer = OpenCitationsImportLibrary.OAIImporter(importer_settings, args)
         importer.run()
+
 
     else:
         print "Unknown action: %s" % action
