@@ -515,7 +515,7 @@
             var qry = currentquery();
             //var currurl = '?source=' + JSON.stringify(qry)
             //window.history.pushState("","search",currurl);
-            $('.graphview_graphit').attr('href','../timeline/myindex.html?source=' + JSON.stringify(qry));
+            $('.graphview_graphit').attr('href','../timeline/index.html?source=' + JSON.stringify(qry));
             $.ajax({
                 type: "GET",
                 url: options.search_url + '?source=' + JSON.stringify(qry),

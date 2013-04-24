@@ -12,165 +12,132 @@
         <script src="js/d3.v2.min.js" type="text/javascript"></script>
         <script src="js/nv.d3.min.js" type="text/javascript"></script>
         <script src="js/bootstrap.min.js" type="text/javascript"></script>
+
+        <!-- get jquery-ui js and css -->
+        <link rel="stylesheet" href="../graphview/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+        <script type="text/javascript" src="../graphview/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
         <script type="text/javascript">
-            // TODO: write all changes in the URL, so you can link to the graph :-)
-            // TODO: labels dependant on selected interval
-            // TODO: use date time pickers (postponed, there is no nice bootstrap widget)
 
-            var fields = {}
-            var chartData = []
-            var mChartType = "line"
+            // add extension to jQuery with a function to get URL parameters
+            jQuery.extend({
+                getUrlVars: function() {
+                    var params = new Object;
+                    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                    for ( var i = 0; i < hashes.length; i++ ) {
+                        hash = hashes[i].split('=');
+                        if ( hash.length > 1 ) {
+                            if ( hash[1].replace(/%22/gi,"")[0] == "[" || hash[1].replace(/%22/gi,"")[0] == "{" ) {
+                                hash[1] = hash[1].replace(/^%22/,"").replace(/%22$/,"");
+                                var newval = JSON.parse(unescape(hash[1].replace(/%22/gi,'"')));
+                            } else {
+                                var newval = unescape(hash[1].replace(/%22/gi,'"'));
+                            }
+                            params[hash[0]] = newval;
+                        }
+                    }
+                    return params;
+                },
+                getUrlVar: function(name){
+                    return jQuery.getUrlVars()[name];
+                }
+            });
 
+
+            var chartData = [];
+            var mChartType = "line";
 
              $(document).ready(function () {
 
-                $.ajax({
-                    processData: false,
-                    url: "http://test.cottagelabs.com:9200/_cluster/state",
-                    type: "GET",
-                    dataType: "json",
-                    success: configureIndices
-                })
+                var opts = {
+                    inline: true,
+                    dateFormat: 'dd/mm/yy',
+                    defaultDate: new Date(),
+                    changeYear: true
+                };
+                $('.datepicker').datepicker(opts);
 
-                // add listener to the index select forms (and to those which will be created)
-                $("div.data-select select[name=index]").on('change', function (evt) {
-                    var index = $(evt.target).find("option:selected").val()
-                    $(evt.target).parent().find("select[name=type] option").remove()
-                    _.each(_.keys(fields[index]), function (type) {
-                        $(evt.target).parent().find("select[name=type]").append(new Option(type, type))
-                        $(evt.target).parent().find("select[name=type]").trigger('change')
-                    })
-                })
-
-                // add listener to the type select forms
-                $("div.data-select select[name=type]").on('change', function (evt) {
-                    var type = $(evt.target).find("option:selected").val()
-                    var index = $(evt.target).parent().find("select[name=index] option:selected").val()
-                    $(evt.target).parent().find("select[name=field] option").remove()
-                    _.each(fields[index][type], function (field) {
-                        $(evt.target).parent().find("select[name=field]").append(new Option(field, field))
-                    })
-                })
-
-                // add listener to the "add" button
-                $('.icon-plus-sign').on('click', function (evt) {
-                    // chane class, remove all events and add the remove one
-                    //$(evt.target).unbind().removeClass('icon-plus-sign').addClass('icon-minus-sign').on('click', removeDataSelector)
-                    // copy element (including listeners)
-                    var newDataSelect = $(".data-select-template").clone(true, true).removeClass('data-select-template').css('display', 'block')
-                    // append after last element
-                    $('#graphform .data-select').last().after(newDataSelect)
-                })
-
-                $('.icon-minus-sign').on('click', removeDataSelector)
 
                 // add listener to the graph button
-                $("#graphform").submit(function (evt) {
-                    evt.preventDefault();
-                    chartData = []
-                    nv.graphs = []
+                $("#graphform").submit(function (event) {
+                    event.preventDefault();
+                    chartData = [];
+                    nv.graphs = [];
                     nv.render.active = false;
-                    nv.render.queue = []
+                    nv.render.queue = [];
                     nv.dispatch.render_end();
                     executeRequest();
                 });
+
+                nv.graphs = [];
+                nv.render.active = false;
+                nv.render.queue = [];
+                nv.dispatch.render_end();
+                executeRequest();
             });
 
-            function removeDataSelector(evt) {
-                if ($("#graphform .icon-minus-sign").size() > 1) {
-                    $(evt.target).parent().remove()
-                }
-            }
-
-            function configureIndices(data) {
-                // create fields data structure
-                var indices = _.keys(data.metadata.indices)
-                _.each(indices, function (idx) {
-                    _.each(_.keys(data.metadata.indices[idx].mappings), function (key) {
-                        _.each(_.keys(data.metadata.indices[idx].mappings[key].properties), function (field) {
-                            if (data.metadata.indices[idx].mappings[key].properties[field] && data.metadata.indices[idx].mappings[key].properties[field].type == 'date') {
-                                if (_.isUndefined(fields[idx])) fields[idx] = {}
-                                if (_.isUndefined(fields[idx][key])) fields[idx][key] = []
-                                fields[idx][key].push(field)
-                            }
-                        })
-                    })
-                })
-
-                // set default for the first select box
-                _.each(_.keys(fields), function (key) {
-                    $("div.data-select select[name=index]").append(new Option(key, key))
-                })
-                $("div.data-select select[name=index]").trigger('change')
-
-            }
-
             function executeRequest() {
-                var chartType = $('#graphform select[name=chart-type]').val()
-                var interval = $('#graphform select[name=interval]').val()
-                var from = $('#graphform input[name=from]').val()
-                var to = $('#graphform input[name=to]').val()
-
-                $('#graphform div.data-select').each(function (element) {
-                    var index = $(this).find('select[name=index]').val()
-                    var type = $(this).find('select[name=type]').val()
-                    var field = $(this).find('select[name=field]').val()
-                    var color = $(this).find('input[name=color]').val()
-                    var legend = $(this).find('input[name=legend]').val()
-
-                    var url = "http://test.cottagelabs.com:9200/" + index + "/" + type + "/_search?size=0"
-                    var facetFilter = {}
-                    facetFilter[field] = {
-                        "from": from,
-                        "to": to
-                    }
-                    $.ajax({
-                        processData: false,
-                        url: url,
-                        type: "POST",
-                        dataType: "json",
-                        data: JSON.stringify({
-                            "query": {
-                                "query_string": {
-                                    "query": legend
-                                }
-                            },
-                            "facets": {
-                                "data": {
-                                    "date_histogram": {
-                                        "field": field,
-                                        "interval": interval
-                                    },
-                                    "facet_filter": {
-                                        "range": facetFilter
-                                    }
+                var qry = $.getUrlVar('source');
+                if ( qry == undefined ) {
+                    qry = {
+                        "size": 0,
+                        "query": {
+                            "match_all": {}
+                        },
+                        "facets": {
+                            "range": {
+                                "date_histogram": {
+                                    "field": "date",
+                                    "interval": "month"
                                 }
                             }
-                        }),
-                        success: function (data) {
-                            drawChart(data, {
-                                type: chartType,
-                                color: color,
-                                legend: legend
-                            })
                         }
-                    })
-                })
+                    }
+                }
+
+                var url = 'http://test.cottagelabs.com:9200/occ/record/_search';
+                var chartType = $('#graphform select[name=chart-type]').val();
+                var from = $('#graphform input[name=from]').val();
+                var to = $('#graphform input[name=to]').val();
+                var interval = $('#graphform select[name=interval]').val();
+                qry.facets.range.date_histogram.interval = interval;
+                qry.facets.range["facet_filter"] = {
+                    "range": {
+                        "date": {
+                            "from": from,
+                            "to": to
+                        }
+                    }
+                };
+
+                $.ajax({
+                    processData: false,
+                    url: url,
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify(qry),
+                    success: function (data) {
+                        drawChart(data, {
+                            type: chartType,
+                            legend: "query"
+                        });
+                    }
+                });
             }
 
 
             function drawChart(data, cfg) {
-
-                var counts = _.map(data.facets.data.entries, function (entry) {
+                
+                var counts = _.map(data.facets.range.entries, function (entry) {
                     return entry.count;
                 });
-                var tooltips = _.map(data.facets.data.entries, function (entry) {
+                var tooltips = _.map(data.facets.range.entries, function (entry) {
                     return moment(new Date(entry.time)).format("DD.MM") + ": " + entry.count + " items";
                 });
 
                 // has many {x:foo, y:bar} entries
                 var x = 0
-                var dataArray = _.map(data.facets.data.entries, function (entry) {
+                var dataArray = _.map(data.facets.range.entries, function (entry) {
                     return {
                         x: x++,
                         y: entry.count,
@@ -182,17 +149,11 @@
                 chartData.push({
                     values: dataArray,
                     key: cfg.legend,
-                    color: cfg.color,
                     area: true
                 })
 
-                // do not graph until all ajax requests have returned
-                if (chartData.length != $('#graphform div.data-select').size()) {
-                    return
-                }
-
-                var labelYAxis = $('#graphform input[name=label-y-axis]').val()
-                var labelXAxis = $('#graphform input[name=label-x-axis]').val()
+                var labelYAxis = "";
+                var labelXAxis = "";
 
                 nv.addGraph(function () {
                     var chart = nv.models.lineChart()
@@ -200,7 +161,7 @@
                     case "bar":
                         chart = nv.models.multiBarChart()
                         break
-                    case "stacked area":
+                    case "area":
                         chart = nv.models.stackedAreaChart()
                         break
                     }
@@ -242,62 +203,26 @@
     <body>
         <div class="container">
             
-            <h1>Open Citations Timeline</h1>
-
             <form class="form-inline" id="graphform">
+                <input type="text" class="input-medium datepicker" name="from" value="01/01/2011">
+                <input type="text" class="input-medium datepicker" name="to" value="01/01/2012">
+                <select name="interval">
+                    <option>day</option>
+                    <option selected="true">month</option>
+                    <option>year</option>
+                </select>
                 <select name="chart-type">
                     <option>line</option>
                     <option>bar</option>
-                    <option>stacked area</option>
+                    <option>area</option>
                 </select>
-                <br />
-                <input type="text" class="input-medium" name="from" value="01/01/2011">
-                <input type="text" class="input-medium" name="to" value="01/01/2012">
-                <select name="interval">
-                    <option>day</option>
-                    <option>minute</option>
-                    <option>hour</option>
-                    <option>week</option>
-                    <option selected="true">month</option>
-                    <option>quarter</option>
-                    <option>year</option>
-                </select>
-                <br />
-                <input type="text" name="label-y-axis" placeholder="Y axis label" />
-                <input type="text" name="label-x-axis" placeholder="X axis label" />
-                <br />
-                <div class="data-select">
-                    <select name="index" class="input-medium"></select>
-                    <select name="type" class="input-medium"></select>
-                    <select name="field" class="input-medium"></select>
-                    <input type="text" name="legend" value="DNA" />
-                    <input type="color" name="color" value="#5050ff" class="input-mini"></input>
-                    <i class="icon-minus-sign" style="cursor: pointer"></i>
-                    <i class="icon-plus-sign" style="cursor: pointer"></i>
-                </div>
-                <div class="data-select">
-                    <select name="index" class="input-medium"></select>
-                    <select name="type" class="input-medium"></select>
-                    <select name="field" class="input-medium"></select>
-                    <input type="text" name="legend" value="Oxford" />
-                    <input type="color" name="color" value="#ff7f0e" class="input-mini"></input>
-                    <i class="icon-minus-sign" style="cursor: pointer"></i>
-                    <i class="icon-plus-sign" style="cursor: pointer"></i>
-
-                </div>
-                <div style="padding-top: 1em">
-                    <button type="submit" class="btn btn-primary">Graph</button>
-                </div>
+                <button type="submit" class="btn btn-primary">Draw</button>
             </form>
             <div id='chart'>
                 <svg style='height:500px'></svg>
             </div>
             <div class="data-select data-select-template" style="display : none">
-                <select name="index" class="input-medium"></select>
-                <select name="type" class="input-medium"></select>
-                <select name="field" class="input-medium"></select>
-                <input type="text" name="legend" value="Oxford" />
-                <input type="color" name="color" value="#ff7f0e" class="input-mini"></input>
+                <input type="text" name="legend" value="" placeholder="enter a search value" />
                 <i class="icon-minus-sign" style="cursor: pointer"></i>
                 <i class="icon-plus-sign" style="cursor: pointer"></i>
             </div>

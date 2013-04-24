@@ -10,7 +10,7 @@
         <script src="js/underscore-min.js" type="text/javascript"></script>
         <script src="js/moment.min.js" type="text/javascript"></script>
         <script src="js/d3.v2.min.js" type="text/javascript"></script>
-        <script src="js/nv.d3.js" type="text/javascript"></script>
+        <script src="js/nv.d3.min.js" type="text/javascript"></script>
         <script src="js/bootstrap.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             // TODO: write all changes in the URL, so you can link to the graph :-)
@@ -26,7 +26,7 @@
 
                 $.ajax({
                     processData: false,
-                    url: "http://92.235.188.179:9200/_cluster/state",
+                    url: "http://test.cottagelabs.com:9200/_cluster/state",
                     type: "GET",
                     dataType: "json",
                     success: configureIndices
@@ -118,7 +118,7 @@
                     var color = $(this).find('input[name=color]').val()
                     var legend = $(this).find('input[name=legend]').val()
 
-                    var url = "http://92.235.188.179:9200/" + index + "/" + type + "/_search?size=0"
+                    var url = "http://test.cottagelabs.com:9200/" + index + "/" + type + "/_search?size=0"
                     var facetFilter = {}
                     facetFilter[field] = {
                         "from": from,
