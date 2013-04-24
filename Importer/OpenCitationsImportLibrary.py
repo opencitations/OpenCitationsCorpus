@@ -545,6 +545,11 @@ class OAIImporter(ImporterAbstract):
                 from_date += timedelta(days=(self.settings['delta_days']))
                 total_records += number_of_records
 
+                # Pause so as not to get banned.
+                to = 20
+                print "Sleeping for %i seconds so as not to get banned." % to
+                time.sleep(to)
+
             
         # Store the records in the index
         batcher.clear()
